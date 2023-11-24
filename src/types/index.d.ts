@@ -35,12 +35,11 @@ declare global {
 
 export type CachedUser = {
     id: string;
+    firstName: string;
+    lastName: string;
     username: string;
     image: string | null;
     email: string;
-    permissions: number;
-    roles: string[];
-    strikes: number;
     createdAt: string;
     updatedAt: string;
 };

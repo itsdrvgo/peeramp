@@ -2,16 +2,16 @@ import "./globals.css";
 import { siteConfig } from "@/src/config/site";
 import { Analytics } from "@vercel/analytics/react";
 import { Metadata } from "next";
-import { Sunflower } from "next/font/google";
+import { Titillium_Web } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import ClientProvider from "../components/providers/client";
 import ServerProvider from "../components/providers/server";
 import { cn } from "../lib/utils";
 import { RootLayoutProps } from "../types";
 
-const font = Sunflower({
+const font = Titillium_Web({
     subsets: ["latin"],
-    weight: ["300", "500", "700"],
+    weight: ["200", "300", "400", "600", "700", "900"],
 });
 
 export const metadata: Metadata = {

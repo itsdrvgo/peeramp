@@ -30,12 +30,11 @@ export async function getUserFromCache(id: string) {
         const cachableUser: CachedUser = {
             id: user.id,
             username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
             image: user.image,
             createdAt: user.createdAt.toISOString(),
             email: user.email,
-            permissions: user.account.permissions,
-            roles: user.account.roles,
-            strikes: user.account.strikes,
             updatedAt: user.updatedAt.toISOString(),
         };
 
@@ -59,12 +58,11 @@ export async function getAllUsersFromCache() {
         const cachableUsers: CachedUser[] = users.map((user) => ({
             id: user.id,
             username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
             image: user.image,
             createdAt: user.createdAt.toISOString(),
             email: user.email,
-            permissions: user.account.permissions,
-            roles: user.account.roles,
-            strikes: user.account.strikes,
             updatedAt: user.updatedAt.toISOString(),
         }));
 

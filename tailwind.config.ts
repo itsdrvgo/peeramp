@@ -87,7 +87,7 @@ export default withUt({
                 },
                 dark: {
                     colors: {
-                        background: "hsl(0, 0%, 0%)",
+                        background: "hsl(0, 12%, 6%)",
                         primary: {
                             DEFAULT: "hsl(240, 66%, 85%)",
                             "50": "hsl(240, 66%, 15%)",

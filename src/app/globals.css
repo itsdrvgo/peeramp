@@ -47,7 +47,7 @@
         --light-foreground: hsl(0, 0%, 0%);
 
         /* THEME : DARK */
-        --dark-background: hsl(0, 0%, 0%);
+        --dark-background: hsl(0, 12%, 6%);
 
         --dark-primary: hsl(240, 66%, 85%);
         --dark-primary-50: hsl(240, 66%, 15%);

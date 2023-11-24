@@ -1,11 +1,12 @@
 "use client";
 
 import useThemeStore from "@/src/lib/store/theme";
+import { cn } from "@/src/lib/utils";
 import { SwitchProps, useSwitch, VisuallyHidden } from "@nextui-org/react";
 import { useEffect } from "react";
 import { Icons } from "../../icons/icons";
 
-function ThemeSwitch({ ...props }: SwitchProps) {
+function ThemeSwitch({ className, ...props }: SwitchProps) {
     const {
         Component,
         slots,
@@ -32,7 +33,7 @@ function ThemeSwitch({ ...props }: SwitchProps) {
     }, [isPressed]);
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className={cn("flex flex-col gap-2", className)}>
             <Component {...getBaseProps()} {...props}>
                 <VisuallyHidden>
                     <input {...getInputProps()} />
@@ -42,7 +43,7 @@ function ThemeSwitch({ ...props }: SwitchProps) {
                     {...getWrapperProps()}
                     className={slots.wrapper({
                         class: [
-                            "h-7 w-7",
+                            "mr-0 h-7 w-7",
                             "flex items-center justify-center",
                             "bg-transparent text-foreground group-data-[selected=true]:bg-transparent",
                         ],
