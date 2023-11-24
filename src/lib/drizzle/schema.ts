@@ -1,12 +1,6 @@
-import {
-    InferInsertModel,
-    InferSelectModel,
-    relations,
-    sql,
-} from "drizzle-orm";
+import { InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
 import {
     int,
-    json,
     mysqlTable,
     timestamp,
     uniqueIndex,
@@ -20,6 +14,8 @@ export const users = mysqlTable(
     "users",
     {
         id: varchar("id", { length: 191 }).notNull().primaryKey(),
+        firstName: varchar("first_name", { length: 191 }).notNull(),
+        lastName: varchar("last_name", { length: 191 }).notNull(),
         username: varchar("username", { length: 191 }).unique().notNull(),
         email: varchar("email", { length: 191 }).notNull().unique(),
         image: varchar("image", { length: 191 }),
@@ -36,13 +32,6 @@ export const users = mysqlTable(
         usernameIndex: uniqueIndex("name_idx").on(user.username),
     })
 );
-
-export const accounts = mysqlTable("accounts", {
-    id: varchar("id", { length: 191 }).notNull().primaryKey(),
-    roles: json("roles").$type<string[]>().notNull().default(["user"]),
-    strikes: int("strikes").notNull().default(0),
-    permissions: int("permissions").notNull().default(1),
-});
 
 export const roles = mysqlTable(
     "roles",
@@ -67,27 +56,10 @@ export const roles = mysqlTable(
 
 // RELATIONS
 
-export const usersRelations = relations(users, ({ one }) => ({
-    account: one(accounts, {
-        fields: [users.id],
-        references: [accounts.id],
-    }),
-}));
-
-export const accountsRelations = relations(accounts, ({ one }) => ({
-    user: one(users, {
-        fields: [accounts.id],
-        references: [users.id],
-    }),
-}));
-
 // TYPES
 
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
-
-export type Account = InferSelectModel<typeof accounts>;
-export type NewAccount = InferInsertModel<typeof accounts>;
 
 export type Role = InferSelectModel<typeof roles>;
 export type NewRole = InferInsertModel<typeof roles>;
@@ -95,7 +67,4 @@ export type NewRole = InferInsertModel<typeof roles>;
 // ZOD SCHEMA
 
 export const insertUserSchema = createInsertSchema(users);
-
-export const insertAccountSchema = createInsertSchema(accounts);
-
 export const insertRoleSchema = createInsertSchema(roles);

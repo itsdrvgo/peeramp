@@ -3,5 +3,9 @@ import { connect } from "@planetscale/database";
 import { drizzle } from "drizzle-orm/planetscale-serverless";
 import * as AuthSchema from "./schema";
 
-const connection = connect({ url: env.DATABASE_URL });
+const connection = connect({
+    host: env.DATABASE_HOST,
+    username: env.DATABASE_USERNAME,
+    password: env.DATABASE_PASSWORD,
+});
 export const db = drizzle(connection, { schema: AuthSchema });

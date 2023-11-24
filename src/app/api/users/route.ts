@@ -1,6 +1,6 @@
 import { env } from "@/env.mjs";
 import { db } from "@/src/lib/drizzle";
-import { accounts, users } from "@/src/lib/drizzle/schema";
+import { users } from "@/src/lib/drizzle/schema";
 import {
     addUsernameToCache,
     addUserToCache,
@@ -12,7 +12,7 @@ import {
 } from "@/src/lib/redis/methods/user";
 import { handleError } from "@/src/lib/utils";
 import {
-    userDeleteSchema,
+    userDeleteWebhookSchema,
     userWebhookSchema,
     WebhookData,
     webhookSchema,
@@ -48,34 +48,31 @@ export async function POST(req: NextRequest) {
     switch (type) {
         case "user.created": {
             try {
-                const { id, email_addresses, profile_image_url, username } =
-                    userWebhookSchema
-                        .omit({
-                            private_metadata: true,
-                        })
-                        .parse(data);
+                const {
+                    id,
+                    email_addresses,
+                    first_name: firstName,
+                    image_url: image,
+                    last_name: lastName,
+                    username,
+                } = userWebhookSchema.parse(data);
 
                 await Promise.all([
                     db.insert(users).values({
+                        firstName,
+                        lastName,
                         username,
                         id,
-                        image: profile_image_url,
+                        image,
                         email: email_addresses[0].email_address,
-                    }),
-                    db.insert(accounts).values({
-                        id,
-                        permissions: 1,
-                        roles: ["user"],
-                        strikes: 0,
                     }),
                     addUserToCache({
                         id,
                         username,
-                        image: profile_image_url,
+                        firstName,
+                        lastName,
+                        image,
                         email: email_addresses[0].email_address,
-                        permissions: 1,
-                        roles: ["user"],
-                        strikes: 0,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
                     }),
@@ -95,9 +92,10 @@ export async function POST(req: NextRequest) {
             const {
                 id,
                 email_addresses,
-                profile_image_url,
+                image_url: image,
+                first_name: firstName,
+                last_name: lastName,
                 username,
-                private_metadata,
             } = userWebhookSchema.parse(data);
 
             const existingUser = await getUserFromCache(id);
@@ -115,31 +113,17 @@ export async function POST(req: NextRequest) {
                             email_addresses[0].email_address ??
                             existingUser.email,
                         username: username ?? existingUser.username,
-                        image: profile_image_url ?? existingUser.image,
+                        image: image ?? existingUser.image,
                     })
                     .where(eq(users.id, existingUser.id)),
-                db
-                    .update(accounts)
-                    .set({
-                        permissions:
-                            private_metadata.permissions ??
-                            existingUser.permissions,
-                        roles: private_metadata.roles ?? existingUser.roles,
-                        strikes:
-                            private_metadata.strikes ?? existingUser.strikes,
-                    })
-                    .where(eq(accounts.id, existingUser.id)),
                 updateUserInCache({
                     id,
                     username: username ?? existingUser.username,
-                    image: profile_image_url ?? existingUser.image,
+                    firstName: firstName ?? existingUser.firstName,
+                    lastName: lastName ?? existingUser.lastName,
+                    image: image ?? existingUser.image,
                     email:
                         email_addresses[0].email_address ?? existingUser.email,
-                    permissions:
-                        private_metadata.permissions ??
-                        existingUser.permissions,
-                    roles: private_metadata.roles ?? existingUser.roles,
-                    strikes: private_metadata.strikes ?? existingUser.strikes,
                     createdAt: existingUser.createdAt,
                     updatedAt: new Date().toISOString(),
                 }),
@@ -154,7 +138,7 @@ export async function POST(req: NextRequest) {
         }
 
         case "user.deleted": {
-            const { id } = userDeleteSchema.parse(data);
+            const { id } = userDeleteWebhookSchema.parse(data);
 
             const existingUser = await getUserFromCache(id);
             if (!existingUser)
@@ -165,7 +149,6 @@ export async function POST(req: NextRequest) {
 
             await Promise.all([
                 db.delete(users).where(eq(users.id, id)),
-                db.delete(accounts).where(eq(accounts.id, id)),
                 deleteUserFromCache(id),
                 deleteUsernameFromCache(existingUser.username),
             ]);

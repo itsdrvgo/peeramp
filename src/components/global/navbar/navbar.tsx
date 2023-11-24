@@ -60,7 +60,7 @@ function NavBar({ ...props }: NavbarProps) {
                             <Link
                                 href={item.href}
                                 as={NextLink}
-                                className="font-medium text-foreground"
+                                className="font-semibold text-foreground"
                             >
                                 {item.title}
                             </Link>

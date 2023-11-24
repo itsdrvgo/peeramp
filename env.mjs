@@ -5,9 +5,10 @@ export const env = createEnv({
     server: {
         NODE_ENV: z.enum(["development", "test", "production"]),
 
-        DATABASE_NAME: z.string(),
         DATABASE_HOST: z.string(),
         DATABASE_URL: z.string().url(),
+        DATABASE_USERNAME: z.string(),
+        DATABASE_PASSWORD: z.string(),
 
         CLERK_SECRET_KEY: z.string(),
         SVIX_SECRET: z.string(),
@@ -30,9 +31,10 @@ export const env = createEnv({
 
         NODE_ENV: process.env.NODE_ENV,
 
-        DATABASE_NAME: process.env.DATABASE_NAME,
         DATABASE_HOST: process.env.DATABASE_HOST,
         DATABASE_URL: process.env.DATABASE_URL,
+        DATABASE_USERNAME: process.env.DATABASE_USERNAME,
+        DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
 
         CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
         SVIX_SECRET: process.env.SVIX_SECRET,

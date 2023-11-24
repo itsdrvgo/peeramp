@@ -1,9 +1,7 @@
-import { authMiddleware, clerkClient } from "@clerk/nextjs";
+import { authMiddleware } from "@clerk/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
-import { BitFieldPermissions } from "./config/const";
-import { hasPermission } from "./lib/utils";
 
 const cache = new Map();
 
@@ -17,76 +15,28 @@ const globalRateLimiter = new Ratelimit({
 
 export default authMiddleware({
     ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico", "/"],
-    publicRoutes: [
-        "/auth(.*)",
-        "/sso-callback(.*)",
-        "/verification(.*)",
-        "/api/uploadthing(.*)",
-    ],
+    publicRoutes: ["/signin(.*)", "/signup(.*)", "/api/uploadthing(.*)"],
+    apiRoutes: ["/api(.*)"],
     afterAuth: async (auth, req, evt) => {
         const url = new URL(req.nextUrl.origin);
 
         if (auth.isPublicRoute) {
             if (
                 auth.userId &&
-                ["/auth", "/callback", "/verification"].includes(
-                    req.nextUrl.pathname
-                )
+                ["/signin", "/signup"].includes(req.nextUrl.pathname)
             ) {
                 url.pathname = "/profile";
 
                 return NextResponse.redirect(url);
-            } else if (req.nextUrl.pathname.startsWith("/support"))
-                return NextResponse.redirect("https://dsc.gg/drvgo");
-            else return NextResponse.next();
+            } else return NextResponse.next();
         }
 
         if (!auth.userId) {
-            url.pathname = "/auth";
+            url.pathname = "/signin";
             return NextResponse.redirect(url);
         }
 
-        const user = await clerkClient.users.getUser(auth.userId);
-        if (!user) throw new Error("User not found!");
-
-        if (
-            (!user.privateMetadata.roles ||
-                !user.privateMetadata.roles.length) &&
-            !user.privateMetadata.permissions &&
-            !user.privateMetadata.strikes
-        ) {
-            await clerkClient.users.updateUser(auth.userId, {
-                privateMetadata: {
-                    roles: ["user"],
-                    permissions: 1,
-                    strikes: 0,
-                },
-            });
-        }
-
-        if (req.nextUrl.pathname.startsWith("/admin")) {
-            if (
-                hasPermission(
-                    user.privateMetadata.permissions,
-                    BitFieldPermissions.Administrator
-                )
-            )
-                return NextResponse.next();
-            else if (
-                hasPermission(
-                    user.privateMetadata.permissions,
-                    BitFieldPermissions.ViewPrivatePages
-                )
-            )
-                return NextResponse.next();
-            else
-                return NextResponse.json({
-                    code: 403,
-                    message: "Forbidden!",
-                });
-        }
-
-        if (req.nextUrl.pathname.startsWith("/api")) {
+        if (auth.isApiRoute) {
             const { success, pending, limit, reset, remaining } =
                 await globalRateLimiter.limit(auth.userId);
             evt.waitUntil(pending);

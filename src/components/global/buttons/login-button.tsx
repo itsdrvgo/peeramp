@@ -13,10 +13,10 @@ function LoginButton({ className, text, ...props }: LoginButtonProps) {
 
     return (
         <Button
-            className={cn("text-sm font-medium dark:text-black", className)}
+            className={cn("text-sm font-semibold dark:text-black", className)}
             color="primary"
             radius="full"
-            onPress={() => router.push("/auth")}
+            onPress={() => router.push("/signin")}
             {...props}
         >
             {text || "Sign In"}

@@ -16,7 +16,7 @@ function Footer({
         >
             <div className="container flex max-w-4xl flex-col-reverse items-center justify-between gap-3 text-sm font-light md:flex-row 2xl:max-w-6xl">
                 <p className="text-gray-500">
-                    © 2021 PeerAmp. All rights reserved.
+                    © 2023 PeerAmp. All rights reserved.
                 </p>
 
                 <div className="flex items-center gap-2 text-white">
