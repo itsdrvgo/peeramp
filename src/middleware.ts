@@ -14,8 +14,8 @@ const globalRateLimiter = new Ratelimit({
 });
 
 export default authMiddleware({
-    ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico", "/"],
-    publicRoutes: ["/signin(.*)", "/signup(.*)", "/api/uploadthing(.*)"],
+    ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico"],
+    publicRoutes: ["/signin(.*)", "/signup(.*)", "/api/uploadthing(.*)", "/"],
     apiRoutes: ["/api(.*)"],
     afterAuth: async (auth, req, evt) => {
         const url = new URL(req.nextUrl.origin);
@@ -23,10 +23,10 @@ export default authMiddleware({
         if (auth.isPublicRoute) {
             if (
                 auth.userId &&
-                ["/signin", "/signup"].includes(req.nextUrl.pathname)
+                (["/signin", "/signup"].includes(req.nextUrl.pathname) ||
+                    req.nextUrl.pathname === "/")
             ) {
                 url.pathname = "/profile";
-
                 return NextResponse.redirect(url);
             } else return NextResponse.next();
         }
