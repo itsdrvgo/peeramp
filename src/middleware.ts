@@ -2,6 +2,7 @@ import { authMiddleware } from "@clerk/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+import { CResponse } from "./lib/utils";
 
 const cache = new Map();
 
@@ -43,10 +44,7 @@ export default authMiddleware({
 
             const res = success
                 ? NextResponse.next()
-                : NextResponse.json({
-                      code: 429,
-                      message: "Too many requests, go slow",
-                  });
+                : CResponse({ message: "TOO_MANY_REQUESTS" });
 
             res.headers.set("X-RateLimit-Limit", limit.toString());
             res.headers.set("X-RateLimit-Remaining", remaining.toString());
