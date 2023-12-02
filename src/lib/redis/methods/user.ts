@@ -1,8 +1,38 @@
-import { CachedUser } from "@/src/types";
 import { eq } from "drizzle-orm";
 import { redis } from "..";
 import { db } from "../../drizzle";
 import { users } from "../../drizzle/schema";
+import { CachedUser, cachedUserSchema } from "../../validation/user";
+
+async function getCachableUser(userId: string) {
+    const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        with: {
+            details: true,
+        },
+    });
+
+    if (!user) return null;
+
+    const cachableUser: CachedUser = {
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        image: user.image,
+        bio: user.details.bio,
+        type: user.details.type,
+        category: user.details.category,
+        gender: user.details.gender,
+        socials: user.details.socials,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+        usernameChangedAt: user.details.usernameChangedAt.toISOString(),
+    };
+
+    return cachableUser;
+}
 
 export async function addUserToCache(user: CachedUser) {
     await redis.set(`user:${user.id}`, JSON.stringify(user));
@@ -19,65 +49,20 @@ export async function deleteUserFromCache(id: string) {
 export async function getUserFromCache(id: string) {
     const cachedUser = await redis.get<CachedUser | null>(`user:${id}`);
     if (!cachedUser) {
-        const user = await db.query.users.findFirst({
-            where: eq(users.id, id),
-            with: {
-                account: true,
-            },
-        });
-        if (!user) return null;
-
-        const cachableUser: CachedUser = {
-            id: user.id,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            image: user.image,
-            createdAt: user.createdAt.toISOString(),
-            email: user.email,
-            updatedAt: user.updatedAt.toISOString(),
-        };
+        const cachableUser = await getCachableUser(id);
+        if (!cachableUser) return null;
 
         await addUserToCache(cachableUser);
+        return cachableUser;
+    } else if (!cachedUserSchema.safeParse(cachedUser).success) {
+        const cachableUser = await getCachableUser(id);
+        if (!cachableUser) return null;
+
+        await updateUserInCache(cachableUser);
         return cachableUser;
     }
 
     return cachedUser;
-}
-
-export async function getAllUsersFromCache() {
-    const keys = await redis.keys("user:*");
-    if (!keys.length) {
-        const users = await db.query.users.findMany({
-            with: {
-                account: true,
-            },
-        });
-        if (!users.length) return [];
-
-        const cachableUsers: CachedUser[] = users.map((user) => ({
-            id: user.id,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            image: user.image,
-            createdAt: user.createdAt.toISOString(),
-            email: user.email,
-            updatedAt: user.updatedAt.toISOString(),
-        }));
-
-        const pipeline = redis.pipeline();
-        cachableUsers.forEach((user) => {
-            pipeline.set(`user:${user.id}`, JSON.stringify(user));
-            pipeline.sadd("usernames", user.username);
-        });
-
-        await pipeline.exec();
-        return cachableUsers;
-    }
-
-    const users = await redis.mget<CachedUser[]>(...keys);
-    return users;
 }
 
 export async function addUsernameToCache(username: string) {
