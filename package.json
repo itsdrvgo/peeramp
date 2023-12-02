@@ -7,9 +7,9 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "postinstall": "drizzle-kit generate:mysql",
-        "db:push": "drizzle-kit push:mysql",
-        "db:introspect": "drizzle-kit introspect:mysql",
+        "postinstall": "drizzle-kit generate:pg",
+        "db:push": "drizzle-kit push:pg",
+        "db:introspect": "drizzle-kit introspect:pg",
         "db:studio": "drizzle-kit studio"
     },
     "dependencies": {
@@ -37,7 +37,9 @@
         "lucide-react": "^0.292.0",
         "nanoid": "^5.0.3",
         "next": "^14.0.3",
+        "postgres": "^3.4.3",
         "react": "^18.2.0",
+        "react-cropper": "^2.3.3",
         "react-dom": "^18.2.0",
         "react-dropzone": "^14.2.3",
         "react-hook-form": "^7.48.2",
