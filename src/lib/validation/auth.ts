@@ -77,7 +77,7 @@ export const resetPasswordSchema = z
 
 export type NameData = z.infer<typeof nameSchema>;
 export type PasswordData = z.infer<typeof passwordSchema>;
-export type UsernameData = z.infer<typeof emailSchema>;
+export type UsernameData = z.infer<typeof usernameSchema>;
 export type EmailData = z.infer<typeof emailSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type SignUpData = z.infer<typeof signupSchema>;
