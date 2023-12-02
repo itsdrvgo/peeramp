@@ -18,7 +18,7 @@ function ResetPasswordStep2Section({ className, ...props }: DefaultProps) {
                     <p className="text-2xl font-bold">
                         Reset Password - Step 2
                     </p>
-                    <p className="text-sm text-black/80 dark:text-white/80">
+                    <p className="text-sm opacity-80">
                         Enter your new password and the verification code you
                         received in your email.
                     </p>

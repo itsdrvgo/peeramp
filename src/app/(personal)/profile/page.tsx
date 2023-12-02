@@ -1,15 +1,11 @@
-"use client";
-
-import { useClerk } from "@clerk/nextjs";
+import ProfileFetch from "@/src/components/profile/profile-fetch";
 
 function Page() {
-    const { signOut } = useClerk();
-
-    const handleSignOut = async () => {
-        await signOut();
-    };
-
-    return <button onClick={handleSignOut}>Logout</button>;
+    return (
+        <section className="flex w-full justify-center">
+            <ProfileFetch />
+        </section>
+    );
 }
 
 export default Page;

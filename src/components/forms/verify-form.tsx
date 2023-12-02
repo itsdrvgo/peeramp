@@ -1,5 +1,7 @@
 "use client";
 
+import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
+import { handleClientError } from "@/src/lib/utils";
 import {
     VerificationCodeData,
     verificationCodeSchema,
@@ -7,7 +9,7 @@ import {
 import { isClerkAPIResponseError, useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -22,10 +24,14 @@ import {
 
 function VerifyForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [isLoading, setIsLoading] = useState(false);
     const { signUp, isLoaded, setActive } = useSignUp();
     const [value, setValue] = useState("");
+
+    const isMentor =
+        searchParams.has("type") && searchParams.get("type") === "mentor";
 
     const form = useForm<VerificationCodeData>({
         resolver: zodResolver(verificationCodeSchema),
@@ -58,7 +64,10 @@ function VerifyForm() {
                         await setActive({
                             session: res.createdSessionId,
                         });
-                        router.push("/profile?new=true");
+                        router.push(
+                            "/profile/edit?new=true" +
+                                (isMentor ? "&type=mentor" : "")
+                        );
                     }
                     break;
 
@@ -67,15 +76,14 @@ function VerifyForm() {
                     break;
             }
         } catch (err) {
-            const unknownError = "Something went wrong, please try again!";
-
             isClerkAPIResponseError(err)
-                ? toast.error(err.errors[0]?.longMessage ?? unknownError, {
-                      id: toastId,
-                  })
-                : toast.error(unknownError, {
-                      id: toastId,
-                  });
+                ? toast.error(
+                      err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
+                      {
+                          id: toastId,
+                      }
+                  )
+                : handleClientError(err, toastId);
 
             return;
         } finally {

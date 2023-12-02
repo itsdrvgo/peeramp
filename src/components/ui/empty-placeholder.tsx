@@ -31,7 +31,7 @@ export function EmptyPlaceholder({
     return (
         <Card className={cn("gap-3 py-10", className)} fullWidth {...props}>
             <CardHeader className="items-center justify-center">
-                <div className="rounded-full border bg-primary-200 p-5">
+                <div className="rounded-full bg-primary-200 p-5">
                     <div>
                         <Icon />
                     </div>

@@ -18,7 +18,7 @@ function ResetPasswordStep1Section({ className, ...props }: DefaultProps) {
                     <p className="text-2xl font-bold">
                         Reset Password - Step 1
                     </p>
-                    <p className="text-sm text-black/80 dark:text-white/80">
+                    <p className="text-sm opacity-80">
                         Enter your email address to receive a verification code.
                     </p>
                 </div>

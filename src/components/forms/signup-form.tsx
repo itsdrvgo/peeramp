@@ -1,11 +1,13 @@
 "use client";
 
+import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
+import { handleClientError } from "@/src/lib/utils";
 import { SignUpData, signupSchema } from "@/src/lib/validation/auth";
 import { isClerkAPIResponseError, useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Checkbox, Input, Link } from "@nextui-org/react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -21,10 +23,14 @@ import {
 
 function SignUpForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
+
+    const isMentor =
+        searchParams.has("type") && searchParams.get("type") === "mentor";
 
     const { signUp, isLoaded } = useSignUp();
 
@@ -66,17 +72,16 @@ function SignUpForm() {
                 id: toastId,
             });
 
-            router.push("/signup/verify");
+            router.push("/signup/verify" + (isMentor ? "?type=mentor" : ""));
         } catch (err) {
-            const unknownError = "Something went wrong, please try again!";
-
             isClerkAPIResponseError(err)
-                ? toast.error(err.errors[0]?.longMessage ?? unknownError, {
-                      id: toastId,
-                  })
-                : toast.error(unknownError, {
-                      id: toastId,
-                  });
+                ? toast.error(
+                      err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
+                      {
+                          id: toastId,
+                      }
+                  )
+                : handleClientError(err, toastId);
 
             return;
         } finally {
@@ -199,9 +204,9 @@ function SignUpForm() {
                                             }
                                         >
                                             {isVisible ? (
-                                                <Icons.hide className="h-5 w-5 text-black/60 dark:text-white/60" />
+                                                <Icons.hide className="h-5 w-5 opacity-80" />
                                             ) : (
-                                                <Icons.view className="h-5 w-5 text-black/60 dark:text-white/60" />
+                                                <Icons.view className="h-5 w-5 opacity-80" />
                                             )}
                                         </button>
                                     }
@@ -235,9 +240,11 @@ function SignUpForm() {
                 />
 
                 <div className="space-y-2">
-                    <p className="text-sm text-black/70 dark:text-white/60">
-                        By signing up, you agree to the processing of your
-                        personal data as described in our{" "}
+                    <p>
+                        <span className="text-sm opacity-80">
+                            By signing up, you agree to the processing of your
+                            personal data as described in our{" "}
+                        </span>
                         <Link
                             as={NextLink}
                             href="/legal/privacy"
