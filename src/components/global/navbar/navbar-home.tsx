@@ -20,7 +20,7 @@ import LoginButton from "../buttons/login-button";
 import ThemeSwitch from "../buttons/theme-button";
 import PeerAmp from "../svgs/PeerAmp";
 
-function NavBar({ ...props }: NavbarProps) {
+function NavbarHome({ ...props }: NavbarProps) {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -92,4 +92,4 @@ function NavBar({ ...props }: NavbarProps) {
     );
 }
 
-export default NavBar;
+export default NavbarHome;
