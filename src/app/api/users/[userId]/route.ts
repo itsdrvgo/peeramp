@@ -22,6 +22,9 @@ const publicMetadataSchema = z.object({
     type: userTypesSchema,
     socials: z.array(userSocialSchema),
     usernameChangedAt: z.number(),
+    ampCount: z.number(),
+    followingCount: z.number(),
+    peersCount: z.number(),
 });
 
 type UserContext = z.infer<typeof userContextSchema>;
@@ -55,8 +58,7 @@ export async function PUT(req: NextRequest, context: UserContext) {
         const body = await req.json();
 
         const { params } = userContextSchema.parse(context);
-        const { bio, category, gender, type, usernameChangedAt, socials } =
-            publicMetadataSchema.parse(body);
+        const publicMetadata = publicMetadataSchema.parse(body);
 
         const user = await currentUser();
         if (!user) return CResponse({ message: "UNAUTHORIZED" });
@@ -65,14 +67,7 @@ export async function PUT(req: NextRequest, context: UserContext) {
             return CResponse({ message: "FORBIDDEN" });
 
         await clerkClient.users.updateUserMetadata(params.userId, {
-            publicMetadata: {
-                bio,
-                gender,
-                category,
-                type,
-                socials,
-                usernameChangedAt,
-            },
+            publicMetadata,
         });
 
         return CResponse({ message: "OK" });

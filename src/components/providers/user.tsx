@@ -17,6 +17,9 @@ function UserProvider({ children }: RootLayoutProps) {
                 "type",
                 "usernameChangedAt",
                 "socials",
+                "ampCount",
+                "followingCount",
+                "peersCount",
             ].every((key) => key in user.publicMetadata)
         )
             return <SyncAccount user={user} />;

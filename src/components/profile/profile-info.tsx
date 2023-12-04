@@ -74,20 +74,26 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
 
                         <div className="hidden justify-between gap-2 md:flex">
                             <p>
-                                <span className="mr-2 font-semibold">
-                                    {shortenNumber(785)}
+                                <span className="mr-1 font-semibold">
+                                    {shortenNumber(
+                                        user.publicMetadata.ampCount
+                                    )}
                                 </span>
                                 Amps
                             </p>
                             <p>
-                                <span className="mr-2 font-semibold">
-                                    {shortenNumber(4146113)}
+                                <span className="mr-1 font-semibold">
+                                    {shortenNumber(
+                                        user.publicMetadata.peersCount
+                                    )}
                                 </span>
                                 Peers
                             </p>
                             <p>
-                                <span className="mr-2 font-semibold">
-                                    {shortenNumber(60)}
+                                <span className="mr-1 font-semibold">
+                                    {shortenNumber(
+                                        user.publicMetadata.followingCount
+                                    )}
                                 </span>
                                 Following
                             </p>
@@ -124,13 +130,17 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
                         <div className="grid grid-flow-col justify-items-stretch py-4 md:hidden">
                             <p className="flex flex-col items-center">
                                 <span className="font-semibold">
-                                    {shortenNumber(785)}
+                                    {shortenNumber(
+                                        user.publicMetadata.ampCount
+                                    )}
                                 </span>
                                 <span className="text-sm opacity-60">Amps</span>
                             </p>
                             <p className="flex flex-col items-center">
                                 <span className="font-semibold">
-                                    {shortenNumber(4146113)}
+                                    {shortenNumber(
+                                        user.publicMetadata.peersCount
+                                    )}
                                 </span>
                                 <span className="text-sm opacity-60">
                                     Peers
@@ -138,7 +148,9 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
                             </p>
                             <p className="flex flex-col items-center">
                                 <span className="font-semibold">
-                                    {shortenNumber(60)}
+                                    {shortenNumber(
+                                        user.publicMetadata.followingCount
+                                    )}
                                 </span>
                                 <span className="text-sm opacity-60">
                                     Following

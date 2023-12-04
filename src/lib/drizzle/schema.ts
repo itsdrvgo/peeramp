@@ -117,6 +117,12 @@ export const userRelations = relations(users, ({ one, many }) => ({
         references: [userDetails.userId],
     }),
     amps: many(amps),
+    following: many(users, {
+        relationName: "following",
+    }),
+    peers: many(users, {
+        relationName: "peers",
+    }),
 }));
 
 // TYPES

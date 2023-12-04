@@ -47,6 +47,9 @@ export const userUpdateWebhookSchema = z.object({
         gender: userGenderSchema,
         socials: z.array(userSocialSchema),
         usernameChangedAt: z.number(),
+        peersCount: z.number(),
+        followingCount: z.number(),
+        ampCount: z.number(),
     }),
 });
 
