@@ -2,7 +2,7 @@
 
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
-import { Divider, Skeleton } from "@nextui-org/react";
+import { Button, Divider, Skeleton } from "@nextui-org/react";
 import { Icons } from "../../icons/icons";
 
 function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
@@ -17,20 +17,26 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
             <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
                 <Skeleton className="h-32 w-32 rounded-full" />
 
-                <div className="flex w-full basis-2/3 flex-col-reverse items-center justify-between gap-4 md:flex-row md:items-start">
+                <div className="flex w-full basis-2/3 flex-col-reverse items-center justify-between gap-8 md:flex-row md:items-start">
                     <div className="w-full space-y-4">
                         <div className="flex items-center justify-center gap-2 md:justify-start">
                             <Skeleton className="h-6 w-24 rounded-lg" />
                             <Skeleton className="h-6 w-16 rounded-lg" />
                         </div>
 
-                        <div className="hidden w-full max-w-xs justify-between gap-2 md:flex">
-                            {Array.from({ length: 3 }).map((_, i) => (
-                                <Skeleton
-                                    key={i}
-                                    className="h-5 w-16 rounded-lg"
-                                />
-                            ))}
+                        <div className="hidden w-full justify-between gap-2 md:flex">
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-5 w-8 rounded-lg" />
+                                <span>Amps</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-5 w-8 rounded-lg" />
+                                <span>Peers</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Skeleton className="h-5 w-8 rounded-lg" />
+                                <span>Following</span>
+                            </div>
                         </div>
 
                         <div className="flex items-center justify-center md:justify-start">
@@ -66,7 +72,15 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                     </div>
 
                     <div>
-                        <Skeleton className="h-8 w-28 rounded-lg md:w-8" />
+                        <Button
+                            size="sm"
+                            variant="flat"
+                            startContent={<Icons.pencil className="h-4 w-4" />}
+                            className="min-w-0 md:px-2"
+                            isDisabled
+                        >
+                            <p className="md:hidden">Edit Profile</p>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -100,8 +114,6 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                         <Icons.smile className="h-5 w-5" />
                     </div>
                 </div>
-
-                <Divider />
 
                 <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, i) => (
