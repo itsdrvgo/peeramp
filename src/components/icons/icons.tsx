@@ -10,6 +10,7 @@ import {
     BarChart2,
     Bell,
     Bold,
+    Bookmark,
     BookMarked,
     BookOpenCheck,
     Bug,
@@ -88,6 +89,7 @@ import {
     Plus,
     Podcast,
     RefreshCw,
+    Repeat2,
     Search,
     Send,
     SendHorizonal,
@@ -111,6 +113,7 @@ import {
     UserPlus,
     Users,
     Verified,
+    Video,
     Vote,
     Wrench,
     X,
@@ -122,6 +125,9 @@ import {
 export type Icon = LucideIcon;
 
 export const Icons = {
+    repeat: Repeat2,
+    bookmark: Bookmark,
+    video: Video,
     twitch: Twitch,
     linkedin: Linkedin,
     messages: MessageCircle,

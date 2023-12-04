@@ -39,6 +39,12 @@ export type NavItem = {
     icon?: keyof typeof Icons;
 };
 
+export type AsideNavItem = {
+    icon: keyof typeof Icons;
+    label: string;
+    href: string;
+};
+
 export type MenuConfig = NavItem[];
 
 export const ResponseMessagesEnum = {
@@ -71,3 +77,6 @@ declare global {
         usernameChangedAt: number;
     }
 }
+
+export type Visibility = "everyone" | "following" | "peers" | "only-me";
+export type Status = "draft" | "published";

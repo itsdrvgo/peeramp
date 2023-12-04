@@ -1,4 +1,4 @@
-import { MenuConfig } from "../types";
+import { AsideNavItem, MenuConfig } from "../types";
 
 export const menuConfig: MenuConfig = [
     {
@@ -16,5 +16,28 @@ export const menuConfig: MenuConfig = [
     {
         title: "Pro",
         href: "/membership",
+    },
+];
+
+export const asideMenuConfig: AsideNavItem[] = [
+    {
+        icon: "home",
+        label: "Home",
+        href: "/",
+    },
+    {
+        icon: "search",
+        label: "Search",
+        href: "/search",
+    },
+    {
+        icon: "compass",
+        label: "Explore",
+        href: "/explore",
+    },
+    {
+        icon: "messages",
+        label: "Messages",
+        href: "/messages",
     },
 ];

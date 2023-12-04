@@ -66,9 +66,9 @@ function MoreTab() {
             }}
         >
             <DropdownTrigger>
-                <div className="flex cursor-pointer items-center gap-4 rounded-lg p-4 px-3 hover:bg-default-100">
+                <div className="flex cursor-pointer items-center gap-4 rounded-lg p-2 md:p-4 md:px-3 md:hover:bg-default-100">
                     <Icons.menu className="h-6 w-6" />
-                    <p>More</p>
+                    <p className="hidden md:block">More</p>
                 </div>
             </DropdownTrigger>
 

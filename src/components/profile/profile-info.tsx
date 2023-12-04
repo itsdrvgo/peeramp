@@ -1,7 +1,9 @@
 "use client";
 
+import { Amp } from "@/src/lib/drizzle/schema";
 import {
     cn,
+    convertMstoTimeElapsed,
     getColorForConnection,
     getIconForConnection,
     getUserCategory,
@@ -9,19 +11,30 @@ import {
 } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
-import { Avatar, Button, Chip, Link, useDisclosure } from "@nextui-org/react";
+import {
+    Avatar,
+    Button,
+    Chip,
+    Divider,
+    Link,
+    Tab,
+    Tabs,
+    useDisclosure,
+} from "@nextui-org/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PfpUploadModal from "../global/modals/pfp-upload";
 import { Icons } from "../icons/icons";
+import CreateAmpCard from "../ui/create-amp-card";
 import MoreSocialModal from "./edit/modals/more-social-modal";
 
 interface PageProps extends DefaultProps {
     user: UserResource;
+    amps: Amp[];
 }
 
-function ProfileInfo({ className, user, ...props }: PageProps) {
+function ProfileInfo({ className, user, amps, ...props }: PageProps) {
     const router = useRouter();
 
     const [iconURL, setIconURL] = useState(user.imageUrl);
@@ -42,23 +55,30 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
 
     return (
         <>
-            <div className={cn("w-full max-w-2xl py-10", className)} {...props}>
-                <div className="flex items-center justify-between gap-5">
+            <div
+                className={cn(
+                    "w-full space-y-5 px-5 py-10 md:max-w-2xl md:space-y-10",
+                    className
+                )}
+                {...props}
+            >
+                <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
                     <button onClick={onImageModalOpen}>
                         <Avatar
                             src={iconURL}
                             alt={user.username!}
                             size="lg"
+                            showFallback
                             classNames={{
                                 base: "h-32 w-32",
                             }}
                         />
                     </button>
 
-                    <div className="flex w-full basis-2/3 justify-between gap-4">
-                        <div className="w-full space-y-4">
+                    <div className="flex w-full basis-2/3 flex-col-reverse items-center justify-between gap-4 md:flex-row md:items-start">
+                        <div className="w-full space-y-2 md:space-y-4">
                             <div>
-                                <p className="text-xl font-semibold">
+                                <p className="text-center text-xl font-semibold md:text-start">
                                     {user.firstName} {user.lastName}{" "}
                                     <span className="font-normal opacity-80">
                                         ({user.username})
@@ -66,7 +86,7 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
                                 </p>
                             </div>
 
-                            <div className="flex max-w-xs justify-between gap-2">
+                            <div className="hidden max-w-xs justify-between gap-2 md:flex">
                                 <p>
                                     <span className="mr-2 font-semibold">
                                         {shortenNumber(785)}
@@ -92,7 +112,7 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
                                 <div className="space-y-2">
                                     {user.publicMetadata.category !==
                                         "none" && (
-                                        <p className="opacity-80">
+                                        <p className="text-center opacity-80 md:text-start">
                                             {getUserCategory(
                                                 user.publicMetadata.category
                                             )}
@@ -100,7 +120,7 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
                                     )}
 
                                     {user.publicMetadata.bio && (
-                                        <div className="text-sm">
+                                        <div className="rounded-lg border border-white/20 p-3 px-4 text-sm md:border-0 md:p-0">
                                             <p>
                                                 {user.publicMetadata.bio
                                                     .split("\n")
@@ -115,6 +135,33 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
                                     )}
                                 </div>
                             )}
+
+                            <div className="grid grid-flow-col justify-items-stretch py-4 md:hidden">
+                                <p className="flex flex-col items-center">
+                                    <span className="font-semibold">
+                                        {shortenNumber(785)}
+                                    </span>
+                                    <span className="text-sm opacity-60">
+                                        Amps
+                                    </span>
+                                </p>
+                                <p className="flex flex-col items-center">
+                                    <span className="font-semibold">
+                                        {shortenNumber(4146113)}
+                                    </span>
+                                    <span className="text-sm opacity-60">
+                                        Peers
+                                    </span>
+                                </p>
+                                <p className="flex flex-col items-center">
+                                    <span className="font-semibold">
+                                        {shortenNumber(60)}
+                                    </span>
+                                    <span className="text-sm opacity-60">
+                                        Following
+                                    </span>
+                                </p>
+                            </div>
 
                             <div className="flex flex-wrap items-center gap-2">
                                 {user.publicMetadata?.socials.length > 0 && (
@@ -175,16 +222,263 @@ function ProfileInfo({ className, user, ...props }: PageProps) {
 
                         <div>
                             <Button
-                                isIconOnly
                                 size="sm"
-                                variant="shadow"
+                                variant="flat"
                                 startContent={
                                     <Icons.pencil className="h-4 w-4" />
                                 }
+                                className="min-w-0 md:px-2"
                                 onPress={() => router.push("/profile/edit")}
-                            />
+                            >
+                                <p className="md:hidden">Edit Profile</p>
+                            </Button>
                         </div>
                     </div>
+                </div>
+
+                <Divider />
+
+                <div className="w-full">
+                    <Tabs aria-label="Amp Tabs" variant="underlined" fullWidth>
+                        <Tab key="amps" title="Amps">
+                            <div className="space-y-5">
+                                <CreateAmpCard
+                                    firstName={user.firstName!}
+                                    image={user.imageUrl}
+                                    userId={user.id}
+                                    username={user.username!}
+                                />
+
+                                <Divider />
+
+                                {amps.filter(
+                                    (amp) => amp.status === "published"
+                                ).length > 0 ? (
+                                    <div className="space-y-4">
+                                        {amps
+                                            .filter(
+                                                (amp) =>
+                                                    amp.status === "published"
+                                            )
+                                            .map((amp) => (
+                                                <div
+                                                    key={amp.id}
+                                                    className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
+                                                >
+                                                    <div>
+                                                        <Avatar
+                                                            src={user.imageUrl}
+                                                            alt={user.username!}
+                                                            showFallback
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-full space-y-3">
+                                                        <div className="w-full space-y-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <p className="font-semibold">
+                                                                    {
+                                                                        user.firstName
+                                                                    }{" "}
+                                                                    {
+                                                                        user.lastName
+                                                                    }
+                                                                </p>
+                                                                <p className="space-x-1 text-sm font-light opacity-60">
+                                                                    <span>
+                                                                        @
+                                                                        {
+                                                                            user.username
+                                                                        }
+                                                                    </span>
+                                                                    <span>
+                                                                        •
+                                                                    </span>
+                                                                    <span>
+                                                                        {convertMstoTimeElapsed(
+                                                                            amp.createdAt.getTime()
+                                                                        )}
+                                                                    </span>
+                                                                </p>
+                                                            </div>
+
+                                                            <p className="text-sm md:text-base">
+                                                                {amp.content
+                                                                    .split("\n")
+                                                                    .map(
+                                                                        (
+                                                                            line,
+                                                                            index
+                                                                        ) => (
+                                                                            <span
+                                                                                key={
+                                                                                    index
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    line
+                                                                                }
+                                                                                <br />
+                                                                            </span>
+                                                                        )
+                                                                    )}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <Button
+                                                                isIconOnly
+                                                                radius="full"
+                                                                variant="light"
+                                                                size="sm"
+                                                                startContent={
+                                                                    <Icons.comment className="h-4 w-4" />
+                                                                }
+                                                            />
+
+                                                            <Button
+                                                                isIconOnly
+                                                                radius="full"
+                                                                variant="light"
+                                                                size="sm"
+                                                                startContent={
+                                                                    <Icons.repeat className="h-4 w-4" />
+                                                                }
+                                                            />
+
+                                                            <Button
+                                                                isIconOnly
+                                                                radius="full"
+                                                                variant="light"
+                                                                size="sm"
+                                                                startContent={
+                                                                    <Icons.heart className="h-4 w-4" />
+                                                                }
+                                                            />
+
+                                                            <Button
+                                                                isIconOnly
+                                                                radius="full"
+                                                                variant="light"
+                                                                size="sm"
+                                                                startContent={
+                                                                    <Icons.analytics className="h-4 w-4" />
+                                                                }
+                                                            />
+
+                                                            <div className="flex items-center gap-2">
+                                                                <Button
+                                                                    isIconOnly
+                                                                    radius="full"
+                                                                    variant="light"
+                                                                    size="sm"
+                                                                    startContent={
+                                                                        <Icons.bookmark className="h-4 w-4" />
+                                                                    }
+                                                                />
+
+                                                                <Button
+                                                                    isIconOnly
+                                                                    radius="full"
+                                                                    variant="light"
+                                                                    size="sm"
+                                                                    startContent={
+                                                                        <Icons.share className="h-4 w-4" />
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-5 text-center opacity-60">
+                                        <p className="text-sm md:text-base">
+                                            You don&apos;t have any amps yet.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </Tab>
+
+                        <Tab key="drafts" title="Drafts">
+                            {amps.filter((amp) => amp.status === "draft")
+                                .length > 0 ? (
+                                <div className="space-y-4">
+                                    {amps
+                                        .filter((amp) => amp.status === "draft")
+                                        .map((amp) => (
+                                            <div
+                                                key={amp.id}
+                                                className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
+                                            >
+                                                <div>
+                                                    <Avatar
+                                                        src={user.imageUrl}
+                                                        alt={user.username!}
+                                                        showFallback
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <p className="font-semibold">
+                                                            {user.firstName}{" "}
+                                                            {user.lastName}
+                                                        </p>
+                                                        <p className="space-x-1 text-sm font-light opacity-60">
+                                                            <span>
+                                                                @{user.username}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span>
+                                                                {convertMstoTimeElapsed(
+                                                                    amp.createdAt.getTime()
+                                                                )}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+
+                                                    <p className="text-sm md:text-base">
+                                                        {amp.content
+                                                            .split("\n")
+                                                            .map(
+                                                                (
+                                                                    line,
+                                                                    index
+                                                                ) => (
+                                                                    <span
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                    >
+                                                                        {line}
+                                                                        <br />
+                                                                    </span>
+                                                                )
+                                                            )}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            ) : (
+                                <div className="p-5 text-center opacity-60">
+                                    <p className="text-sm md:text-base">
+                                        You don&apos;t have any drafts yet.
+                                    </p>
+                                </div>
+                            )}
+                        </Tab>
+                        <Tab key="saved" title="Saved">
+                            <div className="p-5 text-center opacity-60">
+                                <p className="text-sm md:text-base">
+                                    You don&apos;t have any saved amps yet.
+                                </p>
+                            </div>
+                        </Tab>
+                    </Tabs>
                 </div>
             </div>
 

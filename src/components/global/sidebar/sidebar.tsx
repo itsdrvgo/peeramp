@@ -1,3 +1,4 @@
+import { asideMenuConfig } from "@/src/config/menu";
 import { siteConfig } from "@/src/config/site";
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
@@ -8,41 +9,12 @@ import PeerAmp from "../svgs/PeerAmp";
 import MoreTab from "./more-tab";
 import ProfileTab from "./profile-tab";
 
-interface Item {
-    icon: keyof typeof Icons;
-    label: string;
-    href: string;
-}
-
-const items: Item[] = [
-    {
-        icon: "home",
-        label: "Home",
-        href: "/",
-    },
-    {
-        icon: "search",
-        label: "Search",
-        href: "/search",
-    },
-    {
-        icon: "compass",
-        label: "Explore",
-        href: "/explore",
-    },
-    {
-        icon: "messages",
-        label: "Messages",
-        href: "/messages",
-    },
-];
-
 function Sidebar({ className, children, ...props }: DefaultProps) {
     return (
-        <div className="flex h-screen w-full overflow-hidden">
+        <div className="flex h-screen w-full flex-col overflow-hidden md:flex-row">
             <aside
                 className={cn(
-                    "flex h-screen w-80 flex-col justify-between border-r border-black/10 p-3 py-8 dark:border-white/10",
+                    "hidden h-screen w-80 flex-col justify-between border-r border-black/10 p-3 py-8 dark:border-white/10 md:flex",
                     className
                 )}
                 {...props}
@@ -61,7 +33,7 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                     </Link>
 
                     <nav className="flex flex-col gap-1">
-                        {items.map((item, index) => {
+                        {asideMenuConfig.map((item, index) => {
                             const Icon = Icons[item.icon];
 
                             return (
@@ -83,7 +55,37 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
 
                 <ProfileTab />
             </aside>
+
+            <header className="sticky top-0 flex items-center justify-between gap-2 border-b border-black/40 bg-background px-5 py-3 dark:border-white/20 md:hidden">
+                <div className="flex items-center gap-1">
+                    <PeerAmp />
+                    <p className="font-bold">PeerAmp</p>
+                </div>
+                <MoreTab />
+            </header>
             {children}
+            <footer className="sticky bottom-0 grid grid-flow-col justify-items-stretch border-t border-black/40 bg-background p-2 px-5 dark:border-white/20 md:hidden">
+                {asideMenuConfig.map((item, index) => {
+                    const Icon = Icons[item.icon];
+
+                    return (
+                        <div
+                            key={index}
+                            className="flex items-center justify-center"
+                        >
+                            <Link
+                                href={item.href}
+                                className="p-2"
+                                color="foreground"
+                            >
+                                <Icon className="h-6 w-6" />
+                            </Link>
+                        </div>
+                    );
+                })}
+
+                <ProfileTab />
+            </footer>
         </div>
     );
 }

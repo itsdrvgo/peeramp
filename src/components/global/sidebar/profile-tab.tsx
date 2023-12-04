@@ -19,16 +19,21 @@ function ProfileTab({ className, ...props }: LinkProps) {
             color="foreground"
             href="/profile"
             className={cn(
-                "flex items-center gap-4 rounded-lg p-2 px-3 hover:bg-default-100",
+                "flex items-center justify-center gap-4 rounded-lg md:justify-start md:p-2 md:px-3 md:hover:bg-default-100",
                 className
             )}
             {...props}
         >
             <div>
-                <Avatar src={user.imageUrl} alt={user.username!} showFallback />
+                <Avatar
+                    src={user.imageUrl}
+                    alt={user.username!}
+                    showFallback
+                    className="h-6 w-6 md:h-10 md:w-10"
+                />
             </div>
 
-            <div>
+            <div className="hidden md:block">
                 <p>{user.username}</p>
                 <p className="text-sm opacity-80">
                     {user.firstName} {user.lastName}

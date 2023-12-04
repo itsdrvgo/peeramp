@@ -23,7 +23,7 @@ function UserProvider({ children }: RootLayoutProps) {
 
     return (
         <Sidebar>
-            <main className="min-h-screen flex-1 overflow-y-scroll">
+            <main className="flex-1 overflow-y-scroll md:min-h-screen">
                 {children}
             </main>
         </Sidebar>
