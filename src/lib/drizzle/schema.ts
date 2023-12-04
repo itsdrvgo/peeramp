@@ -1,4 +1,5 @@
 import { DEFAULT_PROFILE_IMAGE_URL } from "@/src/config/const";
+import { Status, Visibility } from "@/src/types";
 import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import {
     index,
@@ -89,8 +90,11 @@ export const amps = pgTable(
                 onDelete: "cascade",
             }),
         content: text("content").notNull().default(""),
-        status: text("status").notNull().default("draft"),
-        visibility: text("visibility").notNull().default("everyone"),
+        status: text("status").notNull().default("draft").$type<Status>(),
+        visibility: text("visibility")
+            .notNull()
+            .default("everyone")
+            .$type<Visibility>(),
         score: text("score").notNull().default("0"),
         createdAt: timestamp("created_at", { withTimezone: true })
             .notNull()
