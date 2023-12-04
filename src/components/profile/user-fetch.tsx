@@ -4,7 +4,7 @@ import { Amp } from "@/src/lib/drizzle/schema";
 import { DefaultProps } from "@/src/types";
 import { useUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import ProfileInfo from "./profile-info";
+import ProfilePage from "./profile-page";
 import ProfileInfoSkeleton from "./skeletons/profile-info-skeleton";
 
 interface PageProps extends DefaultProps {
@@ -17,7 +17,7 @@ function UserFetch({ className, amps, ...props }: PageProps) {
     if (!user) redirect("/signin");
 
     return (
-        <ProfileInfo user={user} className={className} amps={amps} {...props} />
+        <ProfilePage user={user} className={className} amps={amps} {...props} />
     );
 }
 
