@@ -27,7 +27,7 @@ export default authMiddleware({
                 (["/signin", "/signup"].includes(req.nextUrl.pathname) ||
                     req.nextUrl.pathname === "/")
             ) {
-                url.pathname = "/profile";
+                url.pathname = "/home";
                 return NextResponse.redirect(url);
             } else return NextResponse.next();
         }
