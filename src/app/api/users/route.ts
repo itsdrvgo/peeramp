@@ -1,6 +1,6 @@
 import { env } from "@/env.mjs";
 import { db } from "@/src/lib/drizzle";
-import { users } from "@/src/lib/drizzle/schema";
+import { userDetails, users } from "@/src/lib/drizzle/schema";
 import {
     addUsernameToCache,
     addUserToCache,
@@ -10,16 +10,18 @@ import {
     updateUserInCache,
     updateUsernameInCache,
 } from "@/src/lib/redis/methods/user";
-import { handleError } from "@/src/lib/utils";
+import { CResponse, handleError } from "@/src/lib/utils";
 import {
+    userCreateWebhookSchema,
     userDeleteWebhookSchema,
-    userWebhookSchema,
+    userUpdateWebhookSchema,
     WebhookData,
     webhookSchema,
 } from "@/src/lib/validation/webhook";
 import { SvixHeaders } from "@/src/types";
+import { clerkClient } from "@clerk/nextjs";
 import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { Webhook } from "svix";
 
 export async function POST(req: NextRequest) {
@@ -37,10 +39,7 @@ export async function POST(req: NextRequest) {
     try {
         body = wh.verify(JSON.stringify(payload), headers) as WebhookData;
     } catch (err) {
-        return NextResponse.json({
-            code: 400,
-            message: "Bad Request!",
-        });
+        return CResponse({ message: "BAD_REQUEST" });
     }
 
     const { type, data } = webhookSchema.parse(body);
@@ -52,10 +51,16 @@ export async function POST(req: NextRequest) {
                     id,
                     email_addresses,
                     first_name: firstName,
-                    image_url: image,
                     last_name: lastName,
+                    image_url: image,
                     username,
-                } = userWebhookSchema.parse(data);
+                    primary_email_address_id,
+                } = userCreateWebhookSchema.parse(data);
+
+                const email =
+                    email_addresses.find(
+                        (email) => email.id === primary_email_address_id
+                    )?.email_address ?? email_addresses[0].email_address;
 
                 await Promise.all([
                     db.insert(users).values({
@@ -64,7 +69,11 @@ export async function POST(req: NextRequest) {
                         username,
                         id,
                         image,
-                        email: email_addresses[0].email_address,
+                        email,
+                    }),
+                    db.insert(userDetails).values({
+                        userId: id,
+                        usernameChangedAt: new Date(),
                     }),
                     addUserToCache({
                         id,
@@ -72,99 +81,154 @@ export async function POST(req: NextRequest) {
                         firstName,
                         lastName,
                         image,
-                        email: email_addresses[0].email_address,
+                        email,
+                        bio: null,
+                        type: "normal",
+                        category: "none",
+                        gender: "none",
+                        socials: [],
+                        peersCount: 0,
+                        followingCount: 0,
+                        ampCount: 0,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
+                        usernameChangedAt: new Date().toISOString(),
                     }),
                     addUsernameToCache(username),
+                    clerkClient.users.updateUserMetadata(id, {
+                        publicMetadata: {
+                            bio: null,
+                            type: "normal",
+                            category: "none",
+                            gender: "none",
+                            socials: [],
+                            usernameChangedAt: Date.now(),
+                            ampCount: 0,
+                            peersCount: 0,
+                            followingCount: 0,
+                        },
+                    }),
                 ]);
 
-                return NextResponse.json({
-                    code: 201,
-                    message: "Ok",
-                });
+                return CResponse({ message: "CREATED" });
             } catch (err) {
                 return handleError(err);
             }
         }
 
         case "user.updated": {
-            const {
-                id,
-                email_addresses,
-                image_url: image,
-                first_name: firstName,
-                last_name: lastName,
-                username,
-            } = userWebhookSchema.parse(data);
-
-            const existingUser = await getUserFromCache(id);
-            if (!existingUser)
-                return NextResponse.json({
-                    code: 404,
-                    message: "Account doesn't exist!",
-                });
-
-            await Promise.all([
-                db
-                    .update(users)
-                    .set({
-                        email:
-                            email_addresses[0].email_address ??
-                            existingUser.email,
-                        username: username ?? existingUser.username,
-                        image: image ?? existingUser.image,
-                    })
-                    .where(eq(users.id, existingUser.id)),
-                updateUserInCache({
+            try {
+                const {
                     id,
-                    username: username ?? existingUser.username,
-                    firstName: firstName ?? existingUser.firstName,
-                    lastName: lastName ?? existingUser.lastName,
-                    image: image ?? existingUser.image,
-                    email:
-                        email_addresses[0].email_address ?? existingUser.email,
-                    createdAt: existingUser.createdAt,
-                    updatedAt: new Date().toISOString(),
-                }),
-                username !== existingUser.username &&
-                    updateUsernameInCache(existingUser.username, username),
-            ]);
+                    email_addresses,
+                    image_url: image,
+                    first_name: firstName,
+                    last_name: lastName,
+                    primary_email_address_id,
+                    username,
+                    public_metadata,
+                } = userUpdateWebhookSchema.parse(data);
 
-            return NextResponse.json({
-                code: 200,
-                message: "Ok",
-            });
+                const existingUser = await getUserFromCache(id);
+                if (!existingUser) return CResponse({ message: "NOT_FOUND" });
+
+                const email =
+                    email_addresses.find(
+                        (email) => email.id === primary_email_address_id
+                    )?.email_address ?? email_addresses[0].email_address;
+
+                await Promise.all([
+                    db
+                        .update(users)
+                        .set({
+                            firstName,
+                            lastName,
+                            username,
+                            image,
+                            email,
+                            updatedAt: new Date(),
+                        })
+                        .where(eq(users.id, existingUser.id)),
+                    db
+                        .update(userDetails)
+                        .set({
+                            bio: public_metadata.bio,
+                            type: public_metadata.type,
+                            category: public_metadata.category,
+                            gender: public_metadata.gender,
+                            socials: public_metadata.socials,
+                            usernameChangedAt: new Date(
+                                public_metadata.usernameChangedAt
+                            ),
+                        })
+                        .where(eq(userDetails.userId, existingUser.id)),
+                    updateUserInCache({
+                        id,
+                        username,
+                        firstName,
+                        lastName,
+                        image,
+                        email,
+                        bio: public_metadata.bio,
+                        type: public_metadata.type,
+                        category: public_metadata.category,
+                        gender: public_metadata.gender,
+                        socials: public_metadata.socials,
+                        peersCount: public_metadata.peersCount,
+                        followingCount: public_metadata.followingCount,
+                        ampCount: public_metadata.ampCount,
+                        createdAt: existingUser.createdAt,
+                        updatedAt: new Date().toISOString(),
+                        usernameChangedAt: new Date(
+                            public_metadata.usernameChangedAt
+                        ).toISOString(),
+                    }),
+                    manageUsernameChange(id, username, existingUser.username),
+                ]);
+
+                return CResponse({ message: "OK" });
+            } catch (err) {
+                return handleError(err);
+            }
         }
 
         case "user.deleted": {
-            const { id } = userDeleteWebhookSchema.parse(data);
+            try {
+                const { id } = userDeleteWebhookSchema.parse(data);
 
-            const existingUser = await getUserFromCache(id);
-            if (!existingUser)
-                return NextResponse.json({
-                    code: 404,
-                    message: "Account doesn't exist!",
-                });
+                const existingUser = await getUserFromCache(id);
+                if (!existingUser) return CResponse({ message: "NOT_FOUND" });
 
-            await Promise.all([
-                db.delete(users).where(eq(users.id, id)),
-                deleteUserFromCache(id),
-                deleteUsernameFromCache(existingUser.username),
-            ]);
+                await Promise.all([
+                    db.delete(users).where(eq(users.id, id)),
+                    deleteUserFromCache(id),
+                    deleteUsernameFromCache(existingUser.username),
+                ]);
 
-            return NextResponse.json({
-                code: 200,
-                message: "Ok",
-                data: JSON.stringify(id),
-            });
+                return CResponse({ message: "OK", data: id });
+            } catch (err) {
+                return handleError(err);
+            }
         }
 
         default: {
-            return NextResponse.json({
-                code: 400,
-                message: "Bad Request!",
-            });
+            return CResponse({ message: "BAD_REQUEST" });
         }
     }
+}
+
+async function manageUsernameChange(
+    userId: string,
+    username: string,
+    prevUsername: string
+) {
+    await Promise.all([
+        db
+            .update(userDetails)
+            .set({
+                usernameChangedAt: new Date(),
+            })
+            .where(eq(userDetails.userId, userId)),
+        updateUsernameInCache(prevUsername, username),
+    ]);
 }

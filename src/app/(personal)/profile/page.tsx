@@ -1,15 +1,15 @@
-"use client";
-
-import { useClerk } from "@clerk/nextjs";
+import ProfileFetch from "@/src/components/profile/profile-fetch";
+import ProfileInfoSkeleton from "@/src/components/profile/skeletons/profile-info-skeleton";
+import { Suspense } from "react";
 
 function Page() {
-    const { signOut } = useClerk();
-
-    const handleSignOut = async () => {
-        await signOut();
-    };
-
-    return <button onClick={handleSignOut}>Logout</button>;
+    return (
+        <section className="flex w-full flex-col items-center">
+            <Suspense fallback={<ProfileInfoSkeleton />}>
+                <ProfileFetch />
+            </Suspense>
+        </section>
+    );
 }
 
 export default Page;

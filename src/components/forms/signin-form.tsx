@@ -1,5 +1,7 @@
 "use client";
 
+import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
+import { handleClientError } from "@/src/lib/utils";
 import { LoginData, loginSchema } from "@/src/lib/validation/auth";
 import { isClerkAPIResponseError, useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,15 +69,14 @@ function SignInForm() {
                     console.log(res);
             }
         } catch (err) {
-            const unknownError = "Something went wrong, please try again.";
-
             isClerkAPIResponseError(err)
-                ? toast.error(err.errors[0]?.longMessage ?? unknownError, {
-                      id: toastId,
-                  })
-                : toast.error(unknownError, {
-                      id: toastId,
-                  });
+                ? toast.error(
+                      err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
+                      {
+                          id: toastId,
+                      }
+                  )
+                : handleClientError(err, toastId);
 
             return;
         } finally {
@@ -133,9 +134,9 @@ function SignInForm() {
                                             }
                                         >
                                             {isVisible ? (
-                                                <Icons.hide className="h-5 w-5 text-black/60 dark:text-white/60" />
+                                                <Icons.hide className="h-5 w-5 opacity-80" />
                                             ) : (
-                                                <Icons.view className="h-5 w-5 text-black/60 dark:text-white/60" />
+                                                <Icons.view className="h-5 w-5 opacity-80" />
                                             )}
                                         </button>
                                     }
@@ -147,13 +148,15 @@ function SignInForm() {
                     )}
                 />
 
-                <Link
-                    as={NextLink}
-                    href="/signin/reset-password"
-                    className="text-sm hover:text-black/80 dark:hover:text-white/80"
-                >
-                    Forgot password?
-                </Link>
+                <div>
+                    <Link
+                        as={NextLink}
+                        href="/signin/reset-password"
+                        className="text-sm"
+                    >
+                        Forgot password?
+                    </Link>
+                </div>
 
                 <Button
                     className="bg-default-700 font-semibold text-white dark:bg-primary-900 dark:text-black"

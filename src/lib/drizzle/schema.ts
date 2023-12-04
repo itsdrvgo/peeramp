@@ -1,70 +1,143 @@
-import { InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
+import { DEFAULT_PROFILE_IMAGE_URL } from "@/src/config/const";
+import { Status, Visibility } from "@/src/types";
+import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import {
-    int,
-    mysqlTable,
+    index,
+    jsonb,
+    pgTable,
+    text,
     timestamp,
     uniqueIndex,
-    varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import {
+    UserCategoryType,
+    UserGenderType,
+    UserSocial,
+    UserType,
+} from "../validation/user";
 
 // SCHEMAS
 
-export const users = mysqlTable(
+export const users = pgTable(
     "users",
     {
-        id: varchar("id", { length: 191 }).notNull().primaryKey(),
-        firstName: varchar("first_name", { length: 191 }).notNull(),
-        lastName: varchar("last_name", { length: 191 }).notNull(),
-        username: varchar("username", { length: 191 }).unique().notNull(),
-        email: varchar("email", { length: 191 }).notNull().unique(),
-        image: varchar("image", { length: 191 }),
-        createdAt: timestamp("created_at")
+        id: text("id").notNull().unique().primaryKey(),
+        firstName: text("first_name").notNull(),
+        lastName: text("last_name").notNull(),
+        username: text("username").notNull().unique(),
+        email: text("email").notNull().unique(),
+        image: text("image").notNull().default(DEFAULT_PROFILE_IMAGE_URL),
+        createdAt: timestamp("created_at", { withTimezone: true })
             .notNull()
-            .default(sql`current_timestamp()`),
-        updatedAt: timestamp("updated_at")
+            .defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true })
             .notNull()
-            .default(sql`current_timestamp()`)
-            .onUpdateNow(),
+            .defaultNow(),
     },
-    (user) => ({
-        emailIndex: uniqueIndex("email_idx").on(user.email),
-        usernameIndex: uniqueIndex("name_idx").on(user.username),
-    })
+    (table) => {
+        return {
+            emailIdx: uniqueIndex("email_idx").on(table.email),
+            usernameIdx: uniqueIndex("username_idx").on(table.username),
+        };
+    }
 );
 
-export const roles = mysqlTable(
-    "roles",
+export const userDetails = pgTable(
+    "user_details",
     {
-        id: varchar("id", { length: 191 }).notNull().primaryKey(),
-        name: varchar("name", { length: 191 }).notNull().unique(),
-        key: varchar("key", { length: 191 }).notNull().unique(),
-        position: int("position").notNull().default(0),
-        permissions: int("permissions").notNull().default(1),
-        createdAt: timestamp("created_at")
-            .default(sql`current_timestamp()`)
-            .notNull(),
-        updatedAt: timestamp("updated_at")
-            .default(sql`current_timestamp()`)
+        userId: text("user_id")
             .notNull()
-            .onUpdateNow(),
+            .unique()
+            .references(() => users.id, {
+                onDelete: "cascade",
+            })
+            .primaryKey(),
+        bio: text("bio"),
+        type: text("type").notNull().default("normal").$type<UserType>(),
+        category: text("category")
+            .notNull()
+            .default("none")
+            .$type<UserCategoryType>(),
+        gender: text("gender")
+            .notNull()
+            .default("none")
+            .$type<UserGenderType>(),
+        usernameChangedAt: timestamp("username_changed_at", {
+            withTimezone: true,
+        })
+            .notNull()
+            .defaultNow(),
+        socials: jsonb("socials").notNull().$type<UserSocial[]>().default([]),
+        score: text("score").notNull().default("0"),
     },
-    (role) => ({
-        nameIndex: uniqueIndex("name_idx").on(role.name),
-    })
+    (table) => {
+        return {
+            categoryIdx: index("category_idx").on(table.category),
+            typeIdx: index("type_idx").on(table.type),
+            genderIdx: index("gender_idx").on(table.gender),
+        };
+    }
+);
+
+export const amps = pgTable(
+    "amps",
+    {
+        id: text("id").notNull().unique().primaryKey(),
+        creatorId: text("creator_id")
+            .notNull()
+            .references(() => users.id, {
+                onDelete: "cascade",
+            }),
+        content: text("content").notNull().default(""),
+        status: text("status").notNull().default("draft").$type<Status>(),
+        visibility: text("visibility")
+            .notNull()
+            .default("everyone")
+            .$type<Visibility>(),
+        score: text("score").notNull().default("0"),
+        createdAt: timestamp("created_at", { withTimezone: true })
+            .notNull()
+            .defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }),
+        publishedAt: timestamp("published_at", { withTimezone: true }),
+    },
+    (table) => {
+        return {
+            creatorIdx: index("creator_idx").on(table.creatorId),
+        };
+    }
 );
 
 // RELATIONS
+
+export const userRelations = relations(users, ({ one, many }) => ({
+    details: one(userDetails, {
+        fields: [users.id],
+        references: [userDetails.userId],
+    }),
+    amps: many(amps),
+    following: many(users, {
+        relationName: "following",
+    }),
+    peers: many(users, {
+        relationName: "peers",
+    }),
+}));
 
 // TYPES
 
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
 
-export type Role = InferSelectModel<typeof roles>;
-export type NewRole = InferInsertModel<typeof roles>;
+export type UserDetails = InferSelectModel<typeof userDetails>;
+export type NewUserDetails = InferInsertModel<typeof userDetails>;
+
+export type Amp = InferSelectModel<typeof amps>;
+export type NewAmp = InferInsertModel<typeof amps>;
 
 // ZOD SCHEMA
 
 export const insertUserSchema = createInsertSchema(users);
-export const insertRoleSchema = createInsertSchema(roles);
+export const insertUserDetailsSchema = createInsertSchema(userDetails);
+export const insertAmpSchema = createInsertSchema(amps);

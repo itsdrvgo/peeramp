@@ -2,6 +2,7 @@ import { authMiddleware } from "@clerk/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+import { CResponse } from "./lib/utils";
 
 const cache = new Map();
 
@@ -14,8 +15,8 @@ const globalRateLimiter = new Ratelimit({
 });
 
 export default authMiddleware({
-    ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico", "/"],
-    publicRoutes: ["/signin(.*)", "/signup(.*)", "/api/uploadthing(.*)"],
+    ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico"],
+    publicRoutes: ["/signin(.*)", "/signup(.*)", "/api/uploadthing(.*)", "/"],
     apiRoutes: ["/api(.*)"],
     afterAuth: async (auth, req, evt) => {
         const url = new URL(req.nextUrl.origin);
@@ -23,10 +24,10 @@ export default authMiddleware({
         if (auth.isPublicRoute) {
             if (
                 auth.userId &&
-                ["/signin", "/signup"].includes(req.nextUrl.pathname)
+                (["/signin", "/signup"].includes(req.nextUrl.pathname) ||
+                    req.nextUrl.pathname === "/")
             ) {
-                url.pathname = "/profile";
-
+                url.pathname = "/home";
                 return NextResponse.redirect(url);
             } else return NextResponse.next();
         }
@@ -43,10 +44,7 @@ export default authMiddleware({
 
             const res = success
                 ? NextResponse.next()
-                : NextResponse.json({
-                      code: 429,
-                      message: "Too many requests, go slow",
-                  });
+                : CResponse({ message: "TOO_MANY_REQUESTS" });
 
             res.headers.set("X-RateLimit-Limit", limit.toString());
             res.headers.set("X-RateLimit-Remaining", remaining.toString());

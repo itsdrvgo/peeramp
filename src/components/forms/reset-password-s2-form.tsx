@@ -1,5 +1,7 @@
 "use client";
 
+import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
+import { handleClientError } from "@/src/lib/utils";
 import {
     ResetPasswordData,
     resetPasswordSchema,
@@ -75,15 +77,14 @@ function ResetPasswordS2Form() {
                     break;
             }
         } catch (err) {
-            const unknownError = "Something went wrong, please try again!";
-
             isClerkAPIResponseError(err)
-                ? toast.error(err.errors[0]?.longMessage ?? unknownError, {
-                      id: toastId,
-                  })
-                : toast.error(unknownError, {
-                      id: toastId,
-                  });
+                ? toast.error(
+                      err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
+                      {
+                          id: toastId,
+                      }
+                  )
+                : handleClientError(err, toastId);
 
             return;
         } finally {
@@ -119,9 +120,9 @@ function ResetPasswordS2Form() {
                                             }
                                         >
                                             {isVisible ? (
-                                                <Icons.hide className="h-5 w-5 text-black/60 dark:text-white/60" />
+                                                <Icons.hide className="h-5 w-5 opacity-80" />
                                             ) : (
-                                                <Icons.view className="h-5 w-5 text-black/60 dark:text-white/60" />
+                                                <Icons.view className="h-5 w-5 opacity-80" />
                                             )}
                                         </button>
                                     }

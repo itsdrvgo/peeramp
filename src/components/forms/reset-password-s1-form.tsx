@@ -1,5 +1,7 @@
 "use client";
 
+import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
+import { handleClientError } from "@/src/lib/utils";
 import { EmailData, emailSchema } from "@/src/lib/validation/auth";
 import { isClerkAPIResponseError, useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,15 +65,14 @@ function ResetPasswordS1Form() {
                     break;
             }
         } catch (err) {
-            const unknownError = "Something went wrong, please try again!";
-
             isClerkAPIResponseError(err)
-                ? toast.error(err.errors[0]?.longMessage ?? unknownError, {
-                      id: toastId,
-                  })
-                : toast.error(unknownError, {
-                      id: toastId,
-                  });
+                ? toast.error(
+                      err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
+                      {
+                          id: toastId,
+                      }
+                  )
+                : handleClientError(err, toastId);
 
             return;
         } finally {

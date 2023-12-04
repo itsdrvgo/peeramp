@@ -1,43 +1,15 @@
-export const BitFieldPermissions = {
-    ViewPublicPages: 1 << 0, // 1
-    ViewPrivatePages: 1 << 1, // 2
-    Administrator: 1 << 2, // 4
-    // Total = 7
-};
+// GENEREL
+export const DEFAULT_PROFILE_IMAGE_URL = "https://img.clerk.com/preview.png";
+export const DEFAULT_ERROR_MESSAGE = "Something went wrong, try again later!";
 
-export type PermissionKey = keyof typeof BitFieldPermissions;
+// SCORES FOR ACTIONS
+export const SCORE_PER_LOVE = 10;
+export const SCORE_PER_COMMENT = 5;
+export const SCORE_PER_REAMP = 5;
+export const SCORE_PER_VIEW = 1;
+export const SCORE_PER_BOOKMARK = 5;
 
-export const PermissionKeysArray = Object.keys(
-    BitFieldPermissions
-) as PermissionKey[];
-
-interface Permission {
-    name: string;
-    key: string;
-    bit: number;
-    description: string;
-}
-
-export const Permissions: Permission[] = [
-    {
-        name: "View Public Pages",
-        key: "ViewPublicPages",
-        bit: BitFieldPermissions.ViewPublicPages,
-        description:
-            "Anyone with this permission will be able to view public pages.",
-    },
-    {
-        name: "View Private Pages",
-        key: "ViewPrivatePages",
-        bit: BitFieldPermissions.ViewPrivatePages,
-        description:
-            "Anyone with this permission will be able to view private pages.",
-    },
-    {
-        name: "Administrator",
-        key: "Administrator",
-        bit: BitFieldPermissions.Administrator,
-        description:
-            "Anyone with this permission will have full access to the site.",
-    },
-];
+// SCORES FOR ACCOUNTS
+export const SCORE_PER_FOLLOWER = 5;
+export const SCORE_PER_FOLLOWING = 5;
+export const SCORE_PER_POST = 10;

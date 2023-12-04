@@ -18,8 +18,10 @@ function SignupSection({ className, ...props }: DefaultProps) {
             <div className="m-auto w-full min-w-min max-w-sm space-y-5 px-2 md:w-7/12 md:px-0">
                 <div className="space-y-1">
                     <p className="text-2xl font-bold">Create an account</p>
-                    <p className="text-sm text-black/80 dark:text-white/80">
-                        Already have an account?{" "}
+                    <p>
+                        <span className="text-sm opacity-80">
+                            Already have an account?{" "}
+                        </span>
                         <Link as={NextLink} href="/signin" className="text-sm">
                             Sign in.
                         </Link>
