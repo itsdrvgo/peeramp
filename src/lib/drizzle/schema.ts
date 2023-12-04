@@ -68,6 +68,7 @@ export const userDetails = pgTable(
             .notNull()
             .defaultNow(),
         socials: jsonb("socials").notNull().$type<UserSocial[]>().default([]),
+        score: text("score").notNull().default("0"),
     },
     (table) => {
         return {
@@ -78,13 +79,40 @@ export const userDetails = pgTable(
     }
 );
 
+export const amps = pgTable(
+    "amps",
+    {
+        id: text("id").notNull().unique().primaryKey(),
+        creatorId: text("creator_id")
+            .notNull()
+            .references(() => users.id, {
+                onDelete: "cascade",
+            }),
+        content: text("content").notNull().default(""),
+        status: text("status").notNull().default("draft"),
+        visibility: text("visibility").notNull().default("everyone"),
+        score: text("score").notNull().default("0"),
+        createdAt: timestamp("created_at", { withTimezone: true })
+            .notNull()
+            .defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }),
+        publishedAt: timestamp("published_at", { withTimezone: true }),
+    },
+    (table) => {
+        return {
+            creatorIdx: index("creator_idx").on(table.creatorId),
+        };
+    }
+);
+
 // RELATIONS
 
-export const userRelations = relations(users, ({ one }) => ({
+export const userRelations = relations(users, ({ one, many }) => ({
     details: one(userDetails, {
         fields: [users.id],
         references: [userDetails.userId],
     }),
+    amps: many(amps),
 }));
 
 // TYPES
@@ -95,7 +123,11 @@ export type NewUser = InferInsertModel<typeof users>;
 export type UserDetails = InferSelectModel<typeof userDetails>;
 export type NewUserDetails = InferInsertModel<typeof userDetails>;
 
+export type Amp = InferSelectModel<typeof amps>;
+export type NewAmp = InferInsertModel<typeof amps>;
+
 // ZOD SCHEMA
 
 export const insertUserSchema = createInsertSchema(users);
 export const insertUserDetailsSchema = createInsertSchema(userDetails);
+export const insertAmpSchema = createInsertSchema(amps);
