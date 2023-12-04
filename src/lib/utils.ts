@@ -255,3 +255,25 @@ export function getColorForConnection(connection: UserSocialType) {
 
     return color;
 }
+
+export function convertMstoTimeElapsed(input: number) {
+    const currentTimestamp = Date.now();
+    const elapsed = currentTimestamp - input;
+
+    if (elapsed < 60000) return "just now";
+    else if (elapsed < 3600000) {
+        const minutes = Math.floor(elapsed / 60000);
+        return `${minutes}m`;
+    } else if (elapsed < 86400000) {
+        const hours = Math.floor(elapsed / 3600000);
+        return `${hours}h`;
+    } else {
+        const date = new Date(input);
+        const currentDate = new Date();
+        const isSameYear = date.getFullYear() === currentDate.getFullYear();
+        const month = date.toLocaleString("default", { month: "short" });
+        const day = date.getDate();
+        const year = date.getFullYear();
+        return `${month} ${day}${isSameYear ? "" : `, ${year}`}`;
+    }
+}
