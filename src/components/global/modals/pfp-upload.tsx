@@ -162,6 +162,7 @@ function PfpUploadModal({
                 setImageFile(null);
                 setIconURL(user.imageUrl);
             }}
+            placement="center"
         >
             <ModalContent>
                 {(close) => (

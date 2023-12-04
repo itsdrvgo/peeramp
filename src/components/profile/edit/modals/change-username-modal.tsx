@@ -82,6 +82,7 @@ function ChangeUsernameModal({
                 onClose();
                 form.reset();
             }}
+            placement="center"
         >
             <ModalContent>
                 {(close) => (

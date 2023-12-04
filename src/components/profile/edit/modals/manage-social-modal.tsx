@@ -156,6 +156,7 @@ function ManageSocialModal({
                 onClose();
                 form.reset();
             }}
+            placement="center"
         >
             <ModalContent>
                 {(close) => (

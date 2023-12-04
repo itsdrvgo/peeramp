@@ -30,7 +30,12 @@ function MoreSocialModal({
     user,
 }: PageProps) {
     return (
-        <Modal isOpen={isOpen} onClose={onClose} onOpenChange={onOpenChange}>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            onOpenChange={onOpenChange}
+            placement="center"
+        >
             <ModalContent>
                 {(close) => (
                     <>

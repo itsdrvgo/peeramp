@@ -100,7 +100,12 @@ function ChangePasswordModal({
     });
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} onOpenChange={onOpenChange}>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            onOpenChange={onOpenChange}
+            placement="center"
+        >
             <ModalContent>
                 {(close) => (
                     <>
