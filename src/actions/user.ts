@@ -64,7 +64,19 @@ export async function updatePassword({
     };
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser({
+    userId,
+    password,
+}: {
+    userId: string;
+    password: string;
+}) {
+    const { verified } = await clerkClient.users.verifyPassword({
+        userId,
+        password,
+    });
+
+    if (!verified) throw new Error("Incorrect password!");
     await clerkClient.users.deleteUser(userId);
 
     return {
