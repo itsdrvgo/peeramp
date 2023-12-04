@@ -1,34 +1,36 @@
-import { eq } from "drizzle-orm";
+import { clerkClient } from "@clerk/nextjs";
 import { redis } from "..";
-import { db } from "../../drizzle";
-import { users } from "../../drizzle/schema";
 import { CachedUser, cachedUserSchema } from "../../validation/user";
 
 async function getCachableUser(userId: string) {
-    const user = await db.query.users.findFirst({
-        where: eq(users.id, userId),
-        with: {
-            details: true,
-        },
-    });
-
+    const user = await clerkClient.users.getUser(userId);
     if (!user) return null;
+
+    const email = user.emailAddresses.find(
+        (email) => email.id === user.primaryEmailAddressId
+    )?.emailAddress;
+    if (!email) return null;
 
     const cachableUser: CachedUser = {
         id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        image: user.image,
-        bio: user.details.bio,
-        type: user.details.type,
-        category: user.details.category,
-        gender: user.details.gender,
-        socials: user.details.socials,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
-        usernameChangedAt: user.details.usernameChangedAt.toISOString(),
+        username: user.username!,
+        firstName: user.firstName!,
+        lastName: user.lastName!,
+        email,
+        image: user.imageUrl,
+        bio: user.publicMetadata.bio,
+        type: user.publicMetadata.type,
+        category: user.publicMetadata.category,
+        gender: user.publicMetadata.gender,
+        socials: user.publicMetadata.socials,
+        createdAt: new Date(user.createdAt).toISOString(),
+        updatedAt: new Date(user.updatedAt).toISOString(),
+        usernameChangedAt: new Date(
+            user.publicMetadata.usernameChangedAt
+        ).toISOString(),
+        ampCount: user.publicMetadata.ampCount,
+        followingCount: user.publicMetadata.followingCount,
+        peersCount: user.publicMetadata.peersCount,
     };
 
     return cachableUser;

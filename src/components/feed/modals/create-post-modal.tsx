@@ -1,7 +1,7 @@
 "use client";
 
 import { createAmp } from "@/src/actions/amp";
-import { handleClientError } from "@/src/lib/utils";
+import { cFetch, handleClientError } from "@/src/lib/utils";
 import { Status, Visibility } from "@/src/types";
 import {
     Avatar,
@@ -37,6 +37,7 @@ interface PageProps {
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    metadata: UserPublicMetadata;
 }
 
 function CreatePostModal({
@@ -47,6 +48,7 @@ function CreatePostModal({
     image,
     username,
     firstName,
+    metadata,
 }: PageProps) {
     const router = useRouter();
 
@@ -105,12 +107,21 @@ function CreatePostModal({
             return { toastId };
         },
         mutationFn: async ({ status }: { status: Status }) => {
-            await createAmp({
-                content: text,
-                creatorId: userId,
-                visibility: Array.from(visibility).toString() as Visibility,
-                status,
-            });
+            await Promise.all([
+                createAmp({
+                    content: text,
+                    creatorId: userId,
+                    visibility: Array.from(visibility).toString() as Visibility,
+                    status,
+                }),
+                cFetch(`/api/users/${userId}`, {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        ...metadata,
+                        ampCount: metadata.ampCount + 1,
+                    }),
+                }),
+            ]);
         },
         onSuccess: (_, { status }: { status: Status }, ctx) => {
             toast.success(
@@ -213,6 +224,7 @@ function CreatePostModal({
                             </div>
 
                             <Textarea
+                                autoFocus
                                 placeholder={
                                     "What are you thinking, " + firstName + "?"
                                 }

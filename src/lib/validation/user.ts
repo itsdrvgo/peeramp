@@ -99,7 +99,7 @@ export const cachedUserSchema = z.object({
     bio: z.string().nullable(),
     type: userTypesSchema,
     category: userCategoriesSchema,
-    gender: z.string().nullable(),
+    gender: userGenderSchema,
     socials: z.array(userSocialSchema),
     peersCount: z.number(),
     followingCount: z.number(),

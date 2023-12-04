@@ -24,6 +24,7 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
                             image={user.imageUrl}
                             userId={user.id}
                             username={user.username!}
+                            metadata={user.publicMetadata}
                         />
 
                         {amps.filter((amp) => amp.status === "published")
