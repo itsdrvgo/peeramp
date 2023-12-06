@@ -3,7 +3,6 @@
 import { Icons } from "@/src/components/icons/icons";
 import { getIconForConnection } from "@/src/lib/utils";
 import { UserSocial } from "@/src/lib/validation/user";
-import { UserResource } from "@clerk/types";
 import {
     Button,
     Link,
@@ -19,7 +18,7 @@ interface PageProps {
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    user: UserResource;
+    firstName: string;
 }
 
 function MoreSocialModal({
@@ -27,7 +26,7 @@ function MoreSocialModal({
     onClose,
     isOpen,
     onOpenChange,
-    user,
+    firstName,
 }: PageProps) {
     return (
         <Modal
@@ -40,7 +39,7 @@ function MoreSocialModal({
                 {(close) => (
                     <>
                         <ModalHeader>
-                            {user.firstName}&apos;s Connections
+                            {firstName}&apos;s Connections
                         </ModalHeader>
 
                         <ModalBody>

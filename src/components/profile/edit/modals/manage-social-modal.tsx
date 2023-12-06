@@ -1,11 +1,6 @@
 "use client";
 
 import {
-    addSocialToUser,
-    deleteSocialForUser,
-    editSocialForUser,
-} from "@/src/actions/user";
-import {
     Form,
     FormControl,
     FormDescription,
@@ -14,6 +9,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/src/components/ui/form";
+import { trpc } from "@/src/lib/trpc/client";
 import { handleClientError } from "@/src/lib/utils";
 import {
     UserSocial,
@@ -34,7 +30,6 @@ import {
     SelectItem,
     SelectSection,
 } from "@nextui-org/react";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
@@ -75,78 +70,62 @@ function ManageSocialModal({
         },
     });
 
-    const { mutate: handleManageSocial, isPending: isManaging } = useMutation({
-        onMutate: () => {
-            const toastId = toast.loading(
-                connection ? "Updating connection..." : "Adding connection..."
-            );
-            return { toastId };
-        },
-        mutationFn: async (data: UserSocial) => {
-            if (connection) {
-                await editSocialForUser({
-                    userId: user.id,
-                    metadata: user.publicMetadata,
-                    social: {
-                        ...data,
-                        id: connection.id,
-                    },
-                });
-            } else {
-                if (
-                    user.publicMetadata.socials.some(
-                        (social) => social.url === data.url
-                    )
-                )
-                    throw new Error("This connection already exists!");
-
-                await addSocialToUser({
-                    userId: user.id,
-                    metadata: user.publicMetadata,
-                    social: data,
-                });
-            }
-        },
-        onSuccess: (_, __, ctx) => {
-            toast.success(
-                connection ? "Connection updated" : "Connection added",
-                {
+    const { mutate: addSocial, isLoading: isAdding } =
+        trpc.user.social.addSocial.useMutation({
+            onMutate: () => {
+                const toastId = toast.loading("Adding connection...");
+                return { toastId };
+            },
+            onSuccess: (_, __, ctx) => {
+                toast.success("Connection added", {
                     id: ctx?.toastId,
-                }
-            );
-            onClose();
-            form.reset();
-            user.reload();
-        },
-        onError: (err, __, ctx) => {
-            handleClientError(err, ctx?.toastId);
-        },
-    });
+                });
+                onClose();
+                form.reset();
+                user.reload();
+            },
+            onError: (err, __, ctx) => {
+                handleClientError(err, ctx?.toastId);
+            },
+        });
 
-    const { mutate: handleDeleteSocial, isPending: isDeleting } = useMutation({
-        onMutate: () => {
-            const toastId = toast.loading("Deleting connection...");
-            return { toastId };
-        },
-        mutationFn: async () => {
-            await deleteSocialForUser({
-                metadata: user.publicMetadata,
-                userId: user.id,
-                socialId: connection!.id!,
-            });
-        },
-        onSuccess: (_, __, ctx) => {
-            toast.success("Connection deleted", {
-                id: ctx?.toastId,
-            });
-            onClose();
-            form.reset();
-            user.reload();
-        },
-        onError: (err, __, ctx) => {
-            handleClientError(err, ctx?.toastId);
-        },
-    });
+    const { mutate: editSocial, isLoading: isEditing } =
+        trpc.user.social.editSocial.useMutation({
+            onMutate: () => {
+                const toastId = toast.loading("Updating connection...");
+                return { toastId };
+            },
+            onSuccess: (_, __, ctx) => {
+                toast.success("Connection updated", {
+                    id: ctx?.toastId,
+                });
+                onClose();
+                form.reset();
+                user.reload();
+            },
+            onError: (err, __, ctx) => {
+                handleClientError(err, ctx?.toastId);
+            },
+        });
+
+    const { mutate: handleDeleteSocial, isLoading: isDeleting } =
+        trpc.user.social.deleteSocial.useMutation({
+            onMutate: () => {
+                const toastId = toast.loading("Deleting connection...");
+                return { toastId };
+            },
+            onSuccess: (_, __, ctx) => {
+                toast.success("Connection deleted", {
+                    id: ctx?.toastId,
+                });
+                onClose();
+                form.reset();
+                user.reload();
+            },
+            onError: (err, __, ctx) => {
+                handleClientError(err, ctx?.toastId);
+            },
+        });
 
     return (
         <Modal
@@ -168,7 +147,20 @@ function ManageSocialModal({
                         <Form {...form}>
                             <form
                                 onSubmit={form.handleSubmit((data) =>
-                                    handleManageSocial(data)
+                                    connection
+                                        ? editSocial({
+                                              userId: user.id,
+                                              metadata: user.publicMetadata,
+                                              social: {
+                                                  ...data,
+                                                  id: connection.id,
+                                              },
+                                          })
+                                        : addSocial({
+                                              userId: user.id,
+                                              metadata: user.publicMetadata,
+                                              social: data,
+                                          })
                                 )}
                             >
                                 <ModalBody className="gap-7">
@@ -326,7 +318,13 @@ function ManageSocialModal({
                                                     isDisabled={isDeleting}
                                                     isLoading={isDeleting}
                                                     onPress={() =>
-                                                        handleDeleteSocial()
+                                                        handleDeleteSocial({
+                                                            userId: user.id,
+                                                            metadata:
+                                                                user.publicMetadata,
+                                                            socialId:
+                                                                connection.id!,
+                                                        })
                                                     }
                                                 >
                                                     Remove
@@ -341,7 +339,9 @@ function ManageSocialModal({
                                         color="danger"
                                         variant="light"
                                         onPress={close}
-                                        isDisabled={isManaging || isDeleting}
+                                        isDisabled={
+                                            isAdding || isEditing || isDeleting
+                                        }
                                     >
                                         Cancel
                                     </Button>
@@ -351,10 +351,13 @@ function ManageSocialModal({
                                         type="submit"
                                         isDisabled={
                                             !form.formState.isDirty ||
-                                            isManaging ||
+                                            isAdding ||
+                                            isEditing ||
                                             isDeleting
                                         }
-                                        isLoading={isManaging}
+                                        isLoading={
+                                            isAdding || isEditing || isDeleting
+                                        }
                                     >
                                         {connection ? "Update" : "Add"}
                                     </Button>

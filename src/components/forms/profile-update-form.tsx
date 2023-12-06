@@ -1,11 +1,11 @@
 "use client";
 
-import { updateUser } from "@/src/actions/user";
+import { trpc } from "@/src/lib/trpc/client";
 import { cn, getUserCategory, handleClientError } from "@/src/lib/utils";
-import { nameSchema } from "@/src/lib/validation/auth";
 import {
     userCategoriesSchema,
-    userGenderSchema,
+    UserEditData,
+    userEditSchema,
 } from "@/src/lib/validation/user";
 import { UserResource } from "@clerk/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,10 +17,8 @@ import {
     SelectSection,
     Textarea,
 } from "@nextui-org/react";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { z } from "zod";
 import {
     Form,
     FormControl,
@@ -29,16 +27,6 @@ import {
     FormLabel,
     FormMessage,
 } from "../ui/form";
-
-const userEditSchema = z.object({
-    firstName: nameSchema.shape.firstName,
-    lastName: nameSchema.shape.lastName,
-    bio: z.string().max(150, "Bio must be less than 150 characters"),
-    category: userCategoriesSchema,
-    gender: userGenderSchema,
-});
-
-export type UserEditData = z.infer<typeof userEditSchema>;
 
 interface CategoryProps {
     label: string;
@@ -69,31 +57,35 @@ function ProfileUpdateForm({ user }: PageProps) {
         },
     });
 
-    const { mutate: handleUserUpdate, isPending } = useMutation({
-        onMutate: () => {
-            const toastId = toast.loading("Updating...");
-            return { toastId };
-        },
-        mutationFn: async (data: UserEditData) => {
-            await updateUser(user.id, data);
-        },
-        onSuccess: (_, __, ctx) => {
-            toast.success("Profile updated", {
-                id: ctx?.toastId,
-            });
-            user.reload();
-        },
-        onError: (err, _, ctx) => {
-            handleClientError(err, ctx?.toastId);
-        },
-    });
+    const { mutate: handleUserUpdate, isLoading: isPending } =
+        trpc.user.updateUser.useMutation({
+            onMutate: () => {
+                const toastId = toast.loading("Updating...");
+                return { toastId };
+            },
+            onSuccess: (_, __, ctx) => {
+                toast.success("Profile updated", {
+                    id: ctx?.toastId,
+                });
+                user.reload();
+            },
+            onError: (err, _, ctx) => {
+                handleClientError(err, ctx?.toastId);
+            },
+        });
 
     return (
         <Form {...form}>
             <form
                 className="grid gap-4"
                 onSubmit={(...args) =>
-                    form.handleSubmit((data) => handleUserUpdate(data))(...args)
+                    form.handleSubmit((data) =>
+                        handleUserUpdate({
+                            userId: user.id,
+                            metadata: user.publicMetadata,
+                            ...data,
+                        })
+                    )(...args)
                 }
             >
                 <div className="flex justify-between gap-4">

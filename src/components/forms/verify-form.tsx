@@ -1,7 +1,7 @@
 "use client";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
-import { handleClientError } from "@/src/lib/utils";
+import { handleClientError, wait } from "@/src/lib/utils";
 import {
     VerificationCodeData,
     verificationCodeSchema,
@@ -64,6 +64,7 @@ function VerifyForm() {
                         await setActive({
                             session: res.createdSessionId,
                         });
+                        await wait(1000);
                         router.push(
                             "/profile/edit?new=true" +
                                 (isMentor ? "&type=mentor" : "")

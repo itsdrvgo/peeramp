@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-    userCategoriesSchema,
-    userGenderSchema,
-    userSocialSchema,
-    userTypesSchema,
-} from "./user";
+import { publicMetadataSchema } from "./user";
 
 export const webhookSchema = z.object({
     data: z.any(),
@@ -40,17 +35,7 @@ export const userUpdateWebhookSchema = z.object({
             id: z.string(),
         })
     ),
-    public_metadata: z.object({
-        bio: z.string().nullable(),
-        type: userTypesSchema,
-        category: userCategoriesSchema,
-        gender: userGenderSchema,
-        socials: z.array(userSocialSchema),
-        usernameChangedAt: z.number(),
-        peersCount: z.number(),
-        followingCount: z.number(),
-        ampCount: z.number(),
-    }),
+    public_metadata: publicMetadataSchema,
 });
 
 export const userDeleteWebhookSchema = z.object({

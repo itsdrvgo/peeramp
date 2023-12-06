@@ -19,9 +19,9 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
 
                 <div className="flex w-full basis-2/3 flex-col-reverse items-center justify-between gap-8 md:flex-row md:items-start">
                     <div className="w-full space-y-4">
-                        <div className="flex items-center justify-center gap-2 md:justify-start">
+                        <div className="flex flex-col items-center gap-2 md:items-start">
                             <Skeleton className="h-6 w-24 rounded-lg" />
-                            <Skeleton className="h-6 w-16 rounded-lg" />
+                            <Skeleton className="h-5 w-32 rounded-lg md:hidden" />
                         </div>
 
                         <div className="hidden w-full justify-between gap-2 md:flex">
@@ -39,8 +39,9 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-center md:justify-start">
-                            <Skeleton className="h-5 w-32 rounded-lg" />
+                        <div className="flex flex-col items-center gap-2 md:items-start">
+                            <Skeleton className="h-5 w-28 rounded-lg" />
+                            <Skeleton className="hidden h-5 w-32 rounded-lg md:block" />
                         </div>
 
                         <Skeleton className="h-16 w-full rounded-lg" />
@@ -64,10 +65,12 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                             {Array.from({ length: 3 }).map((_, i) => (
                                 <Skeleton
                                     key={i}
-                                    className="h-6 w-20 rounded-lg"
+                                    className="h-6 w-full rounded-lg"
                                 />
                             ))}
-                            <Skeleton className="h-6 w-8 rounded-lg" />
+                            <div>
+                                <Skeleton className="h-6 w-8 rounded-lg" />
+                            </div>
                         </div>
                     </div>
 
@@ -88,18 +91,18 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
             <Divider />
 
             <div className="space-y-4">
-                <div className="grid grid-flow-col justify-items-stretch">
-                    {Array.from({ length: 3 }).map((_, i) => (
+                <div className="grid grid-flow-col justify-items-stretch gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
                         <div
                             key={i}
                             className="flex items-center justify-center"
                         >
-                            <Skeleton className="h-6 w-20 rounded-lg" />
+                            <Skeleton className="h-6 w-full rounded-lg" />
                         </div>
                     ))}
                 </div>
 
-                <div className="flex w-full flex-col gap-4 rounded-xl bg-default-50 p-5">
+                <div className="flex w-full flex-col gap-4 rounded-xl bg-default-50 p-3 py-5 md:p-5">
                     <div className="flex items-center gap-4">
                         <div>
                             <Skeleton className="h-10 w-10 rounded-full" />
@@ -119,7 +122,7 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                     {Array.from({ length: 3 }).map((_, i) => (
                         <div
                             key={i}
-                            className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
+                            className="flex gap-2 border-b border-black/30 p-4 px-0 dark:border-white/20 md:gap-4 md:px-2"
                         >
                             <div>
                                 <Skeleton className="h-10 w-10 rounded-full" />

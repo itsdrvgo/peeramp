@@ -15,7 +15,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import "cropperjs/dist/cropper.css";
 import { nanoid } from "nanoid";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Cropper, ReactCropperElement } from "react-cropper";
 import Dropzone from "react-dropzone";
 import toast from "react-hot-toast";
@@ -23,8 +23,6 @@ import { Icons } from "../../icons/icons";
 
 interface PfpUploadModalProps {
     user: UserResource;
-    setIconURL: Dispatch<SetStateAction<string>>;
-    iconURL: string;
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
@@ -32,8 +30,6 @@ interface PfpUploadModalProps {
 
 function PfpUploadModal({
     user,
-    setIconURL,
-    iconURL,
     onClose,
     isOpen,
     onOpenChange,
@@ -79,7 +75,7 @@ function PfpUploadModal({
         setImageFile(file);
     };
 
-    const { mutate: handleImageUpdate, isPending: isImageUpdating } =
+    const { mutate: handleImageUpdate, isLoading: isImageUpdating } =
         useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Updating...");
@@ -111,7 +107,7 @@ function PfpUploadModal({
             },
         });
 
-    const { mutate: handleRemoveImage, isPending: isImageRemoving } =
+    const { mutate: handleRemoveImage, isLoading: isImageRemoving } =
         useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Removing...");
@@ -160,7 +156,6 @@ function PfpUploadModal({
             onClose={() => {
                 setSelectedImage(null);
                 setImageFile(null);
-                setIconURL(user.imageUrl);
             }}
             placement="center"
         >
@@ -213,7 +208,7 @@ function PfpUploadModal({
                                             >
                                                 <Avatar
                                                     showFallback
-                                                    src={iconURL}
+                                                    src={user.imageUrl}
                                                     alt={user.username!}
                                                     size="lg"
                                                     classNames={{

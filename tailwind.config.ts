@@ -36,6 +36,7 @@ export default withUt({
         require("@tailwindcss/typography"),
         nextui({
             prefix: "peeramp",
+            defaultTheme: "dark",
             themes: {
                 light: {
                     colors: {

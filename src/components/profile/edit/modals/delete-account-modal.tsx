@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteUser } from "@/src/actions/user";
 import { Icons } from "@/src/components/icons/icons";
 import {
     Form,
@@ -10,6 +9,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/src/components/ui/form";
+import { trpc } from "@/src/lib/trpc/client";
 import { handleClientError } from "@/src/lib/utils";
 import { PasswordData, passwordSchema } from "@/src/lib/validation/auth";
 import { UserResource } from "@clerk/types";
@@ -23,7 +23,6 @@ import {
     ModalFooter,
     ModalHeader,
 } from "@nextui-org/react";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -53,29 +52,27 @@ function DeleteAccountModal({
         },
     });
 
-    const { mutate: handleDeleteAccount, isPending } = useMutation({
-        onMutate: () => {
-            const toastId = toast.loading("Deleting account...");
-            return { toastId };
-        },
-        mutationFn: async (data: PasswordData) => {
-            await deleteUser({
-                password: data.password,
-                userId: user.id,
-            });
-        },
-        onSuccess: (_, __, ctx) => {
-            onClose();
-            form.reset();
-            toast.success("You will be missed!", { id: ctx?.toastId });
-            router.push("/");
-        },
-        onError: (err, _, ctx) => {
-            if (err.message === "Unprocessable Entity")
-                return toast.error("Incorrect password", { id: ctx?.toastId });
-            handleClientError(err, ctx?.toastId);
-        },
-    });
+    const { mutate: handleDeleteAccount, isLoading: isPending } =
+        trpc.user.deleteUser.useMutation({
+            onMutate: () => {
+                const toastId = toast.loading("Deleting account...");
+                return { toastId };
+            },
+            onSuccess: (_, __, ctx) => {
+                onClose();
+                form.reset();
+                toast.success("You will be missed!", { id: ctx?.toastId });
+                router.push("/");
+            },
+            onError: (err, _, ctx) => {
+                if (err instanceof Error)
+                    if (err.message === "Unprocessable Entity")
+                        return toast.error("Incorrect password", {
+                            id: ctx?.toastId,
+                        });
+                handleClientError(err, ctx?.toastId);
+            },
+        });
 
     return (
         <Modal
@@ -95,7 +92,10 @@ function DeleteAccountModal({
                             <form
                                 onSubmit={(...args) =>
                                     form.handleSubmit((data) =>
-                                        handleDeleteAccount(data)
+                                        handleDeleteAccount({
+                                            userId: user.id,
+                                            ...data,
+                                        })
                                     )(...args)
                                 }
                             >
