@@ -23,7 +23,7 @@ function CreateAmpCard({
 
     return (
         <>
-            <div className="flex w-full flex-col gap-4 rounded-xl bg-default-50 p-5">
+            <div className="flex w-full flex-col gap-4 rounded-xl bg-default-50 p-3 py-5 md:p-5">
                 <div className="flex items-center gap-4">
                     <div>
                         <Avatar src={image} alt={username} />

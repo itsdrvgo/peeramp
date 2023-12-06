@@ -80,6 +80,3 @@ declare global {
         followingCount: number;
     }
 }
-
-export type Visibility = "everyone" | "following" | "peers" | "only-me";
-export type Status = "draft" | "published";

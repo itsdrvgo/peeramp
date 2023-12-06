@@ -120,11 +120,13 @@ import {
     Youtube,
     Zap,
     type IconNode as LucideIcon,
+    MoreHorizontal,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
 
 export const Icons = {
+    moreHor: MoreHorizontal,
     repeat: Repeat2,
     bookmark: Bookmark,
     video: Video,

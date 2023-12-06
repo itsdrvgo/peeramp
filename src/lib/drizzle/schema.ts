@@ -1,7 +1,7 @@
 import { DEFAULT_PROFILE_IMAGE_URL } from "@/src/config/const";
-import { Status, Visibility } from "@/src/types";
 import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import {
+    boolean,
     index,
     jsonb,
     pgTable,
@@ -10,6 +10,7 @@ import {
     uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { Status, Visibility } from "../validation/amp";
 import {
     UserCategoryType,
     UserGenderType,
@@ -96,6 +97,7 @@ export const amps = pgTable(
             .default("everyone")
             .$type<Visibility>(),
         score: text("score").notNull().default("0"),
+        pinned: boolean("pinned").notNull().default(false),
         createdAt: timestamp("created_at", { withTimezone: true })
             .notNull()
             .defaultNow(),
@@ -105,6 +107,7 @@ export const amps = pgTable(
     (table) => {
         return {
             creatorIdx: index("creator_idx").on(table.creatorId),
+            pinnedIdx: index("pinned_idx").on(table.pinned, table.creatorId),
         };
     }
 );

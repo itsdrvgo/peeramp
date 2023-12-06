@@ -5,7 +5,7 @@ import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { Divider } from "@nextui-org/react";
-import ProfileAmps from "./profile-amps";
+import ProfileAmps from "./amps/profile-amps";
 import ProfileInfo from "./profile-info";
 
 interface PageProps extends DefaultProps {

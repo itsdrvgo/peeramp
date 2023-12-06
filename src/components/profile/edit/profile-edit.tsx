@@ -4,7 +4,6 @@ import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { Avatar, useDisclosure } from "@nextui-org/react";
-import { useState } from "react";
 import ProfileUpdateForm from "../../forms/profile-update-form";
 import PfpUploadModal from "../../global/modals/pfp-upload";
 import ProfileDangerZone from "./profile-danger-zone";
@@ -15,8 +14,6 @@ interface PageProps extends DefaultProps {
 }
 
 function ProfileEdit({ className, user, ...props }: PageProps) {
-    const [iconURL, setIconURL] = useState(user.imageUrl);
-
     const {
         isOpen: isImageModalOpen,
         onOpen: onImageModalOpen,
@@ -37,7 +34,7 @@ function ProfileEdit({ className, user, ...props }: PageProps) {
 
                 <div className="flex items-center gap-5">
                     <Avatar
-                        src={iconURL}
+                        src={user.imageUrl}
                         alt={user.username!}
                         size="lg"
                         className="cursor-pointer"
@@ -64,8 +61,6 @@ function ProfileEdit({ className, user, ...props }: PageProps) {
 
             <PfpUploadModal
                 user={user}
-                iconURL={iconURL}
-                setIconURL={setIconURL}
                 isOpen={isImageModalOpen}
                 onOpenChange={onImageModalOpenChange}
                 onClose={onImageModalClose}

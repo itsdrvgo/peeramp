@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nameSchema } from "./auth";
 
 export const userTypesSchema = z.union([
     z.literal("normal"),
@@ -109,6 +110,14 @@ export const cachedUserSchema = z.object({
     usernameChangedAt: z.string(),
 });
 
+export const userEditSchema = z.object({
+    firstName: nameSchema.shape.firstName,
+    lastName: nameSchema.shape.lastName,
+    bio: z.string().max(150, "Bio must be less than 150 characters"),
+    category: userCategoriesSchema,
+    gender: userGenderSchema,
+});
+
 export const clerkUserSchema = z.object({
     id: z.string(),
     firstName: z.string(),
@@ -124,6 +133,18 @@ export const clerkUserSchema = z.object({
     lastSignInAt: z.number().nullable(),
     createdAt: z.number(),
     updatedAt: z.number(),
+});
+
+export const publicMetadataSchema = z.object({
+    gender: userGenderSchema,
+    bio: z.string().nullable(),
+    category: userCategoriesSchema,
+    type: userTypesSchema,
+    socials: z.array(userSocialSchema),
+    usernameChangedAt: z.number(),
+    ampCount: z.number(),
+    followingCount: z.number(),
+    peersCount: z.number(),
 });
 
 export const clerkUserWithoutEmailSchema = clerkUserSchema.omit({
@@ -146,3 +167,5 @@ export type UserCategoryType = z.infer<typeof userCategoriesSchema>;
 export type UserGenderType = z.infer<typeof userGenderSchema>;
 export type UserSocialType = z.infer<typeof userSocialTypesSchema>;
 export type UserSocial = z.infer<typeof userSocialSchema>;
+export type PublicMetadata = z.infer<typeof publicMetadataSchema>;
+export type UserEditData = z.infer<typeof userEditSchema>;

@@ -1,8 +1,11 @@
 "use client";
 
+import { Icons } from "@/src/components/icons/icons";
+import { Amp } from "@/src/lib/drizzle/schema";
 import { trpc } from "@/src/lib/trpc/client";
 import { handleClientError } from "@/src/lib/utils";
-import { Status, Visibility } from "@/src/lib/validation/amp";
+import { Visibility } from "@/src/lib/validation/amp";
+import { UserResource } from "@clerk/types";
 import {
     Avatar,
     Button,
@@ -22,41 +25,28 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { Icons } from "../../icons/icons";
 
 const DynamicEmojiPicker = dynamic(() => import("emoji-picker-react"), {
     ssr: false,
 });
 
 interface PageProps {
-    userId: string;
-    image: string;
-    username: string;
-    firstName: string;
+    amp: Amp;
+    user: UserResource;
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    metadata: UserPublicMetadata;
 }
 
-function CreatePostModal({
-    onClose,
-    isOpen,
-    onOpenChange,
-    userId,
-    image,
-    username,
-    firstName,
-    metadata,
-}: PageProps) {
+function EditAmpModal({ amp, user, onClose, isOpen, onOpenChange }: PageProps) {
     const router = useRouter();
 
     const [visibility, setVisibility] = useState<Selection>(
-        new Set(["everyone"])
+        new Set([amp.visibility])
     );
     const [iconString, setIconString] = useState<keyof typeof Icons>("globe");
     const [Icon, setIcon] = useState<LucideIcon>(Icons.globe);
-    const [text, setText] = useState("");
+    const [content, setContent] = useState(amp.content);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -96,25 +86,13 @@ function CreatePostModal({
         setIcon(Icons[iconString] as LucideIcon);
     }, [iconString, visibility]);
 
-    const { mutate: handleCreateAmp } = trpc.amp.createAmp.useMutation({
-        onMutate: ({ status }: { status: Status }) => {
-            toast.success(
-                status === "draft"
-                    ? "Your amp will be saved as a draft"
-                    : "Your amp will be posted soon"
-            );
+    const { mutate: handleAmpEdit } = trpc.amp.editAmp.useMutation({
+        onMutate: () => {
+            toast.success("Your amp will be edited shortly...");
             onClose();
-            setText("");
-            setVisibility(new Set(["everyone"]));
-            setIsEmojiPickerOpen(false);
         },
-        onSuccess: (_, { status }: { status: Status }) => {
-            toast.success(
-                status === "draft"
-                    ? "Your amp has been saved"
-                    : "Your amp has been posted"
-            );
-
+        onSuccess: () => {
+            toast.success("Your amp has been edited");
             router.refresh();
         },
         onError: (err) => {
@@ -125,43 +103,38 @@ function CreatePostModal({
     return (
         <Modal
             isOpen={isOpen}
+            onOpenChange={onOpenChange}
             onClose={() => {
                 onClose();
+                setContent(amp.content);
                 setIsEmojiPickerOpen(false);
             }}
-            onOpenChange={onOpenChange}
             className="overflow-visible"
             placement="center"
         >
             <ModalContent>
-                {() => (
+                {(close) => (
                     <>
-                        <ModalHeader>Create Post</ModalHeader>
+                        <ModalHeader>Edit Your Amp</ModalHeader>
 
                         <ModalBody>
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <div>
-                                        <Avatar src={image} alt={username} />
+                                        <Avatar
+                                            src={user.imageUrl}
+                                            alt={user.username!}
+                                        />
                                     </div>
 
                                     <div className="w-full space-y-1">
                                         <p className="font-semibold">
-                                            {username}
+                                            {user.username!}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="relative flex items-center gap-1">
-                                    <Button
-                                        isIconOnly
-                                        radius="full"
-                                        variant="light"
-                                        size="sm"
-                                        startContent={
-                                            <Icons.media className="h-5 w-5 text-primary" />
-                                        }
-                                    />
                                     <Button
                                         isIconOnly
                                         radius="full"
@@ -190,7 +163,7 @@ function CreatePostModal({
                                                 searchDisabled={true}
                                                 lazyLoadEmojis={true}
                                                 onEmojiClick={(emoji) => {
-                                                    setText(
+                                                    setContent(
                                                         (prev) =>
                                                             prev + emoji.emoji
                                                     );
@@ -205,11 +178,13 @@ function CreatePostModal({
                             <Textarea
                                 autoFocus
                                 placeholder={
-                                    "What are you thinking, " + firstName + "?"
+                                    "What are you thinking, " +
+                                    user.firstName +
+                                    "?"
                                 }
                                 variant="underlined"
-                                value={text}
-                                onValueChange={setText}
+                                value={content}
+                                onValueChange={setContent}
                                 ref={textareaRef}
                             />
 
@@ -245,41 +220,28 @@ function CreatePostModal({
 
                         <ModalFooter>
                             <Button
-                                radius="sm"
-                                className="font-semibold"
-                                isDisabled={!text}
-                                onPress={() =>
-                                    handleCreateAmp({
-                                        status: "draft",
-                                        content: text,
-                                        creatorId: userId,
-                                        visibility: Array.from(
-                                            visibility
-                                        ).toString() as Visibility,
-                                        metadata,
-                                    })
-                                }
+                                color="danger"
+                                variant="light"
+                                onPress={close}
                             >
-                                Save as Draft
+                                Cancel
                             </Button>
                             <Button
-                                className="font-semibold dark:text-black"
-                                isDisabled={!text}
                                 color="primary"
-                                radius="sm"
-                                onPress={() =>
-                                    handleCreateAmp({
-                                        status: "published",
-                                        content: text,
-                                        creatorId: userId,
+                                variant="flat"
+                                onPress={() => {
+                                    handleAmpEdit({
+                                        ampId: amp.id,
+                                        content: content,
+                                        creatorId: amp.creatorId,
                                         visibility: Array.from(
                                             visibility
                                         ).toString() as Visibility,
-                                        metadata,
-                                    })
-                                }
+                                    });
+                                    close();
+                                }}
                             >
-                                Post
+                                Save
                             </Button>
                         </ModalFooter>
                     </>
@@ -289,4 +251,4 @@ function CreatePostModal({
     );
 }
 
-export default CreatePostModal;
+export default EditAmpModal;
