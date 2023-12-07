@@ -1,7 +1,7 @@
 import { db } from "@/src/lib/drizzle";
 import { amps } from "@/src/lib/drizzle/schema";
 import { auth } from "@clerk/nextjs";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import UserFetch from "./user-fetch";
 
@@ -15,7 +15,14 @@ async function ProfileFetch() {
         orderBy: [desc(amps.createdAt)],
     });
 
-    return <UserFetch amps={data} />;
+    const allAmps = await db
+        .select({
+            count: sql`COUNT(*)`,
+        })
+        .from(amps)
+        .where(and(eq(amps.creatorId, userId), eq(amps.status, "published")));
+
+    return <UserFetch amps={data} ampCount={Number(allAmps[0].count)} />;
 }
 
 export default ProfileFetch;

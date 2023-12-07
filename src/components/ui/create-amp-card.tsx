@@ -9,16 +9,9 @@ interface CardProps {
     image: string;
     username: string;
     firstName: string;
-    metadata: UserPublicMetadata;
 }
 
-function CreateAmpCard({
-    image,
-    username,
-    firstName,
-    userId,
-    metadata,
-}: CardProps) {
+function CreateAmpCard({ image, username, firstName, userId }: CardProps) {
     const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
     return (
@@ -57,7 +50,6 @@ function CreateAmpCard({
                 image={image}
                 username={username}
                 firstName={firstName}
-                metadata={metadata}
             />
         </>
     );

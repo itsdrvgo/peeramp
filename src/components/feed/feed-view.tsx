@@ -22,19 +22,6 @@ function FeedView({ className, user, ...props }: PageProps) {
                         image={user.image}
                         userId={user.id}
                         username={user.username}
-                        metadata={{
-                            ampCount: user.ampCount,
-                            bio: user.bio,
-                            category: user.category,
-                            followingCount: user.followingCount,
-                            gender: user.gender,
-                            peersCount: user.peersCount,
-                            socials: user.socials,
-                            type: user.type,
-                            usernameChangedAt: new Date(
-                                user.usernameChangedAt
-                            ).getTime(),
-                        }}
                     />
                 </div>
             </div>

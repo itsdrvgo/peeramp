@@ -34,18 +34,6 @@ function SyncAccount({ user }: { user: UserResource }) {
                 "socials" in user.publicMetadata
                     ? user.publicMetadata.socials
                     : [],
-            ampCount:
-                "ampCount" in user.publicMetadata
-                    ? user.publicMetadata.ampCount
-                    : 0,
-            followingCount:
-                "followingCount" in user.publicMetadata
-                    ? user.publicMetadata.followingCount
-                    : 0,
-            peersCount:
-                "peersCount" in user.publicMetadata
-                    ? user.publicMetadata.peersCount
-                    : 0,
         };
 
         updateMissingMetadata({

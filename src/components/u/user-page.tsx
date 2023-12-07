@@ -14,9 +14,10 @@ import UserPageSkeleton from "./skeletons/user-page-skeleton";
 interface PageProps extends DefaultProps {
     target: CachedUserWithoutEmail;
     amps: Amp[];
+    ampCount: number;
 }
 
-function UserPage({ target, amps, className, ...props }: PageProps) {
+function UserPage({ target, amps, ampCount, className, ...props }: PageProps) {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return <UserPageSkeleton />;
     if (!user) redirect("/signin");
@@ -31,7 +32,7 @@ function UserPage({ target, amps, className, ...props }: PageProps) {
             )}
             {...props}
         >
-            <ProfileInfo user={user} target={target} />
+            <ProfileInfo user={user} target={target} ampCount={ampCount} />
             <Divider />
             <ProfileAmps amps={amps} user={user} target={target} />
         </div>

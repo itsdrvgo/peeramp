@@ -27,10 +27,17 @@ import MoreSocialModal from "./modals/more-social-modal";
 
 interface PageProps extends DefaultProps {
     user: UserResource;
+    ampCount: number;
     target?: CachedUserWithoutEmail;
 }
 
-function ProfileInfo({ className, user, target, ...props }: PageProps) {
+function ProfileInfo({
+    className,
+    user,
+    ampCount,
+    target,
+    ...props
+}: PageProps) {
     const router = useRouter();
 
     const {
@@ -87,8 +94,13 @@ function ProfileInfo({ className, user, target, ...props }: PageProps) {
                             ? getAccountStatsLG({
                                   type: "target",
                                   data: target,
+                                  ampCount,
                               })
-                            : getAccountStatsLG({ type: "user", data: user })}
+                            : getAccountStatsLG({
+                                  type: "user",
+                                  data: user,
+                                  ampCount,
+                              })}
 
                         {target
                             ? getAccountBio({
@@ -101,10 +113,12 @@ function ProfileInfo({ className, user, target, ...props }: PageProps) {
                             ? getAccountStatsSM({
                                   type: "target",
                                   data: target,
+                                  ampCount,
                               })
                             : getAccountStatsSM({
                                   type: "user",
                                   data: user,
+                                  ampCount,
                               })}
 
                         {target
@@ -245,36 +259,24 @@ function getAccountName(opt: UserProps) {
     );
 }
 
-function getAccountStatsLG(opt: UserProps) {
+function getAccountStatsLG(opt: UserProps & { ampCount: number }) {
     return (
         <div className="hidden justify-between gap-2 md:flex">
             <p>
                 <span className="mr-1 font-semibold">
-                    {shortenNumber(
-                        opt.type === "target"
-                            ? opt.data.ampCount
-                            : opt.data.publicMetadata.ampCount
-                    )}
+                    {shortenNumber(opt.ampCount)}
                 </span>
                 Amps
             </p>
             <p>
                 <span className="mr-1 font-semibold">
-                    {shortenNumber(
-                        opt.type === "target"
-                            ? opt.data.peersCount
-                            : opt.data.publicMetadata.peersCount
-                    )}
+                    {shortenNumber(1465146)}
                 </span>
                 Peers
             </p>
             <p>
                 <span className="mr-1 font-semibold">
-                    {shortenNumber(
-                        opt.type === "target"
-                            ? opt.data.followingCount
-                            : opt.data.publicMetadata.followingCount
-                    )}
+                    {shortenNumber(1365163)}
                 </span>
                 Following
             </p>
@@ -282,37 +284,21 @@ function getAccountStatsLG(opt: UserProps) {
     );
 }
 
-function getAccountStatsSM(opt: UserProps) {
+function getAccountStatsSM(opt: UserProps & { ampCount: number }) {
     return (
         <div className="grid grid-flow-col justify-items-stretch py-4 md:hidden">
             <p className="flex flex-col items-center">
                 <span className="font-semibold">
-                    {shortenNumber(
-                        opt.type === "target"
-                            ? opt.data.ampCount
-                            : opt.data.publicMetadata.ampCount
-                    )}
+                    {shortenNumber(opt.ampCount)}
                 </span>
                 <span className="text-sm opacity-60">Amps</span>
             </p>
             <p className="flex flex-col items-center">
-                <span className="font-semibold">
-                    {shortenNumber(
-                        opt.type === "target"
-                            ? opt.data.peersCount
-                            : opt.data.publicMetadata.peersCount
-                    )}
-                </span>
+                <span className="font-semibold">{shortenNumber(4561561)}</span>
                 <span className="text-sm opacity-60">Peers</span>
             </p>
             <p className="flex flex-col items-center">
-                <span className="font-semibold">
-                    {shortenNumber(
-                        opt.type === "target"
-                            ? opt.data.followingCount
-                            : opt.data.publicMetadata.followingCount
-                    )}
-                </span>
+                <span className="font-semibold">{shortenNumber(41561)}</span>
                 <span className="text-sm opacity-60">Following</span>
             </p>
         </div>

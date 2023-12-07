@@ -76,7 +76,6 @@ function PublishAmpModal({
                                     handlePublishAmp({
                                         ampId: amp.id,
                                         creatorId: user.id,
-                                        metadata: user.publicMetadata,
                                     });
                                     close();
                                 }}

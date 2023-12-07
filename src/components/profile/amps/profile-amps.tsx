@@ -28,7 +28,6 @@ function ProfileAmps({ user, amps, target, className, ...props }: PageProps) {
                                 image={user.imageUrl}
                                 userId={user.id}
                                 username={user.username!}
-                                metadata={user.publicMetadata}
                             />
                         ) : null}
 

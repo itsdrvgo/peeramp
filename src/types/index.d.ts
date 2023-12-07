@@ -75,8 +75,5 @@ declare global {
         gender: UserGenderType;
         socials: UserSocial[];
         usernameChangedAt: number;
-        ampCount: number;
-        peersCount: number;
-        followingCount: number;
     }
 }

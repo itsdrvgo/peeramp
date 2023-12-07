@@ -3,7 +3,6 @@
 import { Amp } from "@/src/lib/drizzle/schema";
 import { trpc } from "@/src/lib/trpc/client";
 import { handleClientError } from "@/src/lib/utils";
-import { UserResource } from "@clerk/types";
 import {
     Button,
     Modal,
@@ -16,20 +15,13 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface PageProps {
-    user: UserResource;
     amp: Amp;
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
-function DeleteAmpModal({
-    amp,
-    onClose,
-    isOpen,
-    onOpenChange,
-    user,
-}: PageProps) {
+function DeleteAmpModal({ amp, onClose, isOpen, onOpenChange }: PageProps) {
     const router = useRouter();
 
     const { mutate: handleDeleteAmp } = trpc.amp.deleteAmp.useMutation({
@@ -76,7 +68,6 @@ function DeleteAmpModal({
                                     handleDeleteAmp({
                                         ampId: amp.id,
                                         creatorId: amp.creatorId,
-                                        metadata: user.publicMetadata,
                                     });
                                     close();
                                 }}

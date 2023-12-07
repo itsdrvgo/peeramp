@@ -1,11 +1,9 @@
-import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { amps } from "../../drizzle/schema";
 import { statusSchema, visibilitySchema } from "../../validation/amp";
-import { publicMetadataSchema } from "../../validation/user";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const ampRouter = createTRPCRouter({
@@ -16,7 +14,6 @@ export const ampRouter = createTRPCRouter({
                 content: z.string(),
                 visibility: visibilitySchema,
                 status: statusSchema,
-                metadata: publicMetadataSchema,
             })
         )
         .use(({ input, ctx, next }) => {
@@ -35,23 +32,14 @@ export const ampRouter = createTRPCRouter({
 
             const { creatorId, content, visibility, status } = input;
 
-            await Promise.all([
-                ctx.db.insert(amps).values({
-                    id,
-                    creatorId,
-                    content,
-                    visibility,
-                    status,
-                    publishedAt: status === "published" ? new Date() : null,
-                }),
-                status === "published" &&
-                    clerkClient.users.updateUserMetadata(creatorId, {
-                        publicMetadata: {
-                            ...input.metadata,
-                            ampCount: input.metadata.ampCount + 1,
-                        },
-                    }),
-            ]);
+            await ctx.db.insert(amps).values({
+                id,
+                creatorId,
+                content,
+                visibility,
+                status,
+                publishedAt: status === "published" ? new Date() : null,
+            });
 
             return { id };
         }),
@@ -104,7 +92,6 @@ export const ampRouter = createTRPCRouter({
             z.object({
                 ampId: z.string(),
                 creatorId: z.string(),
-                metadata: publicMetadataSchema,
             })
         )
         .use(({ input, ctx, next }) => {
@@ -119,7 +106,7 @@ export const ampRouter = createTRPCRouter({
             });
         })
         .mutation(async ({ input, ctx }) => {
-            const { ampId, creatorId, metadata } = input;
+            const { ampId, creatorId } = input;
 
             const amp = await ctx.db.query.amps.findFirst({
                 where: and(eq(amps.id, ampId), eq(amps.creatorId, creatorId)),
@@ -131,21 +118,13 @@ export const ampRouter = createTRPCRouter({
                     message: "Amp not found!",
                 });
 
-            await Promise.all([
-                ctx.db
-                    .update(amps)
-                    .set({
-                        status: "published",
-                        publishedAt: new Date(),
-                    })
-                    .where(eq(amps.id, ampId)),
-                clerkClient.users.updateUserMetadata(creatorId, {
-                    publicMetadata: {
-                        ...metadata,
-                        ampCount: metadata.ampCount + 1,
-                    },
-                }),
-            ]);
+            await ctx.db
+                .update(amps)
+                .set({
+                    status: "published",
+                    publishedAt: new Date(),
+                })
+                .where(eq(amps.id, ampId));
 
             return { id: ampId };
         }),
@@ -260,7 +239,6 @@ export const ampRouter = createTRPCRouter({
             z.object({
                 ampId: z.string(),
                 creatorId: z.string(),
-                metadata: publicMetadataSchema,
             })
         )
         .use(({ input, ctx, next }) => {
@@ -275,7 +253,7 @@ export const ampRouter = createTRPCRouter({
             });
         })
         .mutation(async ({ input, ctx }) => {
-            const { ampId, creatorId, metadata } = input;
+            const { ampId, creatorId } = input;
 
             const amp = await ctx.db.query.amps.findFirst({
                 where: and(eq(amps.id, ampId), eq(amps.creatorId, creatorId)),
@@ -287,15 +265,7 @@ export const ampRouter = createTRPCRouter({
                     message: "Amp not found!",
                 });
 
-            await Promise.all([
-                ctx.db.delete(amps).where(eq(amps.id, ampId)),
-                clerkClient.users.updateUserMetadata(creatorId, {
-                    publicMetadata: {
-                        ...metadata,
-                        ampCount: metadata.ampCount - 1,
-                    },
-                }),
-            ]);
+            await ctx.db.delete(amps).where(eq(amps.id, ampId));
 
             return { id: ampId };
         }),

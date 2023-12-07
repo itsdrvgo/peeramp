@@ -11,9 +11,10 @@ import ProfileInfo from "./profile-info";
 interface PageProps extends DefaultProps {
     user: UserResource;
     amps: Amp[];
+    ampCount: number;
 }
 
-function ProfilePage({ className, user, amps, ...props }: PageProps) {
+function ProfilePage({ className, user, ampCount, amps, ...props }: PageProps) {
     return (
         <div
             className={cn(
@@ -22,7 +23,7 @@ function ProfilePage({ className, user, amps, ...props }: PageProps) {
             )}
             {...props}
         >
-            <ProfileInfo user={user} />
+            <ProfileInfo user={user} ampCount={ampCount} />
             <Divider />
             <ProfileAmps amps={amps} user={user} />
         </div>
