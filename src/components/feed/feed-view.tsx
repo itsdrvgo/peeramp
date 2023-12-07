@@ -13,7 +13,10 @@ function FeedView({ className, user, ...props }: PageProps) {
     return (
         <>
             <div
-                className={cn("w-full max-w-2xl space-y-10 p-10", className)}
+                className={cn(
+                    "w-full max-w-2xl space-y-10 p-10 px-5 md:px-10",
+                    className
+                )}
                 {...props}
             >
                 <div>

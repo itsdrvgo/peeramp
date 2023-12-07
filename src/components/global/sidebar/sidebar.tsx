@@ -2,10 +2,11 @@ import { asideMenuConfig } from "@/src/config/menu";
 import { siteConfig } from "@/src/config/site";
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
-import { Link } from "@nextui-org/react";
+import { Button, Link } from "@nextui-org/react";
 import NextLink from "next/link";
 import { Icons } from "../../icons/icons";
 import PeerAmp from "../svgs/PeerAmp";
+import AmpCreateTab from "./amp-create-tab";
 import MoreTab from "./more-tab";
 import ProfileTab from "./profile-tab";
 
@@ -49,6 +50,8 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                             );
                         })}
 
+                        <AmpCreateTab />
+
                         <MoreTab />
                     </nav>
                 </div>
@@ -56,16 +59,39 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                 <ProfileTab />
             </aside>
 
-            <header className="sticky top-0 flex items-center justify-between gap-2 border-b border-black/40 bg-background px-5 py-3 dark:border-white/20 md:hidden">
+            <header className="sticky top-0 flex items-center justify-between gap-2 border-b border-black/10 bg-background px-5 py-4 dark:border-white/5 md:hidden">
                 <div className="flex items-center gap-1">
                     <PeerAmp />
-                    <p className="font-bold">PeerAmp</p>
+                    <p className="text-xl font-semibold">PeerAmp</p>
                 </div>
-                <MoreTab />
+
+                <div className="flex items-center gap-4">
+                    <Button
+                        size="sm"
+                        isIconOnly
+                        radius="full"
+                        variant="light"
+                        startContent={
+                            <Icons.notification className="h-[22px] w-[22px]" />
+                        }
+                        className="md:hidden"
+                    />
+
+                    <Button
+                        size="sm"
+                        radius="full"
+                        isIconOnly
+                        variant="light"
+                        startContent={
+                            <Icons.messages className="h-[22px] w-[22px]" />
+                        }
+                        className="md:hidden"
+                    />
+                </div>
             </header>
             {children}
-            <footer className="sticky bottom-0 grid grid-flow-col justify-items-stretch border-t border-black/40 bg-background p-2 px-5 dark:border-white/20 md:hidden">
-                {asideMenuConfig.map((item, index) => {
+            <footer className="sticky bottom-0 grid grid-flow-col justify-items-stretch border-t border-black/10 bg-background p-2 px-5 dark:border-white/5 md:hidden">
+                {asideMenuConfig.slice(0, 3).map((item, index) => {
                     const Icon = Icons[item.icon];
 
                     return (
@@ -83,6 +109,8 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                         </div>
                     );
                 })}
+
+                <AmpCreateTab />
 
                 <ProfileTab />
             </footer>

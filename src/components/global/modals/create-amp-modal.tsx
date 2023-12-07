@@ -38,7 +38,7 @@ interface PageProps {
     onOpenChange: (open: boolean) => void;
 }
 
-function CreatePostModal({
+function CreateAmpModal({
     onClose,
     isOpen,
     onOpenChange,
@@ -285,4 +285,4 @@ function CreatePostModal({
     );
 }
 
-export default CreatePostModal;
+export default CreateAmpModal;

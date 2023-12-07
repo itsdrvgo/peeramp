@@ -24,7 +24,7 @@ function ProfileTab({ className, ...props }: LinkProps) {
             )}
             {...props}
         >
-            <div>
+            <div className="p-2 md:p-0">
                 <Avatar
                     src={user.imageUrl}
                     alt={user.username!}
