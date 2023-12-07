@@ -37,6 +37,7 @@ export default withUt({
         nextui({
             prefix: "peeramp",
             defaultTheme: "dark",
+            defaultExtendTheme: "dark",
             themes: {
                 light: {
                     colors: {

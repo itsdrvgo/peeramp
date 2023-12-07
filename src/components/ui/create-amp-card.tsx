@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Button, Divider, useDisclosure } from "@nextui-org/react";
-import CreatePostModal from "../feed/modals/create-post-modal";
+import CreateAmpModal from "../global/modals/create-amp-modal";
 import { Icons } from "../icons/icons";
 
 interface CardProps {
@@ -9,16 +9,9 @@ interface CardProps {
     image: string;
     username: string;
     firstName: string;
-    metadata: UserPublicMetadata;
 }
 
-function CreateAmpCard({
-    image,
-    username,
-    firstName,
-    userId,
-    metadata,
-}: CardProps) {
+function CreateAmpCard({ image, username, firstName, userId }: CardProps) {
     const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
     return (
@@ -49,7 +42,7 @@ function CreateAmpCard({
                 </div>
             </div>
 
-            <CreatePostModal
+            <CreateAmpModal
                 isOpen={isOpen}
                 onClose={onClose}
                 onOpenChange={onOpenChange}
@@ -57,7 +50,6 @@ function CreateAmpCard({
                 image={image}
                 username={username}
                 firstName={firstName}
-                metadata={metadata}
             />
         </>
     );

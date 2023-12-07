@@ -36,10 +36,9 @@ interface PageProps {
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    metadata: UserPublicMetadata;
 }
 
-function CreatePostModal({
+function CreateAmpModal({
     onClose,
     isOpen,
     onOpenChange,
@@ -47,7 +46,6 @@ function CreatePostModal({
     image,
     username,
     firstName,
-    metadata,
 }: PageProps) {
     const router = useRouter();
 
@@ -256,7 +254,6 @@ function CreatePostModal({
                                         visibility: Array.from(
                                             visibility
                                         ).toString() as Visibility,
-                                        metadata,
                                     })
                                 }
                             >
@@ -275,7 +272,6 @@ function CreatePostModal({
                                         visibility: Array.from(
                                             visibility
                                         ).toString() as Visibility,
-                                        metadata,
                                     })
                                 }
                             >
@@ -289,4 +285,4 @@ function CreatePostModal({
     );
 }
 
-export default CreatePostModal;
+export default CreateAmpModal;

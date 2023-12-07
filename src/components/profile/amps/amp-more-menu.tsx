@@ -182,7 +182,6 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
 
             <DeleteAmpModal
                 amp={amp}
-                user={user}
                 isOpen={isDeleteModalOpen}
                 onClose={onDeleteModalClose}
                 onOpenChange={onDeleteModalOpenChange}

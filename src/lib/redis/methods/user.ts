@@ -28,9 +28,6 @@ async function getCachableUser(userId: string) {
         usernameChangedAt: new Date(
             user.publicMetadata.usernameChangedAt
         ).toISOString(),
-        ampCount: user.publicMetadata.ampCount,
-        followingCount: user.publicMetadata.followingCount,
-        peersCount: user.publicMetadata.peersCount,
     };
 
     return cachableUser;

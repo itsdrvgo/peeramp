@@ -33,8 +33,8 @@ export function handleError(err: unknown) {
 
 export function getTheme() {
     if (typeof window === "undefined" || typeof localStorage === "undefined")
-        return "light";
-    return (localStorage.getItem("theme") as "dark" | "light") ?? "light";
+        return "dark";
+    return (localStorage.getItem("theme") as "dark" | "light") ?? "dark";
 }
 
 export function shortenNumber(num: number): string {

@@ -19,7 +19,6 @@ import {
     webhookSchema,
 } from "@/src/lib/validation/webhook";
 import { SvixHeaders } from "@/src/types";
-import { clerkClient } from "@clerk/nextjs";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { Webhook } from "svix";
@@ -87,27 +86,21 @@ export async function POST(req: NextRequest) {
                         category: "none",
                         gender: "none",
                         socials: [],
-                        peersCount: 0,
-                        followingCount: 0,
-                        ampCount: 0,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
                         usernameChangedAt: new Date().toISOString(),
                     }),
                     addUsernameToCache(username),
-                    clerkClient.users.updateUserMetadata(id, {
-                        publicMetadata: {
-                            bio: null,
-                            type: "normal",
-                            category: "none",
-                            gender: "none",
-                            socials: [],
-                            usernameChangedAt: Date.now(),
-                            ampCount: 0,
-                            peersCount: 0,
-                            followingCount: 0,
-                        },
-                    }),
+                    // clerkClient.users.updateUserMetadata(id, {
+                    //     publicMetadata: {
+                    //         bio: null,
+                    //         type: "normal",
+                    //         category: "none",
+                    //         gender: "none",
+                    //         socials: [],
+                    //         usernameChangedAt: Date.now(),
+                    //     },
+                    // }),
                 ]);
 
                 return CResponse({ message: "CREATED" });
@@ -129,7 +122,12 @@ export async function POST(req: NextRequest) {
                     public_metadata,
                 } = userUpdateWebhookSchema.parse(data);
 
-                const existingUser = await getUserFromCache(id);
+                const existingUser = await db.query.users.findFirst({
+                    where: eq(users.id, id),
+                    with: {
+                        details: true,
+                    },
+                });
                 if (!existingUser) return CResponse({ message: "NOT_FOUND" });
 
                 const email =
@@ -149,19 +147,33 @@ export async function POST(req: NextRequest) {
                             updatedAt: new Date(),
                         })
                         .where(eq(users.id, existingUser.id)),
-                    db
-                        .update(userDetails)
-                        .set({
-                            bio: public_metadata.bio,
-                            type: public_metadata.type,
-                            category: public_metadata.category,
-                            gender: public_metadata.gender,
-                            socials: public_metadata.socials,
-                            usernameChangedAt: new Date(
-                                public_metadata.usernameChangedAt
-                            ),
-                        })
-                        .where(eq(userDetails.userId, existingUser.id)),
+
+                    existingUser.details
+                        ? db
+                              .update(userDetails)
+                              .set({
+                                  bio: public_metadata.bio,
+                                  type: public_metadata.type,
+                                  category: public_metadata.category,
+                                  gender: public_metadata.gender,
+                                  socials: public_metadata.socials,
+                                  usernameChangedAt: new Date(
+                                      public_metadata.usernameChangedAt
+                                  ),
+                              })
+                              .where(eq(userDetails.userId, existingUser.id))
+                        : db.insert(userDetails).values({
+                              userId: id,
+                              bio: public_metadata.bio,
+                              type: public_metadata.type,
+                              gender: public_metadata.gender,
+                              category: public_metadata.category,
+                              socials: public_metadata.socials,
+                              usernameChangedAt: new Date(
+                                  public_metadata.usernameChangedAt
+                              ),
+                          }),
+                    ,
                     updateUserInCache({
                         id,
                         username,
@@ -174,10 +186,7 @@ export async function POST(req: NextRequest) {
                         category: public_metadata.category,
                         gender: public_metadata.gender,
                         socials: public_metadata.socials,
-                        peersCount: public_metadata.peersCount,
-                        followingCount: public_metadata.followingCount,
-                        ampCount: public_metadata.ampCount,
-                        createdAt: existingUser.createdAt,
+                        createdAt: existingUser.createdAt.toISOString(),
                         updatedAt: new Date().toISOString(),
                         usernameChangedAt: new Date(
                             public_metadata.usernameChangedAt

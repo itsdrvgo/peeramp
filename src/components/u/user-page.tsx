@@ -7,21 +7,21 @@ import { DefaultProps } from "@/src/types";
 import { useUser } from "@clerk/nextjs";
 import { Divider } from "@nextui-org/react";
 import { redirect } from "next/navigation";
-import ProfileAmps from "../profile/amps/profile-amps";
-import ProfileInfo from "../profile/profile-info";
+import UserAmps from "./amps/user-amps";
 import UserPageSkeleton from "./skeletons/user-page-skeleton";
+import UserInfo from "./user-info";
 
 interface PageProps extends DefaultProps {
     target: CachedUserWithoutEmail;
     amps: Amp[];
+    ampCount: number;
 }
 
-function UserPage({ target, amps, className, ...props }: PageProps) {
+function UserPage({ target, amps, ampCount, className, ...props }: PageProps) {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return <UserPageSkeleton />;
-    if (!user) redirect("/signin");
 
-    if (target.id === user.id) redirect("/profile");
+    if (target.id === user?.id) redirect("/profile");
 
     return (
         <div
@@ -31,9 +31,9 @@ function UserPage({ target, amps, className, ...props }: PageProps) {
             )}
             {...props}
         >
-            <ProfileInfo user={user} target={target} />
+            <UserInfo ampCount={ampCount} target={target} />
             <Divider />
-            <ProfileAmps amps={amps} user={user} target={target} />
+            <UserAmps amps={amps} target={target} />
         </div>
     );
 }

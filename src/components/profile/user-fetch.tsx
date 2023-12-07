@@ -9,15 +9,22 @@ import ProfileInfoSkeleton from "./skeletons/profile-info-skeleton";
 
 interface PageProps extends DefaultProps {
     amps: Amp[];
+    ampCount: number;
 }
 
-function UserFetch({ className, amps, ...props }: PageProps) {
+function UserFetch({ className, amps, ampCount, ...props }: PageProps) {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return <ProfileInfoSkeleton />;
     if (!user) redirect("/signin");
 
     return (
-        <ProfilePage user={user} className={className} amps={amps} {...props} />
+        <ProfilePage
+            user={user}
+            className={className}
+            amps={amps}
+            {...props}
+            ampCount={ampCount}
+        />
     );
 }
 

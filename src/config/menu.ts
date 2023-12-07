@@ -40,4 +40,9 @@ export const asideMenuConfig: AsideNavItem[] = [
         label: "Messages",
         href: "/messages",
     },
+    {
+        icon: "notification",
+        label: "Notifications",
+        href: "/notifications",
+    },
 ];

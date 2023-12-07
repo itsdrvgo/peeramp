@@ -102,9 +102,6 @@ export const cachedUserSchema = z.object({
     category: userCategoriesSchema,
     gender: userGenderSchema,
     socials: z.array(userSocialSchema),
-    peersCount: z.number(),
-    followingCount: z.number(),
-    ampCount: z.number(),
     createdAt: z.string(),
     updatedAt: z.string(),
     usernameChangedAt: z.string(),
@@ -142,9 +139,6 @@ export const publicMetadataSchema = z.object({
     type: userTypesSchema,
     socials: z.array(userSocialSchema),
     usernameChangedAt: z.number(),
-    ampCount: z.number(),
-    followingCount: z.number(),
-    peersCount: z.number(),
 });
 
 export const clerkUserWithoutEmailSchema = clerkUserSchema.omit({
