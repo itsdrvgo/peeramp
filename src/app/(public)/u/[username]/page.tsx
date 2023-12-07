@@ -28,6 +28,7 @@ export async function generateMetadata({
         })
         .from(users)
         .where(eq(users.username, username))
+        .limit(1)
         .leftJoin(userDetails, eq(users.id, userDetails.userId));
 
     if (targets.length === 0)
