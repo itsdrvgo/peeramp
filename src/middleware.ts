@@ -9,6 +9,7 @@ export default authMiddleware({
         "/api/uploadthing(.*)",
         "/",
         "/api/trpc(.*)",
+        "/u(.*)",
     ],
     afterAuth: async (auth, req) => {
         const url = new URL(req.nextUrl.origin);
