@@ -7,28 +7,32 @@ import {
     getUserCategory,
     shortenNumber,
 } from "@/src/lib/utils";
+import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
-import { UserResource } from "@clerk/types";
-import { Avatar, Button, Chip, Link, useDisclosure } from "@nextui-org/react";
+import {
+    Avatar,
+    Button,
+    Chip,
+    Divider,
+    Link,
+    useDisclosure,
+} from "@nextui-org/react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
-import PfpUploadModal from "../global/modals/pfp-upload";
 import { Icons } from "../icons/icons";
-import MoreSocialModal from "./modals/more-social-modal";
+import ImageViewModal from "../profile/modals/image-view-modal";
+import MoreSocialModal from "../profile/modals/more-social-modal";
 
 interface PageProps extends DefaultProps {
-    user: UserResource;
+    target: CachedUserWithoutEmail;
     ampCount: number;
 }
 
-function ProfileInfo({ className, user, ampCount, ...props }: PageProps) {
-    const router = useRouter();
-
+function UserInfo({ target, ampCount, className, ...props }: PageProps) {
     const {
-        isOpen: isImageModalOpen,
-        onOpen: onImageModalOpen,
-        onOpenChange: onImageModalOpenChange,
-        onClose: onImageModalClose,
+        isOpen: isImageViewModalOpen,
+        onOpen: openImageViewModal,
+        onOpenChange: onImageViewModalOpenChange,
+        onClose: closeImageViewModal,
     } = useDisclosure();
 
     const {
@@ -47,10 +51,10 @@ function ProfileInfo({ className, user, ampCount, ...props }: PageProps) {
                 )}
                 {...props}
             >
-                <button onClick={onImageModalOpen}>
+                <button onClick={openImageViewModal}>
                     <Avatar
-                        src={user.imageUrl}
-                        alt={user.username!}
+                        src={target.image}
+                        alt={target.username}
                         size="lg"
                         showFallback
                         classNames={{
@@ -61,66 +65,102 @@ function ProfileInfo({ className, user, ampCount, ...props }: PageProps) {
 
                 <div className="flex w-full basis-2/3 flex-col-reverse items-center justify-between gap-8 md:flex-row md:items-start">
                     <div className="w-full space-y-2 md:space-y-4">
-                        {getAccountName(user)}
+                        {getAccountName(target)}
 
                         {getAccountStatsLG({
                             ampCount,
                         })}
 
-                        {getAccountBio(user)}
+                        {getAccountBio(target)}
 
                         {getAccountStatsSM({
                             ampCount,
                         })}
 
                         {getAccountSocials({
-                            user,
+                            target,
                             onMoreModalOpen,
                         })}
-                    </div>
 
-                    <div>
-                        <Button
-                            size="sm"
-                            variant="flat"
-                            startContent={<Icons.pencil className="h-4 w-4" />}
-                            className="min-w-0 md:px-2"
-                            onPress={() => router.push("/profile/edit")}
-                        >
-                            <p className="md:hidden">Edit Profile</p>
-                        </Button>
+                        <div className="space-y-5 py-1 md:hidden">
+                            <Divider />
+
+                            <div className="flex gap-2">
+                                <Button
+                                    radius="sm"
+                                    className="h-auto w-full py-[6px] font-semibold dark:text-black"
+                                    color="primary"
+                                >
+                                    Follow
+                                </Button>
+                                <Button
+                                    radius="sm"
+                                    className="h-auto w-full py-[6px]"
+                                >
+                                    Message
+                                </Button>
+                                <Button
+                                    radius="sm"
+                                    className="h-auto w-full py-[6px]"
+                                >
+                                    More
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <PfpUploadModal
-                user={user}
-                isOpen={isImageModalOpen}
-                onOpenChange={onImageModalOpenChange}
-                onClose={onImageModalClose}
+            <ImageViewModal
+                isOpen={isImageViewModalOpen}
+                onClose={closeImageViewModal}
+                onOpenChange={onImageViewModalOpenChange}
+                image={target.image}
             />
 
             <MoreSocialModal
-                connections={user.publicMetadata.socials}
+                connections={target.socials}
                 isOpen={isMoreModalOpen}
                 onOpenChange={onMoreModalOpenChange}
                 onClose={onMoreModalClose}
-                firstName={user.firstName!}
+                firstName={target.firstName}
             />
         </>
     );
 }
 
-export default ProfileInfo;
+export default UserInfo;
 
-function getAccountName(user: UserResource) {
+function getAccountName(target: CachedUserWithoutEmail) {
     return (
-        <p className="flex flex-col text-center text-xl font-semibold md:text-start">
-            <span>{user.username}</span>
-            <span className="text-base font-normal md:hidden">
-                {user.firstName} {user.lastName}
-            </span>
-        </p>
+        <div className="flex items-center justify-center md:justify-between">
+            <p className="flex flex-col text-center text-xl font-semibold md:text-start">
+                <span>{target.username}</span>
+                <span className="text-base font-normal md:hidden">
+                    {target.firstName} {target.lastName}
+                </span>
+            </p>
+
+            <div className="hidden items-center gap-2 md:flex">
+                <Button
+                    radius="sm"
+                    className="h-auto py-1 font-semibold dark:text-black"
+                    color="primary"
+                >
+                    Follow
+                </Button>
+                <Button radius="sm" className="h-auto py-1">
+                    Message
+                </Button>
+                <Button
+                    size="sm"
+                    isIconOnly
+                    radius="full"
+                    variant="light"
+                    startContent={<Icons.moreHor className="h-4 w-4" />}
+                />
+            </div>
+        </div>
     );
 }
 
@@ -168,33 +208,30 @@ function getAccountStatsSM({ ampCount }: { ampCount: number }) {
     );
 }
 
-function getAccountBio(user: UserResource) {
+function getAccountBio(target: CachedUserWithoutEmail) {
     return (
         <>
-            {(user.publicMetadata.category !== "none" ||
-                user.publicMetadata.bio) && (
+            {(target.category !== "none" || target.bio) && (
                 <div className="space-y-2">
                     <p className="hidden md:block">
-                        {user.firstName} {user.lastName}
+                        {target.firstName} {target.lastName}
                     </p>
 
-                    {user.publicMetadata.category !== "none" && (
+                    {target.category !== "none" && (
                         <p className="text-center opacity-80 md:text-start">
-                            {getUserCategory(user.publicMetadata.category)}
+                            {getUserCategory(target.category)}
                         </p>
                     )}
 
-                    {user.publicMetadata.bio && (
+                    {target.bio && (
                         <div className="rounded-lg border border-white/20 p-3 px-4 text-sm md:border-0 md:p-0">
                             <p>
-                                {user.publicMetadata.bio
-                                    .split("\n")
-                                    .map((line, index) => (
-                                        <span key={index}>
-                                            {line}
-                                            <br />
-                                        </span>
-                                    ))}
+                                {target.bio.split("\n").map((line, index) => (
+                                    <span key={index}>
+                                        {line}
+                                        <br />
+                                    </span>
+                                ))}
                             </p>
                         </div>
                     )}
@@ -205,17 +242,17 @@ function getAccountBio(user: UserResource) {
 }
 
 function getAccountSocials({
-    user,
+    target,
     onMoreModalOpen,
 }: {
-    user: UserResource;
+    target: CachedUserWithoutEmail;
     onMoreModalOpen: () => void;
 }) {
     return (
         <div className="flex flex-wrap items-center gap-1">
-            {user.publicMetadata.socials.length > 0 && (
+            {target.socials.length > 0 && (
                 <>
-                    {user.publicMetadata.socials.slice(0, 3).map((social) => {
+                    {target.socials.slice(0, 3).map((social) => {
                         const Icon = Icons[getIconForConnection(social.type)];
 
                         return (
@@ -241,13 +278,13 @@ function getAccountSocials({
                         );
                     })}
 
-                    {user.publicMetadata.socials.length > 3 && (
+                    {target.socials.length > 3 && (
                         <Button
                             className="h-auto w-auto min-w-0 items-center gap-0 bg-default-100 px-2 py-[2px]"
                             variant="flat"
                             onPress={() => onMoreModalOpen()}
                         >
-                            <p>+ {user.publicMetadata.socials.length - 3}</p>
+                            <p>+ {target.socials.length - 3}</p>
                         </Button>
                     )}
                 </>

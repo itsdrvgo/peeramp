@@ -1,17 +1,47 @@
 "use client";
 
+import { DEFAULT_PROFILE_IMAGE_URL } from "@/src/config/const";
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { useUser } from "@clerk/nextjs";
 import { Avatar, Link, LinkProps, Skeleton } from "@nextui-org/react";
 import NextLink from "next/link";
-import { redirect } from "next/navigation";
 
 function ProfileTab({ className, ...props }: LinkProps) {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return <ProfileTabSkeleton />;
 
-    if (!user) redirect("/signin");
+    if (!user)
+        return (
+            <div>
+                <Link
+                    as={NextLink}
+                    color="foreground"
+                    href="/signin"
+                    className={cn(
+                        "flex items-center justify-center gap-4 rounded-lg md:justify-start md:p-2 md:px-3 md:hover:bg-default-100",
+                        className
+                    )}
+                    {...props}
+                >
+                    <div className="p-2 md:p-0">
+                        <Avatar
+                            src={DEFAULT_PROFILE_IMAGE_URL}
+                            alt="User"
+                            showFallback
+                            className="h-6 w-6 md:h-10 md:w-10"
+                        />
+                    </div>
+
+                    <div className="hidden md:block">
+                        <p>Sign in</p>
+                        <p className="text-sm opacity-80">
+                            You are not signed in
+                        </p>
+                    </div>
+                </Link>
+            </div>
+        );
 
     return (
         <Link

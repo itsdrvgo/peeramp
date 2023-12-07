@@ -7,6 +7,12 @@ import { eq } from "drizzle-orm";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
+const getBaseUrl = () => {
+    if (typeof window !== "undefined") return "";
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+    return `http://localhost:${process.env.PORT ?? 3000}`;
+};
+
 interface PageProps {
     params: {
         username: string;
@@ -114,7 +120,7 @@ export async function generateMetadata({
                     target.lastName +
                     " on PeerAmp",
             type: "profile",
-            url: process.env.VERCEL_URL + "/u/" + target.username,
+            url: getBaseUrl() + "/u/" + target.username,
             siteName: siteConfig.name,
             images: [
                 {

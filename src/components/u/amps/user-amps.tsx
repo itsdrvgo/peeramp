@@ -2,31 +2,23 @@
 
 import { Amp } from "@/src/lib/drizzle/schema";
 import { cn } from "@/src/lib/utils";
+import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
-import { UserResource } from "@clerk/types";
 import { Avatar, Tab, Tabs } from "@nextui-org/react";
 import { Icons } from "../../icons/icons";
-import CreateAmpCard from "../../ui/create-amp-card";
 import AmpContent from "./amp-content";
 
 interface PageProps extends DefaultProps {
-    user: UserResource;
+    target: CachedUserWithoutEmail;
     amps: Amp[];
 }
 
-function ProfileAmps({ user, amps, className, ...props }: PageProps) {
+function UserAmps({ target, amps, className, ...props }: PageProps) {
     return (
         <div className={cn("w-full", className)} {...props}>
             <Tabs aria-label="Amp Tabs" variant="underlined" fullWidth>
                 <Tab key="amps" title="Amps">
                     <div className="space-y-5">
-                        <CreateAmpCard
-                            firstName={user.firstName!}
-                            image={user.imageUrl}
-                            userId={user.id}
-                            username={user.username!}
-                        />
-
                         {amps.filter((amp) => amp.status === "published")
                             .length > 0 ? (
                             <div className="space-y-4">
@@ -52,15 +44,15 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
                                             <div className="flex gap-3 md:gap-4">
                                                 <div>
                                                     <Avatar
-                                                        src={user.imageUrl}
-                                                        alt={user.username!}
+                                                        src={target.image}
+                                                        alt={target.username}
                                                         showFallback
                                                     />
                                                 </div>
 
                                                 <AmpContent
                                                     amp={amp}
-                                                    user={user}
+                                                    target={target}
                                                 />
                                             </div>
                                         </div>
@@ -69,56 +61,17 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
                         ) : (
                             <div className="p-5 text-center opacity-60">
                                 <p className="text-sm md:text-base">
-                                    You haven&apos;t created any amps yet
+                                    This user has no amps yet
                                 </p>
                             </div>
                         )}
                     </div>
                 </Tab>
 
-                <Tab key="drafts" title="Drafts">
-                    {amps.filter((amp) => amp.status === "draft").length > 0 ? (
-                        <div className="space-y-4">
-                            {amps
-                                .filter((amp) => amp.status === "draft")
-                                .map((amp) => (
-                                    <div
-                                        key={amp.id}
-                                        className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
-                                    >
-                                        <div>
-                                            <Avatar
-                                                src={user.imageUrl}
-                                                alt={user.username!}
-                                                showFallback
-                                            />
-                                        </div>
-
-                                        <AmpContent amp={amp} user={user} />
-                                    </div>
-                                ))}
-                        </div>
-                    ) : (
-                        <div className="p-5 text-center opacity-60">
-                            <p className="text-sm md:text-base">
-                                You don&apos;t have any drafts yet
-                            </p>
-                        </div>
-                    )}
-                </Tab>
-
-                <Tab key="saved" title="Saved">
-                    <div className="p-5 text-center opacity-60">
-                        <p className="text-sm md:text-base">
-                            You don&apos;t have any saved amps yet
-                        </p>
-                    </div>
-                </Tab>
-
                 <Tab key="tagged" title="Tagged">
                     <div className="p-5 text-center opacity-60">
                         <p className="text-sm md:text-base">
-                            You haven&apos;t tagged any amps yet
+                            This user has not been tagged in any amps yet
                         </p>
                     </div>
                 </Tab>
@@ -127,4 +80,4 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
     );
 }
 
-export default ProfileAmps;
+export default UserAmps;

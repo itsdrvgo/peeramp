@@ -2,7 +2,6 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useDisclosure } from "@nextui-org/react";
-import { redirect } from "next/navigation";
 import toast from "react-hot-toast";
 import { Icons } from "../../icons/icons";
 import CreateAmpModal from "../modals/create-amp-modal";
@@ -23,7 +22,18 @@ function AmpCreateTab() {
                 <p className="hidden md:block">Create</p>
             </button>
         );
-    if (!user) redirect("/signin");
+    if (!user)
+        return (
+            <button
+                className="flex cursor-pointer items-center justify-center gap-4 rounded-lg p-2 md:justify-start md:p-4 md:px-3 md:hover:bg-default-100"
+                onClick={() =>
+                    toast.error("You must be signed in to create an amp!")
+                }
+            >
+                <Icons.create className="h-6 w-6" />
+                <p className="hidden md:block">Create</p>
+            </button>
+        );
 
     return (
         <>
