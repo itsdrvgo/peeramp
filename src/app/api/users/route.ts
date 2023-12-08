@@ -86,21 +86,14 @@ export async function POST(req: NextRequest) {
                         category: "none",
                         gender: "none",
                         socials: [],
+                        score: "0",
+                        isVerified: false,
+                        resume: null,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
                         usernameChangedAt: new Date().toISOString(),
                     }),
                     addUsernameToCache(username),
-                    // clerkClient.users.updateUserMetadata(id, {
-                    //     publicMetadata: {
-                    //         bio: null,
-                    //         type: "normal",
-                    //         category: "none",
-                    //         gender: "none",
-                    //         socials: [],
-                    //         usernameChangedAt: Date.now(),
-                    //     },
-                    // }),
                 ]);
 
                 return CResponse({ message: "CREATED" });
@@ -147,7 +140,6 @@ export async function POST(req: NextRequest) {
                             updatedAt: new Date(),
                         })
                         .where(eq(users.id, existingUser.id)),
-
                     existingUser.details
                         ? db
                               .update(userDetails)
@@ -157,6 +149,9 @@ export async function POST(req: NextRequest) {
                                   category: public_metadata.category,
                                   gender: public_metadata.gender,
                                   socials: public_metadata.socials,
+                                  isVerified: public_metadata.isVerified,
+                                  score: public_metadata.score,
+                                  resume: public_metadata.resume,
                                   usernameChangedAt: new Date(
                                       public_metadata.usernameChangedAt
                                   ),
@@ -169,6 +164,9 @@ export async function POST(req: NextRequest) {
                               gender: public_metadata.gender,
                               category: public_metadata.category,
                               socials: public_metadata.socials,
+                              score: public_metadata.score,
+                              isVerified: public_metadata.isVerified,
+                              resume: public_metadata.resume,
                               usernameChangedAt: new Date(
                                   public_metadata.usernameChangedAt
                               ),
@@ -186,6 +184,9 @@ export async function POST(req: NextRequest) {
                         category: public_metadata.category,
                         gender: public_metadata.gender,
                         socials: public_metadata.socials,
+                        isVerified: public_metadata.isVerified,
+                        score: public_metadata.score,
+                        resume: public_metadata.resume,
                         createdAt: existingUser.createdAt.toISOString(),
                         updatedAt: new Date().toISOString(),
                         usernameChangedAt: new Date(

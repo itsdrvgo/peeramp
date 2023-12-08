@@ -90,6 +90,15 @@ export const userSocialSchema = z
         }
     );
 
+export const resumeSchema = z
+    .object({
+        key: z.string(),
+        name: z.string(),
+        size: z.number(),
+        url: z.string(),
+    })
+    .nullable();
+
 export const cachedUserSchema = z.object({
     id: z.string(),
     firstName: z.string(),
@@ -102,6 +111,9 @@ export const cachedUserSchema = z.object({
     category: userCategoriesSchema,
     gender: userGenderSchema,
     socials: z.array(userSocialSchema),
+    score: z.string(),
+    resume: resumeSchema,
+    isVerified: z.boolean(),
     createdAt: z.string(),
     updatedAt: z.string(),
     usernameChangedAt: z.string(),
@@ -138,6 +150,9 @@ export const publicMetadataSchema = z.object({
     category: userCategoriesSchema,
     type: userTypesSchema,
     socials: z.array(userSocialSchema),
+    isVerified: z.boolean(),
+    score: z.string(),
+    resume: resumeSchema,
     usernameChangedAt: z.number(),
 });
 
@@ -163,3 +178,4 @@ export type UserSocialType = z.infer<typeof userSocialTypesSchema>;
 export type UserSocial = z.infer<typeof userSocialSchema>;
 export type PublicMetadata = z.infer<typeof publicMetadataSchema>;
 export type UserEditData = z.infer<typeof userEditSchema>;
+export type Resume = z.infer<typeof resumeSchema>;
