@@ -43,82 +43,98 @@ function ProfileDangerZone({ className, user, ...props }: PageProps) {
                 <div className="rounded-lg border border-danger-100 bg-default-50">
                     <div className="flex items-center justify-between gap-2 border-b border-black/40 p-4 dark:border-white/20">
                         <div className="space-y-1">
-                            <p>Change your username</p>
-                            <p className="max-w-sm text-sm opacity-60">
+                            <p className="text-sm md:text-base">
+                                Change your username
+                            </p>
+                            <p className="max-w-sm text-xs opacity-60 md:text-sm">
                                 This will change your username and your profile
                                 link. You can only do this once every 60 days.
                             </p>
                         </div>
 
-                        <Button
-                            color="danger"
-                            size="sm"
-                            variant="faded"
-                            className="text-danger-400"
-                            onPress={onChangeUsernameModalOpen}
-                        >
-                            Change Username
-                        </Button>
+                        <div>
+                            <Button
+                                color="danger"
+                                size="sm"
+                                variant="faded"
+                                className="text-danger-400"
+                                onPress={onChangeUsernameModalOpen}
+                            >
+                                Change Username
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 border-b border-black/40 p-4 dark:border-white/20">
                         <div className="space-y-1">
-                            <p>Change your Email</p>
-                            <p className="max-w-sm text-sm opacity-60">
+                            <p className="text-sm md:text-base">
+                                Change your Email
+                            </p>
+                            <p className="max-w-sm text-xs opacity-60 md:text-sm">
                                 This will change your email and you will have to
                                 verify it again.
                             </p>
                         </div>
 
-                        <Button
-                            color="danger"
-                            size="sm"
-                            variant="faded"
-                            className="text-danger-400"
-                            onPress={() => toast.error("Coming soon!")}
-                        >
-                            Change Email
-                        </Button>
+                        <div>
+                            <Button
+                                color="danger"
+                                size="sm"
+                                variant="faded"
+                                className="text-danger-400"
+                                onPress={() => toast.error("Coming soon!")}
+                            >
+                                Change Email
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 border-b border-black/40 p-4 dark:border-white/20">
                         <div className="space-y-1">
-                            <p>Change your password</p>
-                            <p className="max-w-sm text-sm opacity-60">
+                            <p className="text-sm md:text-base">
+                                Change your password
+                            </p>
+                            <p className="max-w-sm text-xs opacity-60 md:text-sm">
                                 This will change your password. You will have to
                                 log in using your new password next time.
                             </p>
                         </div>
 
-                        <Button
-                            color="danger"
-                            size="sm"
-                            variant="faded"
-                            className="text-danger-400"
-                            onPress={onChangePasswordModalOpen}
-                        >
-                            Change Password
-                        </Button>
+                        <div>
+                            <Button
+                                color="danger"
+                                size="sm"
+                                variant="faded"
+                                className="text-danger-400"
+                                onPress={onChangePasswordModalOpen}
+                            >
+                                Change Password
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 p-4">
                         <div className="space-y-1">
-                            <p>Delete your account</p>
-                            <p className="max-w-sm text-sm opacity-60">
+                            <p className="text-sm md:text-base">
+                                Delete your account
+                            </p>
+                            <p className="max-w-sm text-xs opacity-60 md:text-sm">
                                 This will delete your account and all your data.
                                 You will not be able to recover your account.
                             </p>
                         </div>
 
-                        <Button
-                            color="danger"
-                            size="sm"
-                            variant="faded"
-                            className="text-danger-400"
-                            onPress={onDeleteAccountModalOpen}
-                        >
-                            Delete Account
-                        </Button>
+                        <div>
+                            <Button
+                                color="danger"
+                                size="sm"
+                                variant="faded"
+                                className="text-danger-400"
+                                onPress={onDeleteAccountModalOpen}
+                            >
+                                Delete Account
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
