@@ -51,6 +51,10 @@ function SyncAccount({ user }: { user: UserResource }) {
                 "score" in user.publicMetadata
                     ? user.publicMetadata.score
                     : "0",
+            education:
+                "education" in user.publicMetadata
+                    ? user.publicMetadata.education
+                    : [],
         };
 
         updateMissingMetadata({

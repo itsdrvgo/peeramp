@@ -3,6 +3,7 @@ import { HTMLAttributes, ReactNode } from "react";
 import { WebhookRequiredHeaders } from "svix";
 import { Icons } from "../components/icons/icons";
 import {
+    Education,
     Resume,
     UserCategoryType,
     UserGenderType,
@@ -78,6 +79,7 @@ declare global {
         isVerified: boolean;
         score: string;
         resume: Resume | null;
+        education: Education[];
         usernameChangedAt: number;
     }
 }

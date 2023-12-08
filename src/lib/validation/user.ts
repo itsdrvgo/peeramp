@@ -90,6 +90,49 @@ export const userSocialSchema = z
         }
     );
 
+const userDegreeSchema = z.union([
+    z.literal("none"),
+    z.literal("high_school"),
+    z.literal("bachelor_of_science"), // BSc
+    z.literal("bachelor_of_arts"), // BA
+    z.literal("bachelor_of_commerce"), // BCom
+    z.literal("bachelor_of_technology"), // BTech
+    z.literal("bachelor_of_business_administration"), // BBA
+    z.literal("bachelor_of_laws"), // LLB
+    z.literal("bachelor_of_fine_arts"), // BFA
+    z.literal("master_of_science"), // MSc
+    z.literal("master_of_arts"), // MA
+    z.literal("master_of_commerce"), // MCom
+    z.literal("master_of_technology"), // MTech
+    z.literal("master_of_business_administration"), // MBA
+    z.literal("master_of_laws"), // LLM
+    z.literal("master_of_fine_arts"), // MFA
+    z.literal("doctor_of_philosophy"), // PhD
+    z.literal("doctor_of_medicine"), // MD
+    z.literal("doctor_of_laws"), // LLD
+    z.literal("doctor_of_education"), // EdD
+    z.literal("doctor_of_science"), // DSc
+    z.literal("doctor_of_engineering"), // DEng
+    z.literal("doctor_of_business_administration"), // DBA
+    z.literal("other"),
+]);
+
+const userGradeSchema = z.object({
+    total: z.string(),
+    achieved: z.string(),
+});
+
+const userEducationSchema = z.object({
+    id: z.string(),
+    school: z.string(),
+    degree: userDegreeSchema,
+    fieldOfStudy: z.string(),
+    grade: userGradeSchema.optional(),
+    description: z.string().optional(),
+    startTimestamp: z.number(),
+    endTimestamp: z.number().optional(),
+});
+
 export const resumeSchema = z
     .object({
         key: z.string(),
@@ -98,6 +141,27 @@ export const resumeSchema = z
         url: z.string(),
     })
     .nullable();
+
+export const publicMetadataSchema = z.object({
+    gender: userGenderSchema,
+    bio: z.string().nullable(),
+    category: userCategoriesSchema,
+    type: userTypesSchema,
+    socials: z.array(userSocialSchema),
+    isVerified: z.boolean(),
+    score: z.string(),
+    resume: resumeSchema,
+    education: z.array(userEducationSchema),
+    usernameChangedAt: z.number(),
+});
+
+export const userEditSchema = z.object({
+    firstName: nameSchema.shape.firstName,
+    lastName: nameSchema.shape.lastName,
+    bio: z.string().max(150, "Bio must be less than 150 characters"),
+    category: userCategoriesSchema,
+    gender: userGenderSchema,
+});
 
 export const cachedUserSchema = z.object({
     id: z.string(),
@@ -114,19 +178,11 @@ export const cachedUserSchema = z.object({
     score: z.string(),
     resume: resumeSchema,
     isVerified: z.boolean(),
+    education: z.array(userEducationSchema),
     createdAt: z.string(),
     updatedAt: z.string(),
     usernameChangedAt: z.string(),
 });
-
-export const userEditSchema = z.object({
-    firstName: nameSchema.shape.firstName,
-    lastName: nameSchema.shape.lastName,
-    bio: z.string().max(150, "Bio must be less than 150 characters"),
-    category: userCategoriesSchema,
-    gender: userGenderSchema,
-});
-
 export const clerkUserSchema = z.object({
     id: z.string(),
     firstName: z.string(),
@@ -142,18 +198,6 @@ export const clerkUserSchema = z.object({
     lastSignInAt: z.number().nullable(),
     createdAt: z.number(),
     updatedAt: z.number(),
-});
-
-export const publicMetadataSchema = z.object({
-    gender: userGenderSchema,
-    bio: z.string().nullable(),
-    category: userCategoriesSchema,
-    type: userTypesSchema,
-    socials: z.array(userSocialSchema),
-    isVerified: z.boolean(),
-    score: z.string(),
-    resume: resumeSchema,
-    usernameChangedAt: z.number(),
 });
 
 export const clerkUserWithoutEmailSchema = clerkUserSchema.omit({
@@ -179,3 +223,6 @@ export type UserSocial = z.infer<typeof userSocialSchema>;
 export type PublicMetadata = z.infer<typeof publicMetadataSchema>;
 export type UserEditData = z.infer<typeof userEditSchema>;
 export type Resume = z.infer<typeof resumeSchema>;
+export type Education = z.infer<typeof userEducationSchema>;
+export type Degree = z.infer<typeof userDegreeSchema>;
+export type Grade = z.infer<typeof userGradeSchema>;
