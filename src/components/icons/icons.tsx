@@ -121,12 +121,14 @@ import {
     X,
     Youtube,
     Zap,
-    type IconNode as LucideIcon
+    type IconNode as LucideIcon,
+    GraduationCap
 } from "lucide-react";
 
 export type Icon = LucideIcon;
 
 export const Icons = {
+    graduationHat: GraduationCap,
     create: PlusSquare,
     moreHor: MoreHorizontal,
     repeat: Repeat2,
