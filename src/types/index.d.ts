@@ -69,6 +69,11 @@ export const ResponseMessagesEnum = {
 
 export type ResponseMessages = keyof typeof ResponseMessagesEnum;
 
+export type CategoryProps = {
+    label: string;
+    value: string;
+};
+
 declare global {
     interface UserPublicMetadata {
         bio: string | null;
