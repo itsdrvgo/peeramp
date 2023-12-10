@@ -1,12 +1,9 @@
-import FeedFetch from "@/src/components/feed/feed-fetch";
-import { Suspense } from "react";
+import FeedView from "@/src/components/feed/feed-view";
 
 function Page() {
     return (
         <section className="flex w-full justify-center">
-            <Suspense fallback={<div>Loading...</div>}>
-                <FeedFetch />
-            </Suspense>
+            <FeedView />
         </section>
     );
 }
