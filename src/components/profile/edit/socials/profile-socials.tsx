@@ -4,8 +4,8 @@ import { cn, getIconForConnection } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { Button, useDisclosure } from "@nextui-org/react";
-import { Icons } from "../../icons/icons";
-import ManageSocialModal from "./modals/manage-social-modal";
+import { Icons } from "../../../icons/icons";
+import ManageSocialModal from "../modals/manage-social-modal";
 import SocialEditButton from "./social-edit-button";
 
 interface PageProps extends DefaultProps {

@@ -277,3 +277,75 @@ export function convertMstoTimeElapsed(input: number) {
         return `${month} ${day}${isSameYear ? "" : `, ${year}`}`;
     }
 }
+
+export function convertBytesIntoHumanReadable(bytes: number) {
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+
+    if (bytes === 0) {
+        return "0 Byte";
+    }
+
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i];
+}
+
+export function convertSizeIntoRawBytes(
+    size:
+        | "2B"
+        | "2KB"
+        | "2MB"
+        | "2GB"
+        | "1B"
+        | "1KB"
+        | "1MB"
+        | "1GB"
+        | "4B"
+        | "4KB"
+        | "4MB"
+        | "4GB"
+        | "32B"
+        | "32KB"
+        | "32MB"
+        | "32GB"
+        | "8B"
+        | "8KB"
+        | "8MB"
+        | "8GB"
+        | "16B"
+        | "16KB"
+        | "16MB"
+        | "16GB"
+        | "64B"
+        | "64KB"
+        | "64MB"
+        | "64GB"
+        | "128B"
+        | "128KB"
+        | "128MB"
+        | "128GB"
+        | "256B"
+        | "256KB"
+        | "256MB"
+        | "256GB"
+        | "512B"
+        | "512KB"
+        | "512MB"
+        | "512GB"
+        | "1024B"
+        | "1024KB"
+        | "1024MB"
+        | "1024GB"
+) {
+    const sizes = ["B", "KB", "MB", "GB"];
+    const sizeNumber = parseInt(size.slice(0, -1));
+    const match = size.match(/\D+$/);
+    const sizeUnit = match ? match[0] : "";
+
+    if (sizeUnit === "B") {
+        return sizeNumber;
+    } else {
+        const i = sizes.indexOf(sizeUnit);
+        return sizeNumber * Math.pow(1024, i);
+    }
+}

@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { publicMetadataSchema, userEditSchema } from "../../validation/user";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { userEducationRouter } from "./education";
 import { userSocialRouter } from "./social";
 
 export const userRouter = createTRPCRouter({
@@ -108,4 +109,5 @@ export const userRouter = createTRPCRouter({
             return { id: userId };
         }),
     social: userSocialRouter,
+    education: userEducationRouter,
 });

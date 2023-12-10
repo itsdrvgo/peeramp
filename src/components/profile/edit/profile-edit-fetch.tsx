@@ -21,7 +21,7 @@ export default ProfileEditFetch;
 function ProfileEditSkeleton({ className, ...props }: DefaultProps) {
     return (
         <div
-            className={cn("w-full max-w-2xl space-y-5 py-10", className)}
+            className={cn("w-full max-w-2xl space-y-5 px-5 py-10", className)}
             {...props}
         >
             <div>
@@ -70,21 +70,31 @@ function ProfileEditSkeleton({ className, ...props }: DefaultProps) {
             </div>
 
             <div className="space-y-4">
+                <p className="text-xl font-semibold">Resume</p>
+
+                <Skeleton className="h-60 w-full rounded-lg" />
+            </div>
+
+            <div className="space-y-4">
                 <p className="text-xl font-semibold">Connections</p>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Skeleton className="h-7 w-32 rounded-xl" />
                     <Skeleton className="h-7 w-20 rounded-xl" />
                     <Skeleton className="h-7 w-28 rounded-xl" />
                     <Skeleton className="h-7 w-32 rounded-xl" />
-                    <div className="flex cursor-pointer items-center rounded-xl bg-default text-sm">
+
+                    <Button
+                        className="h-auto w-auto gap-0 p-0 text-sm"
+                        isDisabled={true}
+                    >
                         <div className="border-r border-white/20 px-3 py-1 pr-2">
                             <p>Add Connection</p>
                         </div>
                         <div className="p-1 px-2">
                             <Icons.add className="h-4 w-4" />
                         </div>
-                    </div>
+                    </Button>
                 </div>
             </div>
 

@@ -25,7 +25,7 @@ function SyncAccount({ user }: { user: UserResource }) {
                 "usernameChangedAt" in user.publicMetadata
                     ? user.publicMetadata.usernameChangedAt
                     : user.createdAt?.getTime() || Date.now(),
-            bio: "bio" in user.publicMetadata ? user.publicMetadata.bio : "",
+            bio: "bio" in user.publicMetadata ? user.publicMetadata.bio : null,
             category:
                 "category" in user.publicMetadata
                     ? user.publicMetadata.category
@@ -33,6 +33,27 @@ function SyncAccount({ user }: { user: UserResource }) {
             socials:
                 "socials" in user.publicMetadata
                     ? user.publicMetadata.socials
+                    : [],
+            isVerified:
+                "isVerified" in user.publicMetadata
+                    ? user.publicMetadata.isVerified
+                    : false,
+            resume:
+                "resume" in user.publicMetadata
+                    ? user.publicMetadata.resume
+                    : {
+                          key: "",
+                          name: "",
+                          size: 0,
+                          url: "",
+                      },
+            score:
+                "score" in user.publicMetadata
+                    ? user.publicMetadata.score
+                    : "0",
+            education:
+                "education" in user.publicMetadata
+                    ? user.publicMetadata.education
                     : [],
         };
 

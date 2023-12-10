@@ -3,6 +3,8 @@ import { HTMLAttributes, ReactNode } from "react";
 import { WebhookRequiredHeaders } from "svix";
 import { Icons } from "../components/icons/icons";
 import {
+    Education,
+    Resume,
     UserCategoryType,
     UserGenderType,
     UserSocial,
@@ -67,6 +69,11 @@ export const ResponseMessagesEnum = {
 
 export type ResponseMessages = keyof typeof ResponseMessagesEnum;
 
+export type CategoryProps = {
+    label: string;
+    value: string;
+};
+
 declare global {
     interface UserPublicMetadata {
         bio: string | null;
@@ -74,6 +81,10 @@ declare global {
         category: UserCategoryType;
         gender: UserGenderType;
         socials: UserSocial[];
+        isVerified: boolean;
+        score: string;
+        resume: Resume | null;
+        education: Education[];
         usernameChangedAt: number;
     }
 }

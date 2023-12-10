@@ -12,6 +12,8 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { Status, Visibility } from "../validation/amp";
 import {
+    Education,
+    Resume,
     UserCategoryType,
     UserGenderType,
     UserSocial,
@@ -64,13 +66,19 @@ export const userDetails = pgTable(
             .notNull()
             .default("none")
             .$type<UserGenderType>(),
+        isVerified: boolean("is_verified").notNull().default(false),
+        socials: jsonb("socials").notNull().$type<UserSocial[]>().default([]),
+        education: jsonb("education")
+            .notNull()
+            .default([])
+            .$type<Education[]>(),
+        resume: jsonb("resume").default(null).$type<Resume>(),
+        score: text("score").notNull().default("0"),
         usernameChangedAt: timestamp("username_changed_at", {
             withTimezone: true,
         })
             .notNull()
             .defaultNow(),
-        socials: jsonb("socials").notNull().$type<UserSocial[]>().default([]),
-        score: text("score").notNull().default("0"),
     },
     (table) => {
         return {

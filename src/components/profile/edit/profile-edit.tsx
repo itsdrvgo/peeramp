@@ -6,8 +6,10 @@ import { UserResource } from "@clerk/types";
 import { Avatar, useDisclosure } from "@nextui-org/react";
 import ProfileUpdateForm from "../../forms/profile-update-form";
 import PfpUploadModal from "../../global/modals/pfp-upload";
+import ProfileEducation from "./education/profile-education";
 import ProfileDangerZone from "./profile-danger-zone";
-import ProfileSocials from "./profile-socials";
+import ProfileResume from "./resume/profile-resume";
+import ProfileSocials from "./socials/profile-socials";
 
 interface PageProps extends DefaultProps {
     user: UserResource;
@@ -24,7 +26,10 @@ function ProfileEdit({ className, user, ...props }: PageProps) {
     return (
         <>
             <div
-                className={cn("w-full max-w-2xl space-y-5 py-10", className)}
+                className={cn(
+                    "w-full max-w-2xl space-y-5 px-5 py-10",
+                    className
+                )}
                 {...props}
             >
                 <div>
@@ -54,7 +59,11 @@ function ProfileEdit({ className, user, ...props }: PageProps) {
 
                 <ProfileUpdateForm user={user} />
 
+                <ProfileResume user={user} />
+
                 <ProfileSocials user={user} />
+
+                <ProfileEducation user={user} />
 
                 <ProfileDangerZone user={user} />
             </div>
