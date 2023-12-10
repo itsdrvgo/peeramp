@@ -425,7 +425,7 @@ function ManageEducationModal({
                                                             <FormControl>
                                                                 <Input
                                                                     size="sm"
-                                                                    placeholder="Achieved"
+                                                                    placeholder="Total"
                                                                     {...field}
                                                                     onChange={(
                                                                         e
@@ -440,6 +440,13 @@ function ManageEducationModal({
                                                                             )
                                                                         )
                                                                             return;
+
+                                                                        form.setValue(
+                                                                            "grade.total",
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        );
                                                                     }}
                                                                 />
                                                             </FormControl>
