@@ -90,9 +90,13 @@ export const userSocialSchema = z
         }
     );
 
-const userDegreeSchema = z.union([
+export const userDegreeSchema = z.union([
     z.literal("none"),
+    z.literal("boards_X"),
+    z.literal("boards_XII"),
+    z.literal("below_high_school"),
     z.literal("high_school"),
+    z.literal("diploma"),
     z.literal("bachelor_of_science"), // BSc
     z.literal("bachelor_of_arts"), // BA
     z.literal("bachelor_of_commerce"), // BCom
@@ -117,21 +121,68 @@ const userDegreeSchema = z.union([
     z.literal("other"),
 ]);
 
-const userGradeSchema = z.object({
-    total: z.string(),
-    achieved: z.string(),
+export const userEducationTypeSchema = z.union([
+    z.literal("school"),
+    z.literal("university"),
+]);
+
+export const userGradeSchema = z
+    .object({
+        achieved: z.string(),
+        total: z.string(),
+    })
+    .refine(
+        (data) => {
+            const achieved = parseFloat(data.achieved);
+            const total = parseFloat(data.total);
+
+            if (achieved < 0 || total <= 0) return false;
+
+            return achieved <= total;
+        },
+        {
+            message: "Achieved must be less than or equal to total",
+            path: ["achieved"],
+        }
+    );
+
+export const userEducationDateSchema = z.object({
+    month: z.number().min(0).max(11),
+    year: z.number().min(1900).max(new Date().getFullYear()),
 });
 
-const userEducationSchema = z.object({
-    id: z.string(),
-    school: z.string(),
-    degree: userDegreeSchema,
-    fieldOfStudy: z.string(),
-    grade: userGradeSchema.optional(),
-    description: z.string().optional(),
-    startTimestamp: z.number(),
-    endTimestamp: z.number().optional(),
-});
+export const userEducationSchema = z
+    .object({
+        id: z.string().optional(),
+        organization: z.string().min(1, "Please enter your organization name"),
+        type: userEducationTypeSchema,
+        degree: userDegreeSchema,
+        fieldOfStudy: z.string(),
+        grade: userGradeSchema.optional(),
+        description: z.string().optional(),
+        startTimestamp: userEducationDateSchema,
+        endTimestamp: userEducationDateSchema,
+    })
+    .refine(
+        (data) => {
+            const startTimestamp = new Date(
+                data.startTimestamp.year,
+                data.startTimestamp.month
+            ).getTime();
+            const endTimestamp = new Date(
+                data.endTimestamp.year,
+                data.endTimestamp.month
+            ).getTime();
+
+            if (startTimestamp > endTimestamp) return false;
+
+            return true;
+        },
+        {
+            message: "Start date must be before end date",
+            path: ["startTimestamp"],
+        }
+    );
 
 export const resumeSchema = z
     .object({
@@ -226,3 +277,4 @@ export type Resume = z.infer<typeof resumeSchema>;
 export type Education = z.infer<typeof userEducationSchema>;
 export type Degree = z.infer<typeof userDegreeSchema>;
 export type Grade = z.infer<typeof userGradeSchema>;
+export type EducationType = z.infer<typeof userEducationTypeSchema>;

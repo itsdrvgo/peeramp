@@ -10,8 +10,8 @@ import { UserResource } from "@clerk/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useUploadThing } from "../../ui/uploadthing";
-import UploadZone from "../../ui/uploadzone";
+import { useUploadThing } from "../../../ui/uploadthing";
+import UploadZone from "../../../ui/uploadzone";
 import ResumePreview from "./resume-preview";
 
 interface PageProps extends DefaultProps {

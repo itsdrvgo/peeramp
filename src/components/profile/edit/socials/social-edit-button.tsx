@@ -4,8 +4,8 @@ import { getColorForConnection } from "@/src/lib/utils";
 import { UserSocial } from "@/src/lib/validation/user";
 import { UserResource } from "@clerk/types";
 import { Button, ButtonProps, useDisclosure } from "@nextui-org/react";
-import { Icons } from "../../icons/icons";
-import ManageSocialModal from "./modals/manage-social-modal";
+import { Icons } from "../../../icons/icons";
+import ManageSocialModal from "../modals/manage-social-modal";
 
 interface PageProps extends ButtonProps {
     social: UserSocial;

@@ -56,7 +56,7 @@ function UploadZone({
                 <div
                     {...getRootProps()}
                     className={cn(
-                        "flex min-h-[15rem] w-full cursor-pointer flex-col items-center justify-center gap-5 rounded-lg border border-dashed border-white/20 bg-default-50 p-3 text-center md:p-12",
+                        "flex min-h-[15rem] w-full cursor-pointer flex-col items-center justify-center gap-5 rounded-lg border border-dashed border-black/20 bg-default-50 p-3 text-center dark:border-white/20 md:p-12",
                         className,
                         isDragActive && "bg-sky-900"
                     )}

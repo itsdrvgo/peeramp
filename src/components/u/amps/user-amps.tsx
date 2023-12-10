@@ -4,7 +4,7 @@ import { Amp } from "@/src/lib/drizzle/schema";
 import { cn } from "@/src/lib/utils";
 import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
-import { Avatar, Tab, Tabs } from "@nextui-org/react";
+import { Accordion, AccordionItem, Avatar, Tab, Tabs } from "@nextui-org/react";
 import { Icons } from "../../icons/icons";
 import AmpContent from "./amp-content";
 
@@ -64,6 +64,107 @@ function UserAmps({ target, amps, className, ...props }: PageProps) {
                                     This user has no amps yet
                                 </p>
                             </div>
+                        )}
+                    </div>
+                </Tab>
+
+                <Tab key="about" title="About">
+                    <div className="space-y-5 py-5">
+                        {Object.keys(target.education).length > 0 && (
+                            <Accordion
+                                variant="splitted"
+                                className="p-0"
+                                aria-label="About"
+                            >
+                                <AccordionItem
+                                    key="education"
+                                    aria-label="Education"
+                                    classNames={{
+                                        base: "p-0",
+                                    }}
+                                    title={
+                                        <div className="flex items-center gap-2">
+                                            <div>
+                                                <Icons.graduationHat className="h-6 w-6" />
+                                            </div>
+                                            <p className="text-lg font-semibold">
+                                                Education
+                                            </p>
+                                        </div>
+                                    }
+                                >
+                                    {target.education.map((edu, index) => {
+                                        const startTime = new Date(
+                                            edu.startTimestamp.year,
+                                            edu.startTimestamp.month
+                                        ).toLocaleDateString("en-US", {
+                                            month: "long",
+                                            year: "numeric",
+                                        });
+
+                                        const endTime = new Date(
+                                            edu.endTimestamp.year,
+                                            edu.endTimestamp.month
+                                        ).toLocaleDateString("en-US", {
+                                            month: "long",
+                                            year: "numeric",
+                                        });
+
+                                        return (
+                                            <div
+                                                key={edu.id}
+                                                className={cn(
+                                                    "space-y-2 border-black/10 px-2 dark:border-white/10",
+                                                    index === 0
+                                                        ? "pb-4 pt-2"
+                                                        : "py-4",
+                                                    {
+                                                        "border-b":
+                                                            index !==
+                                                            target.education
+                                                                .length -
+                                                                1,
+                                                    }
+                                                )}
+                                            >
+                                                <p className="text-sm md:text-base">
+                                                    {new Date().getTime() >
+                                                    new Date(
+                                                        edu.startTimestamp.year,
+                                                        edu.startTimestamp.month
+                                                    ).getTime()
+                                                        ? "Studied"
+                                                        : "Studies"}{" "}
+                                                    <span className="font-semibold">
+                                                        {edu.degree
+                                                            .split("_")
+                                                            .map(
+                                                                (word) =>
+                                                                    word[0].toUpperCase() +
+                                                                    word.slice(
+                                                                        1
+                                                                    )
+                                                            )
+                                                            .join(" ")}{" "}
+                                                    </span>
+                                                    in{" "}
+                                                    <span className="font-semibold">
+                                                        {edu.fieldOfStudy}
+                                                    </span>{" "}
+                                                    at{" "}
+                                                    <span className="font-semibold">
+                                                        {edu.organization}
+                                                    </span>
+                                                </p>
+
+                                                <p className="text-xs opacity-60 md:text-sm">
+                                                    {startTime} - {endTime}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </AccordionItem>
+                            </Accordion>
                         )}
                     </div>
                 </Tab>

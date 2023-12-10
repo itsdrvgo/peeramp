@@ -55,7 +55,7 @@ function ClientProvider({ children, className, ...props }: DefaultProps) {
                     <body className={cn(storeTheme, className)} {...props}>
                         {children}
                     </body>
-                    <ReactQueryDevtools initialIsOpen={true} />
+                    <ReactQueryDevtools />
                 </QueryClientProvider>
             </trpc.Provider>
         </NextUIProvider>

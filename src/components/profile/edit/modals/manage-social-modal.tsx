@@ -16,6 +16,7 @@ import {
     userSocialSchema,
     userSocialTypesSchema,
 } from "@/src/lib/validation/user";
+import { CategoryProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -32,11 +33,6 @@ import {
 } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-
-interface CategoryProps {
-    label: string;
-    value: string;
-}
 
 const socials: CategoryProps[] = userSocialTypesSchema._def.options
     .map((option) => option.value)
@@ -146,22 +142,24 @@ function ManageSocialModal({
 
                         <Form {...form}>
                             <form
-                                onSubmit={form.handleSubmit((data) =>
-                                    connection
-                                        ? editSocial({
-                                              userId: user.id,
-                                              metadata: user.publicMetadata,
-                                              social: {
-                                                  ...data,
-                                                  id: connection.id,
-                                              },
-                                          })
-                                        : addSocial({
-                                              userId: user.id,
-                                              metadata: user.publicMetadata,
-                                              social: data,
-                                          })
-                                )}
+                                onSubmit={(...args) =>
+                                    form.handleSubmit((data) =>
+                                        connection
+                                            ? editSocial({
+                                                  userId: user.id,
+                                                  metadata: user.publicMetadata,
+                                                  social: {
+                                                      ...data,
+                                                      id: connection.id,
+                                                  },
+                                              })
+                                            : addSocial({
+                                                  userId: user.id,
+                                                  metadata: user.publicMetadata,
+                                                  social: data,
+                                              })
+                                    )(...args)
+                                }
                             >
                                 <ModalBody className="gap-7">
                                     <div className="space-y-4">

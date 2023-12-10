@@ -7,6 +7,7 @@ import {
     UserEditData,
     userEditSchema,
 } from "@/src/lib/validation/user";
+import { CategoryProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,11 +28,6 @@ import {
     FormLabel,
     FormMessage,
 } from "../ui/form";
-
-interface CategoryProps {
-    label: string;
-    value: string;
-}
 
 const categories: CategoryProps[] = userCategoriesSchema._def.options
     .map((option) => option.value)
