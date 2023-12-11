@@ -1,12 +1,144 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
+import { withCursorPagination } from "drizzle-pagination";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { amps } from "../../drizzle/schema";
 import { statusSchema, visibilitySchema } from "../../validation/amp";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const ampRouter = createTRPCRouter({
+    getPinnedAmp: publicProcedure
+        .input(
+            z.object({
+                creatorId: z.string(),
+            })
+        )
+        .query(async ({ input, ctx }) => {
+            const { creatorId } = input;
+
+            const data = await ctx.db.query.amps.findFirst({
+                where: and(
+                    eq(amps.creatorId, creatorId),
+                    eq(amps.pinned, true)
+                ),
+            });
+
+            return data;
+        }),
+    getInfiniteAmps: publicProcedure
+        .input(
+            z.object({
+                creatorId: z.string(),
+                cursor: z.string().nullish(),
+                limit: z.number().min(1).max(100).default(4),
+                type: z
+                    .enum(["published", "draft", "all"])
+                    .default("published"),
+            })
+        )
+        .query(async ({ input, ctx }) => {
+            const { creatorId, cursor, limit, type } = input;
+
+            switch (type) {
+                case "published": {
+                    const data = await ctx.db.query.amps.findMany(
+                        withCursorPagination({
+                            limit,
+                            where: and(
+                                eq(amps.creatorId, creatorId),
+                                eq(amps.status, "published"),
+                                ne(amps.pinned, true)
+                            ),
+                            cursors: [
+                                [
+                                    amps.publishedAt,
+                                    "desc",
+                                    cursor ? new Date(cursor) : undefined,
+                                ],
+                            ],
+                        })
+                    );
+
+                    return {
+                        data,
+                        nextCursor: data.length
+                            ? data[data.length - 1].publishedAt!.toISOString()
+                            : null,
+                    };
+                }
+
+                case "draft": {
+                    const data = await ctx.db.query.amps.findMany(
+                        withCursorPagination({
+                            limit,
+                            where: and(
+                                eq(amps.creatorId, creatorId),
+                                eq(amps.status, "draft")
+                            ),
+                            cursors: [
+                                [
+                                    amps.createdAt,
+                                    "desc",
+                                    cursor ? new Date(cursor) : undefined,
+                                ],
+                            ],
+                        })
+                    );
+
+                    return {
+                        data,
+                        nextCursor: data.length
+                            ? data[data.length - 1].createdAt.toISOString()
+                            : null,
+                    };
+                }
+
+                default: {
+                    const data = await ctx.db.query.amps.findMany(
+                        withCursorPagination({
+                            limit,
+                            where: eq(amps.creatorId, creatorId),
+                            cursors: [
+                                [
+                                    amps.createdAt,
+                                    "desc",
+                                    cursor ? new Date(cursor) : undefined,
+                                ],
+                            ],
+                        })
+                    );
+
+                    return {
+                        data,
+                        nextCursor: data.length
+                            ? data[data.length - 1].createdAt.toISOString()
+                            : null,
+                    };
+                }
+            }
+        }),
+    getAmpCount: publicProcedure
+        .input(
+            z.object({
+                creatorId: z.string(),
+            })
+        )
+        .query(async ({ input, ctx }) => {
+            const data = await ctx.db
+                .select({
+                    count: sql`COUNT(*)`,
+                })
+                .from(amps)
+                .where(
+                    and(
+                        eq(amps.creatorId, input.creatorId),
+                        eq(amps.status, "published")
+                    )
+                );
+
+            return Number(data[0].count);
+        }),
     createAmp: protectedProcedure
         .input(
             z.object({
