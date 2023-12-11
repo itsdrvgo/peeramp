@@ -31,7 +31,7 @@ export const ampRouter = createTRPCRouter({
             z.object({
                 creatorId: z.string(),
                 cursor: z.string().nullish(),
-                limit: z.number().min(1).max(100).default(4),
+                limit: z.number().min(1).max(100).default(10),
                 type: z
                     .enum(["published", "draft", "all"])
                     .default("published"),
