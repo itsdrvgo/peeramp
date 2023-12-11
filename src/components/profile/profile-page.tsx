@@ -1,6 +1,5 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
@@ -10,11 +9,10 @@ import ProfileInfo from "./profile-info";
 
 interface PageProps extends DefaultProps {
     user: UserResource;
-    amps: Amp[];
     ampCount: number;
 }
 
-function ProfilePage({ className, user, ampCount, amps, ...props }: PageProps) {
+function ProfilePage({ className, user, ampCount, ...props }: PageProps) {
     return (
         <div
             className={cn(
@@ -25,7 +23,7 @@ function ProfilePage({ className, user, ampCount, amps, ...props }: PageProps) {
         >
             <ProfileInfo user={user} ampCount={ampCount} />
             <Divider />
-            <ProfileAmps amps={amps} user={user} />
+            <ProfileAmps user={user} />
         </div>
     );
 }

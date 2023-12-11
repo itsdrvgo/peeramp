@@ -1,20 +1,101 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
+import { trpc } from "@/src/lib/trpc/client";
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
-import { Avatar, Tab, Tabs } from "@nextui-org/react";
+import { useIntersection } from "@mantine/hooks";
+import { Avatar, Spinner, Tab, Tabs } from "@nextui-org/react";
+import { useEffect, useMemo, useRef } from "react";
+import AmpLoadSkeleton from "../../global/skeletons/amp-load-skeleton";
 import { Icons } from "../../icons/icons";
 import CreateAmpCard from "../../ui/create-amp-card";
 import AmpContent from "./amp-content";
 
 interface PageProps extends DefaultProps {
     user: UserResource;
-    amps: Amp[];
 }
 
-function ProfileAmps({ user, amps, className, ...props }: PageProps) {
+function ProfileAmps({ user, className, ...props }: PageProps) {
+    const { data: pinnedAmp, isLoading: isPinnedAmpLoading } =
+        trpc.amp.getPinnedAmp.useQuery({
+            creatorId: user.id,
+        });
+
+    const {
+        data: publishedAmpsRaw,
+        isLoading: isPublishedAmpsLoading,
+        fetchNextPage: fetchNextPublishedAmpsPage,
+        isFetchingNextPage: isFetchingNextPublishedAmpsPage,
+    } = trpc.amp.getInfiniteAmps.useInfiniteQuery(
+        {
+            creatorId: user.id,
+            type: "published",
+        },
+        {
+            getNextPageParam: (lastPage) => lastPage.nextCursor,
+        }
+    );
+
+    const {
+        data: draftAmpsRaw,
+        isLoading: isDraftAmpsLoading,
+        fetchNextPage: fetchNextDraftAmpsPage,
+        isFetchingNextPage: isFetchingNextDraftAmpsPage,
+    } = trpc.amp.getInfiniteAmps.useInfiniteQuery(
+        {
+            creatorId: user.id,
+            type: "draft",
+        },
+        {
+            getNextPageParam: (lastPage) => lastPage.nextCursor,
+        }
+    );
+
+    const publishedAmps = useMemo(
+        () => publishedAmpsRaw?.pages.flatMap((page) => page.data) ?? [],
+        [publishedAmpsRaw]
+    );
+
+    const draftAmps = useMemo(
+        () => draftAmpsRaw?.pages.flatMap((page) => page.data) ?? [],
+        [draftAmpsRaw]
+    );
+
+    const publishedViewPortRef = useRef<HTMLDivElement>(null);
+    const { entry: publishedEntry, ref: publishedRef } = useIntersection({
+        root: publishedViewPortRef.current,
+        threshold: 1,
+    });
+
+    const draftViewPortRef = useRef<HTMLDivElement>(null);
+    const { entry: draftEntry, ref: draftRef } = useIntersection({
+        root: draftViewPortRef.current,
+        threshold: 1,
+    });
+
+    useEffect(() => {
+        if (
+            publishedEntry?.isIntersecting &&
+            publishedAmpsRaw?.pages.length &&
+            publishedAmpsRaw.pages[publishedAmpsRaw.pages.length - 1].nextCursor
+        ) {
+            fetchNextPublishedAmpsPage();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [publishedEntry]);
+
+    useEffect(() => {
+        if (
+            draftEntry?.isIntersecting &&
+            draftAmpsRaw?.pages.length &&
+            draftAmpsRaw.pages[draftAmpsRaw.pages.length - 1].nextCursor
+        ) {
+            fetchNextDraftAmpsPage();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [draftEntry]);
+
     return (
         <div className={cn("w-full", className)} {...props}>
             <Tabs aria-label="Amp Tabs" variant="underlined" fullWidth>
@@ -27,28 +108,45 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
                             username={user.username!}
                         />
 
-                        {amps.filter((amp) => amp.status === "published")
-                            .length > 0 ? (
-                            <div className="space-y-4">
-                                {amps
-                                    .filter((amp) => amp.status === "published")
-                                    .sort(
-                                        (a, b) =>
-                                            (b.pinned ? 1 : 0) -
-                                            (a.pinned ? 1 : 0)
-                                    )
-                                    .map((amp) => (
+                        {isPinnedAmpLoading ? (
+                            <AmpLoadSkeleton count={1} />
+                        ) : (
+                            pinnedAmp && (
+                                <div className="group space-y-3 border-b border-black/30 p-4 px-0 dark:border-white/20 md:px-2">
+                                    <div className="flex items-center gap-2 text-sm opacity-60">
+                                        <Icons.pin className="h-4 w-4 fill-white" />
+                                        <p>Pinned</p>
+                                    </div>
+
+                                    <div className="flex gap-3 md:gap-4">
+                                        <div>
+                                            <Avatar
+                                                src={user.imageUrl}
+                                                alt={user.username!}
+                                                showFallback
+                                            />
+                                        </div>
+
+                                        <AmpContent
+                                            amp={pinnedAmp}
+                                            user={user}
+                                        />
+                                    </div>
+                                </div>
+                            )
+                        )}
+
+                        {isPublishedAmpsLoading ? (
+                            <AmpLoadSkeleton />
+                        ) : publishedAmps.length > 0 ? (
+                            <>
+                                {publishedAmps.map((amp, i) =>
+                                    i === publishedAmps.length - 1 ? (
                                         <div
                                             key={amp.id}
                                             className="group space-y-3 border-b border-black/30 p-4 px-0 dark:border-white/20 md:px-2"
+                                            ref={publishedRef}
                                         >
-                                            {amp.pinned && (
-                                                <div className="flex items-center gap-2 text-sm opacity-60">
-                                                    <Icons.pin className="h-4 w-4 fill-white" />
-                                                    <p>Pinned</p>
-                                                </div>
-                                            )}
-
                                             <div className="flex gap-3 md:gap-4">
                                                 <div>
                                                     <Avatar
@@ -64,12 +162,51 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
                                                 />
                                             </div>
                                         </div>
-                                    ))}
-                            </div>
+                                    ) : (
+                                        <div
+                                            key={amp.id}
+                                            className="group space-y-3 border-b border-black/30 p-4 px-0 dark:border-white/20 md:px-2"
+                                        >
+                                            <div className="flex gap-3 md:gap-4">
+                                                <div>
+                                                    <Avatar
+                                                        src={user.imageUrl}
+                                                        alt={user.username!}
+                                                        showFallback
+                                                    />
+                                                </div>
+
+                                                <AmpContent
+                                                    amp={amp}
+                                                    user={user}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                )}
+
+                                {isFetchingNextPublishedAmpsPage && (
+                                    <div className="flex justify-center">
+                                        <Spinner />
+                                    </div>
+                                )}
+
+                                {!isFetchingNextPublishedAmpsPage &&
+                                    publishedAmpsRaw?.pages.length &&
+                                    !publishedAmpsRaw.pages[
+                                        publishedAmpsRaw.pages.length - 1
+                                    ].nextCursor && (
+                                        <div className="text-center opacity-60">
+                                            <p className="text-sm md:text-base">
+                                                No more amps to load
+                                            </p>
+                                        </div>
+                                    )}
+                            </>
                         ) : (
                             <div className="p-5 text-center opacity-60">
                                 <p className="text-sm md:text-base">
-                                    You haven&apos;t created any amps yet
+                                    You don&apos;t have any amps yet
                                 </p>
                             </div>
                         )}
@@ -77,34 +214,72 @@ function ProfileAmps({ user, amps, className, ...props }: PageProps) {
                 </Tab>
 
                 <Tab key="drafts" title="Drafts">
-                    {amps.filter((amp) => amp.status === "draft").length > 0 ? (
-                        <div className="space-y-4">
-                            {amps
-                                .filter((amp) => amp.status === "draft")
-                                .map((amp) => (
-                                    <div
-                                        key={amp.id}
-                                        className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
-                                    >
-                                        <div>
-                                            <Avatar
-                                                src={user.imageUrl}
-                                                alt={user.username!}
-                                                showFallback
-                                            />
-                                        </div>
+                    <div className="space-y-4">
+                        {isDraftAmpsLoading ? (
+                            <AmpLoadSkeleton />
+                        ) : draftAmps.length > 0 ? (
+                            <>
+                                {draftAmps.map((amp, i) =>
+                                    i === draftAmps.length - 1 ? (
+                                        <div
+                                            key={amp.id}
+                                            className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
+                                            ref={draftRef}
+                                        >
+                                            <div>
+                                                <Avatar
+                                                    src={user.imageUrl}
+                                                    alt={user.username!}
+                                                    showFallback
+                                                />
+                                            </div>
 
-                                        <AmpContent amp={amp} user={user} />
+                                            <AmpContent amp={amp} user={user} />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            key={amp.id}
+                                            className="flex gap-4 border-b border-black/30 p-4 px-2 dark:border-white/20"
+                                        >
+                                            <div>
+                                                <Avatar
+                                                    src={user.imageUrl}
+                                                    alt={user.username!}
+                                                    showFallback
+                                                />
+                                            </div>
+
+                                            <AmpContent amp={amp} user={user} />
+                                        </div>
+                                    )
+                                )}
+
+                                {isFetchingNextDraftAmpsPage && (
+                                    <div className="flex justify-center">
+                                        <Spinner />
                                     </div>
-                                ))}
-                        </div>
-                    ) : (
-                        <div className="p-5 text-center opacity-60">
-                            <p className="text-sm md:text-base">
-                                You don&apos;t have any drafts yet
-                            </p>
-                        </div>
-                    )}
+                                )}
+
+                                {!isFetchingNextDraftAmpsPage &&
+                                    draftAmpsRaw?.pages.length &&
+                                    !draftAmpsRaw.pages[
+                                        draftAmpsRaw.pages.length - 1
+                                    ].nextCursor && (
+                                        <div className="text-center opacity-60">
+                                            <p className="text-sm md:text-base">
+                                                No more amps to load
+                                            </p>
+                                        </div>
+                                    )}
+                            </>
+                        ) : (
+                            <div className="p-5 text-center opacity-60">
+                                <p className="text-sm md:text-base">
+                                    You don&apos;t have any drafts yet
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </Tab>
 
                 <Tab key="saved" title="Saved">

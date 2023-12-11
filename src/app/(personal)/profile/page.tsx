@@ -1,13 +1,9 @@
-import ProfileFetch from "@/src/components/profile/profile-fetch";
-import ProfileInfoSkeleton from "@/src/components/profile/skeletons/profile-info-skeleton";
-import { Suspense } from "react";
+import UserFetch from "@/src/components/profile/user-fetch";
 
 function Page() {
     return (
         <section className="flex w-full flex-col items-center">
-            <Suspense fallback={<ProfileInfoSkeleton />}>
-                <ProfileFetch />
-            </Suspense>
+            <UserFetch />
         </section>
     );
 }
