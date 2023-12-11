@@ -6,6 +6,7 @@ import { Status, Visibility } from "@/src/lib/validation/amp";
 import {
     Avatar,
     Button,
+    Link,
     Modal,
     ModalBody,
     ModalContent,
@@ -19,7 +20,6 @@ import {
 import { EmojiStyle, Theme } from "emoji-picker-react";
 import { LucideIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Icons } from "../../icons/icons";
@@ -47,8 +47,6 @@ function CreateAmpModal({
     username,
     firstName,
 }: PageProps) {
-    const router = useRouter();
-
     const [visibility, setVisibility] = useState<Selection>(
         new Set(["everyone"])
     );
@@ -106,14 +104,29 @@ function CreateAmpModal({
             setVisibility(new Set(["everyone"]));
             setIsEmojiPickerOpen(false);
         },
-        onSuccess: (_, { status }: { status: Status }) => {
-            toast.success(
-                status === "draft"
-                    ? "Your amp has been saved"
-                    : "Your amp has been posted"
-            );
-
-            router.refresh();
+        onSuccess: (data, { status }: { status: Status }) => {
+            status === "draft"
+                ? toast.success("Your amp has been saved")
+                : toast.success(
+                      (t) => (
+                          <span>
+                              Your Amp is now live at{" "}
+                              <Link
+                                  underline="always"
+                                  href={
+                                      "/amps?uId=" + userId + "&aId=" + data.id
+                                  }
+                                  onPress={() => toast.dismiss(t.id)}
+                              >
+                                  here
+                              </Link>
+                              {"!"}
+                          </span>
+                      ),
+                      {
+                          duration: 10000,
+                      }
+                  );
         },
         onError: (err) => {
             handleClientError(err);

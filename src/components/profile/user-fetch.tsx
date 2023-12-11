@@ -1,29 +1,27 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
+import { trpc } from "@/src/lib/trpc/client";
 import { DefaultProps } from "@/src/types";
 import { useUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import ProfilePage from "./profile-page";
 import ProfileInfoSkeleton from "./skeletons/profile-info-skeleton";
 
-interface PageProps extends DefaultProps {
-    amps: Amp[];
-    ampCount: number;
-}
-
-function UserFetch({ className, amps, ampCount, ...props }: PageProps) {
+function UserFetch({ className, ...props }: DefaultProps) {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return <ProfileInfoSkeleton />;
     if (!user) redirect("/signin");
+
+    const { data } = trpc.amp.getAmpCount.useQuery({
+        creatorId: user.id,
+    });
 
     return (
         <ProfilePage
             user={user}
             className={className}
-            amps={amps}
             {...props}
-            ampCount={ampCount}
+            ampCount={data ?? 0}
         />
     );
 }

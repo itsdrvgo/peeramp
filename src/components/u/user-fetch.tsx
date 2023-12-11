@@ -1,10 +1,9 @@
 import { db } from "@/src/lib/drizzle";
-import { amps, users } from "@/src/lib/drizzle/schema";
-import { getUserFromCache } from "@/src/lib/redis/methods/user";
-import { cachedUserWithoutEmailSchema } from "@/src/lib/validation/user";
+import { users } from "@/src/lib/drizzle/schema";
+import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
-import { and, desc, eq, sql } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { eq } from "drizzle-orm";
+import NoUserPage from "../global/404/no-user-page";
 import UserPage from "./user-page";
 
 interface PageProps extends DefaultProps {
@@ -16,40 +15,35 @@ interface PageProps extends DefaultProps {
 async function UserFetch({ params, className, ...props }: PageProps) {
     const { username } = params;
 
-    const targetFromDB = await db.query.users.findFirst({
+    const dbTarget = await db.query.users.findFirst({
         where: eq(users.username, username),
+        with: {
+            details: true,
+        },
     });
-    if (!targetFromDB) notFound();
+    if (!dbTarget) return <NoUserPage />;
 
-    const target = await getUserFromCache(targetFromDB.id);
-    if (!target) notFound();
+    const target: CachedUserWithoutEmail = {
+        id: dbTarget.id,
+        username: dbTarget.username,
+        createdAt: dbTarget.createdAt.toISOString(),
+        gender: dbTarget.details.gender,
+        bio: dbTarget.details.bio,
+        category: dbTarget.details.category,
+        education: dbTarget.details.education,
+        firstName: dbTarget.firstName,
+        lastName: dbTarget.lastName,
+        image: dbTarget.image,
+        isVerified: dbTarget.details.isVerified,
+        resume: dbTarget.details.resume,
+        score: dbTarget.details.score,
+        socials: dbTarget.details.socials,
+        type: dbTarget.details.type,
+        updatedAt: dbTarget.updatedAt.toISOString(),
+        usernameChangedAt: dbTarget.details.usernameChangedAt.toISOString(),
+    };
 
-    const parsedTarget = cachedUserWithoutEmailSchema.parse(target);
-
-    const data = await db.query.amps.findMany({
-        limit: 10,
-        where: eq(amps.creatorId, target.id),
-        orderBy: [desc(amps.createdAt)],
-    });
-
-    const allAmps = await db
-        .select({
-            count: sql`COUNT(*)`,
-        })
-        .from(amps)
-        .where(
-            and(eq(amps.creatorId, target.id), eq(amps.status, "published"))
-        );
-
-    return (
-        <UserPage
-            amps={data}
-            target={parsedTarget}
-            ampCount={Number(allAmps[0].count)}
-            className={className}
-            {...props}
-        />
-    );
+    return <UserPage target={target} className={className} {...props} />;
 }
 
 export default UserFetch;

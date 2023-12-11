@@ -1,6 +1,6 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
+import { trpc } from "@/src/lib/trpc/client";
 import { cn } from "@/src/lib/utils";
 import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
@@ -13,15 +13,17 @@ import UserInfo from "./user-info";
 
 interface PageProps extends DefaultProps {
     target: CachedUserWithoutEmail;
-    amps: Amp[];
-    ampCount: number;
 }
 
-function UserPage({ target, amps, ampCount, className, ...props }: PageProps) {
+function UserPage({ target, className, ...props }: PageProps) {
     const { user, isLoaded } = useUser();
     if (!isLoaded) return <UserPageSkeleton />;
 
     if (target.id === user?.id) redirect("/profile");
+
+    const { data } = trpc.amp.getAmpCount.useQuery({
+        creatorId: target.id,
+    });
 
     return (
         <div
@@ -31,9 +33,9 @@ function UserPage({ target, amps, ampCount, className, ...props }: PageProps) {
             )}
             {...props}
         >
-            <UserInfo ampCount={ampCount} target={target} />
+            <UserInfo ampCount={data ?? 0} target={target} />
             <Divider />
-            <UserAmps amps={amps} target={target} />
+            <UserAmps target={target} />
         </div>
     );
 }

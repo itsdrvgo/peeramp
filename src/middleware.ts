@@ -11,7 +11,7 @@ export default authMiddleware({
         "/api/trpc(.*)",
         "/u(.*)",
     ],
-    afterAuth: async (auth, req) => {
+    afterAuth: (auth, req) => {
         const url = new URL(req.nextUrl.origin);
 
         if (auth.isPublicRoute) {
