@@ -4,7 +4,11 @@ import { withCursorPagination } from "drizzle-pagination";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { amps } from "../../drizzle/schema";
-import { statusSchema, visibilitySchema } from "../../validation/amp";
+import {
+    ampMetadataSchema,
+    statusSchema,
+    visibilitySchema,
+} from "../../validation/amp";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const ampRouter = createTRPCRouter({
@@ -146,6 +150,7 @@ export const ampRouter = createTRPCRouter({
                 content: z.string(),
                 visibility: visibilitySchema,
                 status: statusSchema,
+                metadata: ampMetadataSchema,
             })
         )
         .use(({ input, ctx, next }) => {
@@ -162,7 +167,7 @@ export const ampRouter = createTRPCRouter({
         .mutation(async ({ input, ctx }) => {
             const id = nanoid();
 
-            const { creatorId, content, visibility, status } = input;
+            const { creatorId, content, visibility, status, metadata } = input;
 
             await ctx.db.insert(amps).values({
                 id,
@@ -171,6 +176,7 @@ export const ampRouter = createTRPCRouter({
                 visibility,
                 status,
                 publishedAt: status === "published" ? new Date() : null,
+                metadata,
             });
 
             return { id };
