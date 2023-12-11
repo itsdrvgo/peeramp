@@ -18,8 +18,8 @@ import {
     useDisclosure,
 } from "@nextui-org/react";
 import NextLink from "next/link";
+import ImageViewModal from "../global/modals/image-view-modal";
 import { Icons } from "../icons/icons";
-import ImageViewModal from "../profile/modals/image-view-modal";
 import MoreSocialModal from "../profile/modals/more-social-modal";
 
 interface PageProps extends DefaultProps {
