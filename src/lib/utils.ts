@@ -349,3 +349,16 @@ export function convertSizeIntoRawBytes(
         return sizeNumber * Math.pow(1024, i);
     }
 }
+
+export function extractYTVideoId(url: string) {
+    const urlObj = new URL(url);
+    const params = new URLSearchParams(urlObj.search);
+
+    return params.get("v");
+}
+
+export function isYouTubeVideo(url: string) {
+    const regex =
+        /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    return regex.test(url);
+}

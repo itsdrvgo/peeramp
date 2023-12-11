@@ -1,11 +1,17 @@
 "use client";
 
 import { trpc } from "@/src/lib/trpc/client";
-import { handleClientError } from "@/src/lib/utils";
+import {
+    cn,
+    extractYTVideoId,
+    handleClientError,
+    isYouTubeVideo,
+} from "@/src/lib/utils";
 import { Status, Visibility } from "@/src/lib/validation/amp";
 import {
     Avatar,
     Button,
+    Image,
     Link,
     Modal,
     ModalBody,
@@ -15,14 +21,18 @@ import {
     Select,
     Selection,
     SelectItem,
+    Spinner,
     Textarea,
 } from "@nextui-org/react";
 import { EmojiStyle, Theme } from "emoji-picker-react";
 import { LucideIcon } from "lucide-react";
+import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import { Icons } from "../../icons/icons";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
 const DynamicEmojiPicker = dynamic(() => import("emoji-picker-react"), {
     ssr: false,
@@ -54,9 +64,19 @@ function CreateAmpModal({
     const [Icon, setIcon] = useState<LucideIcon>(Icons.globe);
     const [text, setText] = useState("");
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+    const [link, setLink] = useState("");
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setLink(text.match(/https?:\/\/[^\s]+/g)?.[0] ?? "");
+    }, [text]);
+
+    const { data: linkPreview, isLoading: isLinkLoading } =
+        trpc.link.getMetadata.useQuery({
+            link,
+        });
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -224,6 +244,78 @@ function CreateAmpModal({
                                 ref={textareaRef}
                             />
 
+                            {isLinkLoading ? (
+                                <div className="flex justify-center py-2">
+                                    <Spinner size="sm" />
+                                </div>
+                            ) : (
+                                linkPreview &&
+                                Object.keys(linkPreview).length > 0 && (
+                                    <div
+                                        className={cn(
+                                            "rounded-xl bg-default-100 p-1",
+                                            linkPreview.image
+                                                ? "space-y-2 pb-3"
+                                                : "space-y-0 px-2 py-3"
+                                        )}
+                                    >
+                                        {isYouTubeVideo(linkPreview.url) ? (
+                                            <div className="overflow-hidden rounded-lg">
+                                                <LiteYouTubeEmbed
+                                                    id={
+                                                        extractYTVideoId(
+                                                            linkPreview.url
+                                                        ) ?? ""
+                                                    }
+                                                    title={
+                                                        linkPreview.title ??
+                                                        "video_" + nanoid()
+                                                    }
+                                                />
+                                            </div>
+                                        ) : (
+                                            linkPreview.image && (
+                                                <div>
+                                                    <Image
+                                                        radius="sm"
+                                                        src={linkPreview.image}
+                                                        alt={
+                                                            linkPreview.title ??
+                                                            "image_" + nanoid()
+                                                        }
+                                                    />
+                                                </div>
+                                            )
+                                        )}
+
+                                        <div className="px-1">
+                                            {linkPreview.title && (
+                                                <p className="font-semibold">
+                                                    {linkPreview.title.length >
+                                                    100
+                                                        ? linkPreview.title.slice(
+                                                              0,
+                                                              100
+                                                          ) + "..."
+                                                        : linkPreview.title}
+                                                </p>
+                                            )}
+                                            {linkPreview.description && (
+                                                <p className="text-sm opacity-60">
+                                                    {linkPreview.description
+                                                        .length > 100
+                                                        ? linkPreview.description.slice(
+                                                              0,
+                                                              100
+                                                          ) + "..."
+                                                        : linkPreview.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            )}
+
                             <div className="flex items-center gap-2">
                                 <p className="text-sm">
                                     Who can see this post?
@@ -267,6 +359,7 @@ function CreateAmpModal({
                                         visibility: Array.from(
                                             visibility
                                         ).toString() as Visibility,
+                                        metadata: linkPreview ?? null,
                                     })
                                 }
                             >
@@ -285,6 +378,7 @@ function CreateAmpModal({
                                         visibility: Array.from(
                                             visibility
                                         ).toString() as Visibility,
+                                        metadata: linkPreview ?? null,
                                     })
                                 }
                             >

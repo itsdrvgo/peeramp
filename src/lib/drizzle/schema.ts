@@ -10,7 +10,7 @@ import {
     uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { Status, Visibility } from "../validation/amp";
+import { AmpMetadata, Status, Visibility } from "../validation/amp";
 import {
     Education,
     Resume,
@@ -106,6 +106,7 @@ export const amps = pgTable(
             .$type<Visibility>(),
         score: text("score").notNull().default("0"),
         pinned: boolean("pinned").notNull().default(false),
+        metadata: jsonb("metadata").default(null).$type<AmpMetadata>(),
         createdAt: timestamp("created_at", { withTimezone: true })
             .notNull()
             .defaultNow(),
