@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Button, Divider, useDisclosure } from "@nextui-org/react";
-import CreateAmpModal from "../global/modals/create-amp-modal";
+import ManageAmpModal from "../global/modals/manage-amp-modal";
 import { Icons } from "../icons/icons";
 
 interface CardProps {
@@ -42,7 +42,7 @@ function CreateAmpCard({ image, username, firstName, userId }: CardProps) {
                 </div>
             </div>
 
-            <CreateAmpModal
+            <ManageAmpModal
                 isOpen={isOpen}
                 onClose={onClose}
                 onOpenChange={onOpenChange}

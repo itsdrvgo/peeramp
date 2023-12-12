@@ -188,6 +188,7 @@ export const ampRouter = createTRPCRouter({
                 creatorId: z.string(),
                 content: z.string(),
                 visibility: visibilitySchema,
+                metadata: ampMetadataSchema,
             })
         )
         .use(({ input, ctx, next }) => {
@@ -202,7 +203,7 @@ export const ampRouter = createTRPCRouter({
             });
         })
         .mutation(async ({ input, ctx }) => {
-            const { ampId, creatorId, content, visibility } = input;
+            const { ampId, creatorId, content, visibility, metadata } = input;
 
             const amp = await ctx.db.query.amps.findFirst({
                 where: and(eq(amps.id, ampId), eq(amps.creatorId, creatorId)),
@@ -219,6 +220,7 @@ export const ampRouter = createTRPCRouter({
                 .set({
                     content,
                     visibility,
+                    metadata,
                     updatedAt: new Date(),
                 })
                 .where(eq(amps.id, ampId));

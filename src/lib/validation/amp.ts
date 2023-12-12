@@ -15,6 +15,7 @@ export const ampMetadataSchema = z
         description: z.string().nullable().optional(),
         image: z.string().nullable().optional(),
         url: z.string(),
+        isVisible: z.boolean().default(true).optional(),
     })
     .nullable();
 

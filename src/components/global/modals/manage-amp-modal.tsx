@@ -33,6 +33,7 @@ import toast from "react-hot-toast";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import { Icons } from "../../icons/icons";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+import { Amp } from "@/src/lib/drizzle/schema";
 
 const DynamicEmojiPicker = dynamic(() => import("emoji-picker-react"), {
     ssr: false,
@@ -46,9 +47,10 @@ interface PageProps {
     onClose: () => void;
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    amp?: Amp;
 }
 
-function CreateAmpModal({
+function ManageAmpModal({
     onClose,
     isOpen,
     onOpenChange,
@@ -56,21 +58,32 @@ function CreateAmpModal({
     image,
     username,
     firstName,
+    amp,
 }: PageProps) {
     const [visibility, setVisibility] = useState<Selection>(
-        new Set(["everyone"])
+        new Set([amp?.visibility ?? "everyone"])
     );
     const [iconString, setIconString] = useState<keyof typeof Icons>("globe");
     const [Icon, setIcon] = useState<LucideIcon>(Icons.globe);
-    const [text, setText] = useState("");
+    const [text, setText] = useState(amp?.content ?? "");
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
     const [link, setLink] = useState("");
+    const [isPreviewVisible, setIsPreviewVisible] = useState(
+        amp?.metadata?.isVisible ?? true
+    );
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        setLink(text.match(/https?:\/\/[^\s]+/g)?.[0] ?? "");
+        const isLink = text.match(/https?:\/\/[^\s]+/g);
+        if (isLink) {
+            setLink(isLink[0]);
+            setIsPreviewVisible(true);
+        } else {
+            setLink("");
+            setIsPreviewVisible(false);
+        }
     }, [text]);
 
     const { data: linkPreview, isLoading: isLinkLoading } =
@@ -153,6 +166,45 @@ function CreateAmpModal({
         },
     });
 
+    const { mutate: handleEditAmp } = trpc.amp.editAmp.useMutation({
+        onMutate: () => {
+            toast.success("Amp will be edited shortly");
+            onClose();
+        },
+        onSuccess: () => {
+            amp
+                ? amp.status === "draft"
+                    ? toast.success("Your amp has been edited")
+                    : toast.success(
+                          (t) => (
+                              <span>
+                                  Your Amp is now live at{" "}
+                                  <Link
+                                      underline="always"
+                                      href={
+                                          "/amps?uId=" +
+                                          amp.creatorId +
+                                          "&aId=" +
+                                          amp.id
+                                      }
+                                      onPress={() => toast.dismiss(t.id)}
+                                  >
+                                      here
+                                  </Link>
+                                  {"!"}
+                              </span>
+                          ),
+                          {
+                              duration: 10000,
+                          }
+                      )
+                : toast.success("Your amp has been edited");
+        },
+        onError: (err) => {
+            handleClientError(err);
+        },
+    });
+
     return (
         <Modal
             isOpen={isOpen}
@@ -165,9 +217,11 @@ function CreateAmpModal({
             placement="center"
         >
             <ModalContent>
-                {() => (
+                {(close) => (
                     <>
-                        <ModalHeader>Create Post</ModalHeader>
+                        <ModalHeader>
+                            {amp ? "Edit Amp" : "Create Amp"}
+                        </ModalHeader>
 
                         <ModalBody>
                             <div className="flex items-center justify-between gap-4">
@@ -250,10 +304,11 @@ function CreateAmpModal({
                                 </div>
                             ) : (
                                 linkPreview &&
-                                Object.keys(linkPreview).length > 0 && (
+                                Object.keys(linkPreview).length > 0 &&
+                                (isPreviewVisible ? (
                                     <div
                                         className={cn(
-                                            "rounded-xl bg-default-100 p-1",
+                                            "relative rounded-xl bg-default-100 p-1",
                                             linkPreview.image
                                                 ? "space-y-2 pb-3"
                                                 : "space-y-0 px-2 py-3"
@@ -312,8 +367,40 @@ function CreateAmpModal({
                                                 </p>
                                             )}
                                         </div>
+
+                                        <div className="absolute right-2 top-0 z-10">
+                                            <Button
+                                                isIconOnly
+                                                radius="full"
+                                                size="sm"
+                                                variant="shadow"
+                                                className="h-6 w-6 min-w-0"
+                                                startContent={
+                                                    <Icons.close className="h-[14px] w-[14px]" />
+                                                }
+                                                onPress={() =>
+                                                    setIsPreviewVisible(false)
+                                                }
+                                            />
+                                        </div>
                                     </div>
-                                )
+                                ) : (
+                                    <div className="flex items-center justify-between gap-2 rounded-xl bg-default-100 p-2">
+                                        <p className="text-sm opacity-80">
+                                            Link preview has been disabled
+                                        </p>
+                                        <Button
+                                            size="sm"
+                                            color="primary"
+                                            className="font-semibold text-white dark:text-black"
+                                            onPress={() =>
+                                                setIsPreviewVisible(true)
+                                            }
+                                        >
+                                            Show
+                                        </Button>
+                                    </div>
+                                ))
                             )}
 
                             <div className="flex items-center gap-2">
@@ -352,18 +439,36 @@ function CreateAmpModal({
                                 className="font-semibold"
                                 isDisabled={!text}
                                 onPress={() =>
-                                    handleCreateAmp({
-                                        status: "draft",
-                                        content: text,
-                                        creatorId: userId,
-                                        visibility: Array.from(
-                                            visibility
-                                        ).toString() as Visibility,
-                                        metadata: linkPreview ?? null,
-                                    })
+                                    amp
+                                        ? close()
+                                        : handleCreateAmp({
+                                              status: "draft",
+                                              content: text,
+                                              creatorId: userId,
+                                              visibility: Array.from(
+                                                  visibility
+                                              ).toString() as Visibility,
+                                              metadata:
+                                                  {
+                                                      title:
+                                                          linkPreview?.title ??
+                                                          null,
+                                                      description:
+                                                          linkPreview?.description ??
+                                                          null,
+                                                      image:
+                                                          linkPreview?.image ??
+                                                          null,
+                                                      url:
+                                                          linkPreview?.url ??
+                                                          "",
+                                                      isVisible:
+                                                          isPreviewVisible,
+                                                  } ?? null,
+                                          })
                                 }
                             >
-                                Save as Draft
+                                {amp ? "Cancel" : "Save as Draft"}
                             </Button>
                             <Button
                                 className="font-semibold dark:text-black"
@@ -371,18 +476,60 @@ function CreateAmpModal({
                                 color="primary"
                                 radius="sm"
                                 onPress={() =>
-                                    handleCreateAmp({
-                                        status: "published",
-                                        content: text,
-                                        creatorId: userId,
-                                        visibility: Array.from(
-                                            visibility
-                                        ).toString() as Visibility,
-                                        metadata: linkPreview ?? null,
-                                    })
+                                    amp
+                                        ? handleEditAmp({
+                                              ampId: amp.id,
+                                              content: text,
+                                              creatorId: amp.creatorId,
+                                              visibility: Array.from(
+                                                  visibility
+                                              ).toString() as Visibility,
+                                              metadata:
+                                                  {
+                                                      title:
+                                                          linkPreview?.title ??
+                                                          null,
+                                                      description:
+                                                          linkPreview?.description ??
+                                                          null,
+                                                      image:
+                                                          linkPreview?.image ??
+                                                          null,
+                                                      url:
+                                                          linkPreview?.url ??
+                                                          "",
+                                                      isVisible:
+                                                          isPreviewVisible,
+                                                  } ?? null,
+                                          })
+                                        : handleCreateAmp({
+                                              status: "published",
+                                              content: text,
+                                              creatorId: userId,
+                                              visibility: Array.from(
+                                                  visibility
+                                              ).toString() as Visibility,
+                                              metadata:
+                                                  {
+                                                      title:
+                                                          linkPreview?.title ??
+                                                          null,
+                                                      description:
+                                                          linkPreview?.description ??
+                                                          null,
+                                                      image:
+                                                          linkPreview?.image ??
+                                                          null,
+                                                      url:
+                                                          linkPreview?.url ??
+                                                          "",
+                                                      isVisible:
+                                                          isPreviewVisible,
+                                                  } ?? null,
+                                          })
                                 }
                             >
-                                Post
+                                {amp ? "Edit" : "Post"}
                             </Button>
                         </ModalFooter>
                     </>
@@ -392,4 +539,4 @@ function CreateAmpModal({
     );
 }
 
-export default CreateAmpModal;
+export default ManageAmpModal;

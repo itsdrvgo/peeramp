@@ -58,77 +58,81 @@ function AmpContent({ amp, user, className, ...props }: PageProps) {
                         ))}
                     </p>
 
-                    {amp.metadata && Object.keys(amp.metadata).length > 0 && (
-                        <div
-                            className={cn(
-                                "rounded-xl bg-secondary-100 p-2",
-                                amp.metadata.image
-                                    ? "space-y-2 pb-3"
-                                    : "space-y-0 px-2 py-3"
-                            )}
-                        >
-                            {isYouTubeVideo(amp.metadata.url) ? (
-                                <div className="overflow-hidden rounded-lg">
-                                    <LiteYouTubeEmbed
-                                        id={
-                                            extractYTVideoId(
-                                                amp.metadata.url
-                                            ) ?? ""
-                                        }
-                                        title={
-                                            amp.metadata.title ??
-                                            "video_" + nanoid()
-                                        }
-                                    />
-                                </div>
-                            ) : (
-                                amp.metadata.image && (
-                                    <div>
-                                        <button onClick={onOpen}>
-                                            <Image
-                                                radius="sm"
-                                                src={amp.metadata.image}
-                                                alt={
-                                                    amp.metadata.title ??
-                                                    "image_" + nanoid()
-                                                }
-                                            />
-                                        </button>
+                    {amp.metadata &&
+                        Object.keys(amp.metadata).length > 0 &&
+                        amp.metadata.isVisible && (
+                            <div
+                                className={cn(
+                                    "rounded-xl bg-secondary-100 p-2",
+                                    amp.metadata.image
+                                        ? "space-y-2 pb-3"
+                                        : "space-y-0 px-2 py-3"
+                                )}
+                            >
+                                {isYouTubeVideo(amp.metadata.url) ? (
+                                    <div className="overflow-hidden rounded-lg">
+                                        <LiteYouTubeEmbed
+                                            id={
+                                                extractYTVideoId(
+                                                    amp.metadata.url
+                                                ) ?? ""
+                                            }
+                                            title={
+                                                amp.metadata.title ??
+                                                "video_" + nanoid()
+                                            }
+                                        />
                                     </div>
-                                )
-                            )}
+                                ) : (
+                                    amp.metadata.image && (
+                                        <div>
+                                            <button onClick={onOpen}>
+                                                <Image
+                                                    radius="sm"
+                                                    src={amp.metadata.image}
+                                                    alt={
+                                                        amp.metadata.title ??
+                                                        "image_" + nanoid()
+                                                    }
+                                                />
+                                            </button>
+                                        </div>
+                                    )
+                                )}
 
-                            <div className="space-y-1 px-1">
-                                {amp.metadata.title && amp.metadata.url && (
-                                    <Link
-                                        className="font-semibold text-default-50 dark:text-primary"
-                                        href={amp.metadata.url}
-                                        underline="hover"
-                                        isExternal
-                                    >
-                                        {amp.metadata.title
-                                            ? amp.metadata.title.length > 100
-                                                ? amp.metadata.title.slice(
+                                <div className="space-y-1 px-1">
+                                    {amp.metadata.title && amp.metadata.url && (
+                                        <Link
+                                            className="font-semibold text-default-50 dark:text-primary"
+                                            href={amp.metadata.url}
+                                            underline="hover"
+                                            isExternal
+                                        >
+                                            {amp.metadata.title
+                                                ? amp.metadata.title.length >
+                                                  100
+                                                    ? amp.metadata.title.slice(
+                                                          0,
+                                                          100
+                                                      ) + "..."
+                                                    : amp.metadata.title
+                                                : amp.metadata.url}
+                                        </Link>
+                                    )}
+                                    {amp.metadata.description && (
+                                        <p className="text-sm text-white/60">
+                                            {amp.metadata.description.length >
+                                            100
+                                                ? amp.metadata.description.slice(
                                                       0,
                                                       100
                                                   ) + "..."
-                                                : amp.metadata.title
-                                            : amp.metadata.url}
-                                    </Link>
-                                )}
-                                {amp.metadata.description && (
-                                    <p className="text-sm text-white/60">
-                                        {amp.metadata.description.length > 100
-                                            ? amp.metadata.description.slice(
-                                                  0,
-                                                  100
-                                              ) + "..."
-                                            : amp.metadata.description}
-                                    </p>
-                                )}
+                                                : amp.metadata.description}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
                 </div>
 
                 <AmpAccessoryButtons amp={amp} />

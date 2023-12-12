@@ -4,7 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { useDisclosure } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { Icons } from "../../icons/icons";
-import CreateAmpModal from "../modals/create-amp-modal";
+import ManageAmpModal from "../modals/manage-amp-modal";
 
 function AmpCreateTab() {
     const { user, isLoaded } = useUser();
@@ -47,7 +47,7 @@ function AmpCreateTab() {
                 <p className="hidden md:block">Create</p>
             </button>
 
-            <CreateAmpModal
+            <ManageAmpModal
                 isOpen={isOpen}
                 onClose={onClose}
                 onOpenChange={onOpenChange}

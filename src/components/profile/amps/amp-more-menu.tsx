@@ -16,9 +16,9 @@ import {
 } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import ManageAmpModal from "../../global/modals/manage-amp-modal";
 import { Icons } from "../../icons/icons";
 import DeleteAmpModal from "./modals/delete-amp-modal";
-import EditAmpModal from "./modals/edit-amp-modal";
 import PublishAmpModal from "./modals/publish-amp-modal";
 
 interface PageProps extends DefaultProps {
@@ -164,9 +164,12 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                 </Dropdown>
             </div>
 
-            <EditAmpModal
+            <ManageAmpModal
                 amp={amp}
-                user={user}
+                firstName={user.firstName!}
+                image={user.imageUrl}
+                userId={user.id}
+                username={user.username!}
                 isOpen={isEditModalOpen}
                 onClose={onEditModalClose}
                 onOpenChange={onEditModalOpenChange}
