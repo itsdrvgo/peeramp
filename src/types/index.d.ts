@@ -49,26 +49,6 @@ export type AsideNavItem = {
 
 export type MenuConfig = NavItem[];
 
-export const ResponseMessagesEnum = {
-    OK: "OK",
-    ERROR: "ERROR",
-    UNAUTHORIZED: "UNAUTHORIZED",
-    FORBIDDEN: "FORBIDDEN",
-    NOT_FOUND: "NOT_FOUND",
-    BAD_REQUEST: "BAD_REQUEST",
-    TOO_MANY_REQUESTS: "TOO_MANY_REQUESTS",
-    INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
-    SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
-    GATEWAY_TIMEOUT: "GATEWAY_TIMEOUT",
-    UNKNOWN_ERROR: "UNKNOWN_ERROR",
-    UNPROCESSABLE_ENTITY: "UNPROCESSABLE_ENTITY",
-    NOT_IMPLEMENTED: "NOT_IMPLEMENTED",
-    CREATED: "CREATED",
-    BAD_GATEWAY: "BAD_GATEWAY",
-};
-
-export type ResponseMessages = keyof typeof ResponseMessagesEnum;
-
 export type CategoryProps = {
     label: string;
     value: string;
@@ -82,9 +62,21 @@ declare global {
         gender: UserGenderType;
         socials: UserSocial[];
         isVerified: boolean;
-        score: string;
         resume: Resume | null;
         education: Education[];
         usernameChangedAt: number;
     }
+
+    interface ExtendedFile {
+        id: string;
+        url: string;
+        file: File;
+    }
 }
+
+export type UploadFileResponse = {
+    key: string;
+    url: string;
+    name: string;
+    size: number;
+};
