@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { amps } from "../../drizzle/schema";
 import {
+    ampAttachmentSchema,
     ampMetadataSchema,
     statusSchema,
     visibilitySchema,
@@ -151,6 +152,7 @@ export const ampRouter = createTRPCRouter({
                 visibility: visibilitySchema,
                 status: statusSchema,
                 metadata: ampMetadataSchema,
+                attachments: z.array(ampAttachmentSchema).nullable(),
             })
         )
         .use(({ input, ctx, next }) => {
@@ -167,7 +169,14 @@ export const ampRouter = createTRPCRouter({
         .mutation(async ({ input, ctx }) => {
             const id = nanoid();
 
-            const { creatorId, content, visibility, status, metadata } = input;
+            const {
+                creatorId,
+                content,
+                visibility,
+                status,
+                metadata,
+                attachments,
+            } = input;
 
             await ctx.db.insert(amps).values({
                 id,
@@ -177,6 +186,7 @@ export const ampRouter = createTRPCRouter({
                 status,
                 publishedAt: status === "published" ? new Date() : null,
                 metadata,
+                attachments,
             });
 
             return { id };

@@ -25,7 +25,6 @@ async function getCachableUser(userId: string) {
         socials: user.publicMetadata.socials,
         isVerified: user.publicMetadata.isVerified,
         education: user.publicMetadata.education,
-        score: user.publicMetadata.score,
         resume: user.publicMetadata.resume,
         createdAt: new Date(user.createdAt).toISOString(),
         updatedAt: new Date(user.updatedAt).toISOString(),

@@ -77,6 +77,41 @@ export const userRouter = createTRPCRouter({
 
             return { id: userId };
         }),
+    deleteResume: protectedProcedure
+        .input(
+            z.object({
+                userId: z.string(),
+                metadata: publicMetadataSchema,
+            })
+        )
+        .use(({ input, ctx, next }) => {
+            if (ctx.auth.userId !== input.userId)
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You're not authorized!",
+                });
+
+            return next({
+                ctx,
+            });
+        })
+        .mutation(async ({ input }) => {
+            const { userId, metadata } = input;
+
+            await clerkClient.users.updateUserMetadata(userId, {
+                publicMetadata: {
+                    ...metadata,
+                    resume: {
+                        key: "",
+                        name: "",
+                        size: 0,
+                        url: "",
+                    },
+                },
+            });
+
+            return { id: userId };
+        }),
     deleteUser: protectedProcedure
         .input(
             z.object({

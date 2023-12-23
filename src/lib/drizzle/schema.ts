@@ -10,7 +10,12 @@ import {
     uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { AmpMetadata, Status, Visibility } from "../validation/amp";
+import {
+    AmpAttachment,
+    AmpMetadata,
+    Status,
+    Visibility,
+} from "../validation/amp";
 import {
     Education,
     Resume,
@@ -73,7 +78,6 @@ export const userDetails = pgTable(
             .default([])
             .$type<Education[]>(),
         resume: jsonb("resume").default(null).$type<Resume>(),
-        score: text("score").notNull().default("0"),
         usernameChangedAt: timestamp("username_changed_at", {
             withTimezone: true,
         })
@@ -104,9 +108,11 @@ export const amps = pgTable(
             .notNull()
             .default("everyone")
             .$type<Visibility>(),
-        score: text("score").notNull().default("0"),
         pinned: boolean("pinned").notNull().default(false),
         metadata: jsonb("metadata").default(null).$type<AmpMetadata>(),
+        attachments: jsonb("attachments")
+            .default(null)
+            .$type<AmpAttachment[]>(),
         createdAt: timestamp("created_at", { withTimezone: true })
             .notNull()
             .defaultNow(),
