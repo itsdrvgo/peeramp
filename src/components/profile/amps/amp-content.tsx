@@ -11,12 +11,15 @@ import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { Image, Link, useDisclosure } from "@nextui-org/react";
 import { nanoid } from "nanoid";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+import NextImage from "next/image";
+import { BigPlayButton, Player } from "video-react";
 import ImageViewModal from "../../global/modals/image-view-modal";
 import { sanitizeContent } from "../../u/amps/amp-content";
 import AmpAccessoryButtons from "./amp-accessory-buttons";
 import AmpMoreMenu from "./amp-more-menu";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "video-react/dist/video-react.css";
 
 interface PageProps extends DefaultProps {
     amp: Amp;
@@ -133,6 +136,48 @@ function AmpContent({ amp, user, className, ...props }: PageProps) {
                                 </div>
                             </div>
                         )}
+
+                    {amp.attachments && amp.attachments.length > 0 && (
+                        <div
+                            className={cn(
+                                "grid grid-cols-2 gap-2",
+                                amp.attachments.length === 1 && "grid-cols-1",
+                                amp.attachments.length === 3 && "grid-cols-3"
+                            )}
+                        >
+                            {amp.attachments
+                                .filter(
+                                    (attachment) => attachment?.type === "image"
+                                )
+                                .map((attachment, index) => (
+                                    <Image
+                                        as={NextImage}
+                                        key={attachment?.id ?? index}
+                                        src={attachment?.url ?? ""}
+                                        alt={attachment?.name ?? ""}
+                                        radius="sm"
+                                        width={800}
+                                        height={800}
+                                        className="aspect-video object-cover"
+                                    />
+                                ))}
+
+                            {amp.attachments
+                                .filter(
+                                    (attachment) => attachment?.type === "video"
+                                )
+                                .map((attachment, index) => (
+                                    <Player
+                                        key={attachment?.id ?? index}
+                                        src={attachment?.url ?? ""}
+                                        aspectRatio="16:9"
+                                        muted={true}
+                                    >
+                                        <BigPlayButton position="center" />
+                                    </Player>
+                                ))}
+                        </div>
+                    )}
                 </div>
 
                 <AmpAccessoryButtons amp={amp} />

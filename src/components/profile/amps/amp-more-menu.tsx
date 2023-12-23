@@ -16,7 +16,7 @@ import {
 } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import ManageAmpModal from "../../global/modals/manage-amp-modal";
+import ManageAmpModal from "../../global/modals/amps/manage-amp-modal";
 import { Icons } from "../../icons/icons";
 import DeleteAmpModal from "./modals/delete-amp-modal";
 import PublishAmpModal from "./modals/publish-amp-modal";

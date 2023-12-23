@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Button, Divider, useDisclosure } from "@nextui-org/react";
-import ManageAmpModal from "../global/modals/manage-amp-modal";
+import ManageAmpModal from "../global/modals/amps/manage-amp-modal";
 import { Icons } from "../icons/icons";
 
 interface CardProps {
@@ -37,7 +37,17 @@ function CreateAmpCard({ image, username, firstName, userId }: CardProps) {
                 <Divider />
 
                 <div className="flex items-center gap-3 text-primary">
-                    <Icons.media className="h-5 w-5" />
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        startContent={
+                            <Icons.media className="h-5 w-5 text-primary" />
+                        }
+                        radius="full"
+                        onPress={onOpen}
+                    />
+
                     <Icons.smile className="h-5 w-5" />
                 </div>
             </div>

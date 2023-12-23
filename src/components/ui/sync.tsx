@@ -47,10 +47,6 @@ function SyncAccount({ user }: { user: UserResource }) {
                           size: 0,
                           url: "",
                       },
-            score:
-                "score" in user.publicMetadata
-                    ? user.publicMetadata.score
-                    : "0",
             education:
                 "education" in user.publicMetadata
                     ? user.publicMetadata.education
