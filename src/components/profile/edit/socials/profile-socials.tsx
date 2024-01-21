@@ -37,15 +37,13 @@ function ProfileSocials({ className, user, ...props }: PageProps) {
                         ))}
 
                     <Button
-                        className="h-auto w-auto gap-0 p-0 text-sm"
+                        size="sm"
+                        radius="full"
+                        className="size-auto gap-2 p-1 px-3 text-sm"
+                        startContent={<Icons.add className="size-4" />}
                         onPress={onAddModalOpen}
                     >
-                        <div className="border-r border-white/20 px-3 py-1 pr-2">
-                            <p>Add Connection</p>
-                        </div>
-                        <div className="p-1 px-2">
-                            <Icons.add className="h-4 w-4" />
-                        </div>
+                        Add Connection
                     </Button>
                 </div>
             </div>

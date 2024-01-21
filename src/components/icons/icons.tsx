@@ -131,11 +131,27 @@ import {
     ZoomIn,
     ZoomOut,
     type IconNode as LucideIcon,
+    Pause,
+    Play,
+    Shrink,
+    Expand,
+    Volume,
+    Volume1,
+    Volume2,
+    VolumeX,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
 
 export const Icons = {
+    volume: Volume,
+    volume1: Volume1,
+    volume2: Volume2,
+    volumeX: VolumeX,
+    exitFullscreen: Shrink,
+    enterFullscreen: Expand,
+    pause: Pause,
+    play: Play,
     crosshair: Crosshair,
     flipHor: FlipHorizontal,
     flipVert: FlipVertical,

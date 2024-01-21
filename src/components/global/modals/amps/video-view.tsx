@@ -1,12 +1,11 @@
 "use client";
 
 import { Icons } from "@/src/components/icons/icons";
+import Player from "@/src/components/ui/player";
 import { cn } from "@/src/lib/utils";
 import { DefaultProps } from "@/src/types";
 import { Button } from "@nextui-org/react";
 import { Dispatch, SetStateAction } from "react";
-import { BigPlayButton, Player } from "video-react";
-import "video-react/dist/video-react.css";
 
 interface PageProps extends DefaultProps {
     video: ExtendedFile;
@@ -28,13 +27,11 @@ function VideoView({
             {...props}
         >
             <Player
-                aspectRatio="16:9"
-                muted={true}
-                autoPlay={true}
-                src={video.url}
-            >
-                <BigPlayButton position="center" />
-            </Player>
+                source={{
+                    type: "default",
+                    url: video.url,
+                }}
+            />
 
             <div className="absolute right-1 top-1">
                 <Button
@@ -42,8 +39,8 @@ function VideoView({
                     radius="full"
                     size="sm"
                     variant="shadow"
-                    className="h-6 w-6 min-w-0"
-                    startContent={<Icons.close className="h-[14px] w-[14px]" />}
+                    className="size-6 min-w-0"
+                    startContent={<Icons.close className="size-[14px]" />}
                     onPress={() => setUploadedVideo(null)}
                 />
             </div>

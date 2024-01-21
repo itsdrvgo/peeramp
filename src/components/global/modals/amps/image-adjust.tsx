@@ -17,19 +17,29 @@ import {
     FixedCropperRef,
     ImageRestriction,
 } from "react-advanced-cropper";
+import "react-advanced-cropper/dist/style.css";
 
-interface PageProps extends DefaultProps {
-    imageFile: ExtendedFile;
+type FixedCropperProps = {
+    type: "fixed";
+    cropperRef: RefObject<FixedCropperRef>;
+    imageFile: ExtendedFile | null;
+    preset: Preset;
+};
+
+type NonFixedCropperProps = {
+    type: "non-fixed";
+    cropperRef: RefObject<FixedCropperRef>;
+    imageFile: ExtendedFile | null;
     preset: Preset;
     setPreset: Dispatch<SetStateAction<Preset>>;
-    cropperRef: RefObject<FixedCropperRef>;
-}
+};
+
+type PageProps = DefaultProps & (FixedCropperProps | NonFixedCropperProps);
 
 function ImageAdjust({
     className,
     imageFile,
     preset,
-    setPreset,
     cropperRef,
     ...props
 }: PageProps) {
@@ -38,7 +48,7 @@ function ImageAdjust({
             <FixedCropper
                 className="rounded-lg"
                 ref={cropperRef}
-                src={imageFile.url}
+                src={imageFile?.url}
                 stencilProps={{
                     handlers: false,
                     lines: false,
@@ -62,36 +72,38 @@ function ImageAdjust({
             />
 
             <div className="grid grid-flow-col justify-items-stretch gap-2">
-                <div className="flex justify-center">
-                    <Dropdown>
-                        <DropdownTrigger>
-                            <Button
-                                isIconOnly
-                                size="sm"
-                                radius="full"
-                                variant="light"
-                                startContent={
-                                    <Icons.fullscreen className="h-4 w-4" />
-                                }
-                            />
-                        </DropdownTrigger>
+                {props.type === "non-fixed" && (
+                    <div className="flex justify-center">
+                        <Dropdown>
+                            <DropdownTrigger>
+                                <Button
+                                    isIconOnly
+                                    size="sm"
+                                    radius="full"
+                                    variant="light"
+                                    startContent={
+                                        <Icons.fullscreen className="size-4" />
+                                    }
+                                />
+                            </DropdownTrigger>
 
-                        <DropdownMenu
-                            onAction={(key) =>
-                                setPreset(key.toString() as Preset)
-                            }
-                        >
-                            {presets._def.options.map((preset) => (
-                                <DropdownItem
-                                    key={preset.value}
-                                    className="capitalize"
-                                >
-                                    {preset.value}
-                                </DropdownItem>
-                            ))}
-                        </DropdownMenu>
-                    </Dropdown>
-                </div>
+                            <DropdownMenu
+                                onAction={(key) =>
+                                    props.setPreset(key.toString() as Preset)
+                                }
+                            >
+                                {presets._def.options.map((preset) => (
+                                    <DropdownItem
+                                        key={preset.value}
+                                        className="capitalize"
+                                    >
+                                        {preset.value}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                )}
 
                 <div className="flex justify-center">
                     <Button
@@ -100,7 +112,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.crosshair className="h-4 w-4" />}
+                        startContent={<Icons.crosshair className="size-4" />}
                         onPress={() => {
                             const defState =
                                 cropperRef.current?.getDefaultState()
@@ -118,7 +130,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.zoomIn className="h-4 w-4" />}
+                        startContent={<Icons.zoomIn className="size-4" />}
                         onPress={() => cropperRef.current?.zoomImage(1.1)}
                     />
                 </div>
@@ -130,7 +142,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.zoomOut className="h-4 w-4" />}
+                        startContent={<Icons.zoomOut className="size-4" />}
                         onPress={() => cropperRef.current?.zoomImage(0.9)}
                     />
                 </div>
@@ -142,7 +154,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.rotateCcw className="h-4 w-4" />}
+                        startContent={<Icons.rotateCcw className="size-4" />}
                         onPress={() => cropperRef.current?.rotateImage(-90)}
                     />
                 </div>
@@ -154,7 +166,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.rotateCw className="h-4 w-4" />}
+                        startContent={<Icons.rotateCw className="size-4" />}
                         onPress={() => cropperRef.current?.rotateImage(90)}
                     />
                 </div>
@@ -166,7 +178,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.flipHor className="h-4 w-4" />}
+                        startContent={<Icons.flipHor className="size-4" />}
                         onPress={() => cropperRef.current?.flipImage(true)}
                     />
                 </div>
@@ -178,7 +190,7 @@ function ImageAdjust({
                         radius="full"
                         variant="light"
                         isDisabled={!cropperRef.current}
-                        startContent={<Icons.flipVert className="h-4 w-4" />}
+                        startContent={<Icons.flipVert className="size-4" />}
                         onPress={() =>
                             cropperRef.current?.flipImage(false, true)
                         }

@@ -1,12 +1,34 @@
 import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { publicMetadataSchema, userEditSchema } from "../../validation/user";
+import { cachedUserSchema, publicMetadataSchema, userEditSchema } from "../../validation/user";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { userEducationRouter } from "./education";
 import { userSocialRouter } from "./social";
+import { getUserFromCache } from "../../redis/methods/user/user";
 
 export const userRouter = createTRPCRouter({
+    getUser: protectedProcedure
+        .input(
+            z.object({
+                userId: z.string(),
+            })
+        )
+        .query(async ({ input }) => {
+            const { userId } = input;
+
+            const user = await getUserFromCache(userId);
+            if (!user) return null;
+
+            const safeUser = cachedUserSchema.omit({
+                email: true,
+                createdAt: true,
+                updatedAt: true,
+                usernameChangedAt: true,
+            }).parse(user);
+
+            return safeUser;
+        }),
     updateUserMetadata: protectedProcedure
         .input(
             z.object({

@@ -41,9 +41,9 @@ function ImageView({
                                 radius="full"
                                 size="sm"
                                 variant="shadow"
-                                className="h-6 w-6 min-w-0"
+                                className="size-6 min-w-0"
                                 startContent={
-                                    <Icons.pencil className="h-[14px] w-[14px]" />
+                                    <Icons.pencil className="size-[14px]" />
                                 }
                                 onPress={() =>
                                     setEditingImage({
@@ -59,9 +59,9 @@ function ImageView({
                                 radius="full"
                                 size="sm"
                                 variant="shadow"
-                                className="h-6 w-6 min-w-0"
+                                className="size-6 min-w-0"
                                 startContent={
-                                    <Icons.close className="h-[14px] w-[14px]" />
+                                    <Icons.close className="size-[14px]" />
                                 }
                                 onPress={() => {
                                     setUploadedImages(

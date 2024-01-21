@@ -42,13 +42,13 @@ function CreateAmpCard({ image, username, firstName, userId }: CardProps) {
                         size="sm"
                         variant="light"
                         startContent={
-                            <Icons.media className="h-5 w-5 text-primary" />
+                            <Icons.media className="size-5 text-primary" />
                         }
                         radius="full"
                         onPress={onOpen}
                     />
 
-                    <Icons.smile className="h-5 w-5" />
+                    <Icons.smile className="size-5" />
                 </div>
             </div>
 

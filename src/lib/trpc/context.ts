@@ -3,8 +3,8 @@ import {
     SignedInAuthObject,
     SignedOutAuthObject,
 } from "@clerk/nextjs/server";
-import { inferAsyncReturnType } from "@trpc/server";
 import { db } from "../drizzle";
+import { amps, comments, userDetails, users } from "../drizzle/schema";
 
 type CreateContextOptions = {
     auth: SignedInAuthObject | SignedOutAuthObject | null;
@@ -14,6 +14,10 @@ export const createContextInner = async ({ auth }: CreateContextOptions) => {
     return {
         auth,
         db,
+        amps,
+        users,
+        userDetails,
+        comments,
     };
 };
 
@@ -25,4 +29,4 @@ export const createContext = async () => {
     });
 };
 
-export type Context = inferAsyncReturnType<typeof createContextInner>;
+export type Context = Awaited<ReturnType<typeof createContext>>;

@@ -1,28 +1,27 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
 import {
     cn,
     convertMstoTimeElapsed,
     extractYTVideoId,
+    generateId,
     isYouTubeVideo,
 } from "@/src/lib/utils";
+import { AmpWithAnalytics } from "@/src/lib/validation/amp";
 import { DefaultProps } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import { Image, Link, useDisclosure } from "@nextui-org/react";
-import { nanoid } from "nanoid";
+import NextImage from "next/image";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import NextImage from "next/image";
-import { BigPlayButton, Player } from "video-react";
+import AmpAccessoryButtons from "../../global/buttons/amp-accessory-buttons";
 import ImageViewModal from "../../global/modals/image-view-modal";
 import { sanitizeContent } from "../../u/amps/amp-content";
-import AmpAccessoryButtons from "./amp-accessory-buttons";
+import Player from "../../ui/player";
 import AmpMoreMenu from "./amp-more-menu";
-import "video-react/dist/video-react.css";
 
 interface PageProps extends DefaultProps {
-    amp: Amp;
+    amp: AmpWithAnalytics;
     user: UserResource;
 }
 
@@ -82,7 +81,7 @@ function AmpContent({ amp, user, className, ...props }: PageProps) {
                                             }
                                             title={
                                                 amp.metadata.title ??
-                                                "video_" + nanoid()
+                                                "video_" + generateId()
                                             }
                                         />
                                     </div>
@@ -95,7 +94,7 @@ function AmpContent({ amp, user, className, ...props }: PageProps) {
                                                     src={amp.metadata.image}
                                                     alt={
                                                         amp.metadata.title ??
-                                                        "image_" + nanoid()
+                                                        "image_" + generateId()
                                                     }
                                                 />
                                             </button>
@@ -169,18 +168,17 @@ function AmpContent({ amp, user, className, ...props }: PageProps) {
                                 .map((attachment, index) => (
                                     <Player
                                         key={attachment?.id ?? index}
-                                        src={attachment?.url ?? ""}
-                                        aspectRatio="16:9"
-                                        muted={true}
-                                    >
-                                        <BigPlayButton position="center" />
-                                    </Player>
+                                        source={{
+                                            type: "uploadthing",
+                                            fileKey: attachment?.key ?? "",
+                                        }}
+                                    />
                                 ))}
                         </div>
                     )}
                 </div>
 
-                <AmpAccessoryButtons amp={amp} />
+                <AmpAccessoryButtons amp={amp} user={user} />
             </div>
 
             <ImageViewModal

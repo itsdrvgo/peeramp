@@ -157,7 +157,7 @@ function getAccountName(target: CachedUserWithoutEmail) {
                     isIconOnly
                     radius="full"
                     variant="light"
-                    startContent={<Icons.moreHor className="h-4 w-4" />}
+                    startContent={<Icons.moreHor className="size-4" />}
                 />
             </div>
         </div>
@@ -268,7 +268,7 @@ function getAccountSocials({
                                     className="cursor-pointer"
                                     startContent={
                                         <div className="p-1">
-                                            <Icon className="h-[10px] w-[10px]" />
+                                            <Icon className="size-[10px]" />
                                         </div>
                                     }
                                 >
@@ -280,7 +280,7 @@ function getAccountSocials({
 
                     {target.socials.length > 3 && (
                         <Button
-                            className="h-auto w-auto min-w-0 items-center gap-0 bg-default-100 px-2 py-[2px]"
+                            className="size-auto min-w-0 items-center gap-0 bg-default-100 px-2 py-[2px]"
                             variant="flat"
                             onPress={() => onMoreModalOpen()}
                         >

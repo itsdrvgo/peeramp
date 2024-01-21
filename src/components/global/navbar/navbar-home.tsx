@@ -14,7 +14,7 @@ import {
     NavbarProps,
 } from "@nextui-org/react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import LoginButton from "../buttons/login-button";
 import ThemeSwitch from "../buttons/theme-button";
@@ -22,10 +22,13 @@ import PeerAmp from "../svgs/PeerAmp";
 
 function NavbarHome({ ...props }: NavbarProps) {
     const router = useRouter();
+    const pathname = usePathname();
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
         <Navbar
+            isMenuOpen={isMenuOpen}
             onMenuOpenChange={setIsMenuOpen}
             shouldHideOnScroll
             classNames={{
@@ -74,14 +77,15 @@ function NavbarHome({ ...props }: NavbarProps) {
 
             <NavbarMenu>
                 {menuConfig.map((item, index) => (
-                    <NavbarMenuItem
-                        key={index}
-                        onClick={() => router.push(item.href)}
-                    >
+                    <NavbarMenuItem key={index}>
                         <Link
                             href={item.href}
                             size="lg"
                             className="text-foreground"
+                            onPress={() => {
+                                if (pathname === item.href)
+                                    setIsMenuOpen(false);
+                            }}
                         >
                             {item.title}
                         </Link>

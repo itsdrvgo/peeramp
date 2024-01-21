@@ -8,11 +8,9 @@ export const metadata: Metadata = {
 
 function Layout({ children }: RootLayoutProps) {
     return (
-        <div className="flex h-screen flex-col items-center justify-center overflow-x-hidden">
-            <main className="flex h-full w-full flex-col md:flex-row-reverse">
-                {children}
-            </main>
-        </div>
+        <main className="flex h-screen w-full flex-col items-center justify-center md:flex-row-reverse">
+            {children}
+        </main>
     );
 }
 

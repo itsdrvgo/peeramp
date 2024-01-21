@@ -59,7 +59,7 @@ function MoreSocialModal({
                                         >
                                             <div className="flex items-center gap-5">
                                                 <div className="rounded-full bg-secondary-200 p-2 text-white">
-                                                    <Icon className="h-4 w-4" />
+                                                    <Icon className="size-4" />
                                                 </div>
 
                                                 <div>

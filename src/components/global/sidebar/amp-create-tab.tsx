@@ -18,7 +18,7 @@ function AmpCreateTab() {
                     toast.error("Please wait while we load your account...")
                 }
             >
-                <Icons.create className="h-6 w-6" />
+                <Icons.create className="size-6" />
                 <p className="hidden md:block">Create</p>
             </button>
         );
@@ -30,7 +30,7 @@ function AmpCreateTab() {
                     toast.error("You must be signed in to create an amp!")
                 }
             >
-                <Icons.create className="h-6 w-6" />
+                <Icons.create className="size-6" />
                 <p className="hidden md:block">Create</p>
             </button>
         );
@@ -42,7 +42,7 @@ function AmpCreateTab() {
                 onClick={onOpen}
             >
                 <div className="p-2 md:p-0">
-                    <Icons.create className="h-6 w-6" />
+                    <Icons.create className="size-6" />
                 </div>
                 <p className="hidden md:block">Create</p>
             </button>

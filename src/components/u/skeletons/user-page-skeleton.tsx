@@ -16,7 +16,7 @@ function UserPageSkeleton({ className, ...props }: DefaultProps) {
             {...props}
         >
             <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
-                <Skeleton className="h-32 w-32 rounded-full" />
+                <Skeleton className="size-32 rounded-full" />
 
                 <div className="flex w-full basis-2/3 flex-col gap-4">
                     <div className="flex items-center justify-center gap-4 md:justify-between">
@@ -47,7 +47,7 @@ function UserPageSkeleton({ className, ...props }: DefaultProps) {
                                 radius="full"
                                 variant="light"
                                 startContent={
-                                    <Icons.moreHor className="h-4 w-4" />
+                                    <Icons.moreHor className="size-4" />
                                 }
                                 isDisabled
                             />

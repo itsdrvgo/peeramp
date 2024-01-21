@@ -26,15 +26,13 @@ function SocialEditButton({ social, icon, key, user, ...props }: PageProps) {
     return (
         <>
             <Button
+                size="sm"
+                radius="full"
                 key={key}
                 color={getColorForConnection(social.type)}
                 variant="flat"
-                startContent={
-                    <div className="">
-                        <Icon className="h-[10px] w-[10px]" />
-                    </div>
-                }
-                className="h-auto w-auto gap-2 p-1 px-3 text-sm"
+                startContent={<Icon className="size-[10px]" />}
+                className="size-auto gap-2 p-1 px-3 text-sm"
                 onPress={onEditModalOpen}
                 {...props}
             >

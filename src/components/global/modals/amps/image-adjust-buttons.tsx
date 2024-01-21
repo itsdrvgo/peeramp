@@ -1,8 +1,8 @@
 "use client";
 
+import { generateId } from "@/src/lib/utils";
 import { Preset } from "@/src/lib/validation/image";
 import { Button } from "@nextui-org/react";
-import { nanoid } from "nanoid";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { FixedCropperRef } from "react-advanced-cropper";
 
@@ -44,14 +44,18 @@ function ImageAdjustButtons({
             const file = new File(
                 [blob],
                 editingImage?.file.name ??
-                    nanoid() + "_" + userId + "_" + Date.now() + "_crpd.png",
+                    generateId() +
+                        "_" +
+                        userId +
+                        "_" +
+                        Date.now() +
+                        "_crpd.png",
                 {
                     type: mimeString,
                     lastModified: Date.now(),
                 }
             );
 
-            setEditingImage(null);
             setPreset("square");
             setUploadedImages(
                 uploadedImages.map((uploadedImage) =>
@@ -64,6 +68,7 @@ function ImageAdjustButtons({
                         : uploadedImage
                 )
             );
+            setEditingImage(null);
         }
     };
 

@@ -2,13 +2,12 @@
 
 import { Amp } from "@/src/lib/drizzle/schema";
 import { trpc } from "@/src/lib/trpc/client";
-import { cFetch, handleClientError } from "@/src/lib/utils";
+import { cFetch, generateId, handleClientError } from "@/src/lib/utils";
 import { Status, Visibility } from "@/src/lib/validation/amp";
 import { ResponseData } from "@/src/lib/validation/response";
 import { UploadFileResponse } from "@/src/types";
 import { Button, Link, Selection } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import { nanoid } from "nanoid";
 import { Dispatch, SetStateAction } from "react";
 import toast from "react-hot-toast";
 
@@ -33,7 +32,6 @@ interface PageProps {
     setText: Dispatch<SetStateAction<string>>;
     setVisibility: Dispatch<SetStateAction<Selection>>;
     closeModal: () => void;
-    setIsEmojiPickerOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 function AmpManageButtons({
@@ -49,7 +47,6 @@ function AmpManageButtons({
     setText,
     setVisibility,
     closeModal,
-    setIsEmojiPickerOpen,
 }: PageProps) {
     const { mutate: handleCreateAmp } = trpc.amp.createAmp.useMutation({
         onSuccess: (data, { status }: { status: Status }) => {
@@ -122,8 +119,6 @@ function AmpManageButtons({
                 "Your amp is being processed, this may take a few seconds"
             );
             onClose();
-
-            setIsEmojiPickerOpen(false);
         },
         mutationFn: async () => {
             const formData = new FormData();
@@ -211,7 +206,7 @@ function AmpManageButtons({
                         } ?? null,
                     attachments:
                         attachments?.files.map((file) => ({
-                            id: nanoid(),
+                            id: generateId(),
                             type: attachments?.type ?? "image",
                             url: file.url,
                             key: file.key,

@@ -15,7 +15,7 @@ function AmpLoadSkeleton({
                     className="flex gap-2 border-b border-black/30 p-4 px-0 dark:border-white/20 md:gap-4 md:px-2"
                 >
                     <div>
-                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <Skeleton className="size-10 rounded-full" />
                     </div>
 
                     <div className="w-full space-y-3">

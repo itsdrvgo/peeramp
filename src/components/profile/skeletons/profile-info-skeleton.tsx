@@ -16,7 +16,7 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
             {...props}
         >
             <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
-                <Skeleton className="h-32 w-32 rounded-full" />
+                <Skeleton className="size-32 rounded-full" />
 
                 <div className="flex w-full basis-2/3 flex-col-reverse items-center justify-between gap-8 md:flex-row md:items-start">
                     <div className="w-full space-y-4">
@@ -79,7 +79,7 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                         <Button
                             size="sm"
                             variant="flat"
-                            startContent={<Icons.pencil className="h-4 w-4" />}
+                            startContent={<Icons.pencil className="size-4" />}
                             className="min-w-0 md:px-2"
                             isDisabled
                         >
@@ -106,7 +106,7 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                 <div className="flex w-full flex-col gap-4 rounded-xl bg-default-50 p-3 py-5 md:p-5">
                     <div className="flex items-center gap-4">
                         <div>
-                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="size-10 rounded-full" />
                         </div>
                         <Skeleton className="h-9 w-full rounded-full" />
                     </div>
@@ -114,8 +114,8 @@ function ProfileInfoSkeleton({ className, ...props }: DefaultProps) {
                     <Divider />
 
                     <div className="flex items-center gap-3 text-primary">
-                        <Icons.media className="h-5 w-5" />
-                        <Icons.smile className="h-5 w-5" />
+                        <Icons.media className="size-5" />
+                        <Icons.smile className="size-5" />
                     </div>
                 </div>
 

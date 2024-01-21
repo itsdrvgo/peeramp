@@ -1,6 +1,9 @@
 import { clerkClient } from "@clerk/nextjs";
-import { redis } from "..";
-import { CachedUser, cachedUserSchema } from "../../validation/user";
+import { generateCachedUserKey, generateCachedUsernamesKey } from ".";
+import { redis } from "../..";
+import { CachedUser, cachedUserSchema } from "../../../validation/user";
+
+const usernamesKey = generateCachedUsernamesKey();
 
 async function getCachableUser(userId: string) {
     const user = await clerkClient.users.getUser(userId);
@@ -37,19 +40,24 @@ async function getCachableUser(userId: string) {
 }
 
 export async function addUserToCache(user: CachedUser) {
-    await redis.set(`user:${user.id}`, JSON.stringify(user));
+    const key = generateCachedUserKey(user.id);
+    await redis.set(key, JSON.stringify(user));
 }
 
 export async function updateUserInCache(user: CachedUser) {
-    await redis.set(`user:${user.id}`, JSON.stringify(user));
+    const key = generateCachedUserKey(user.id);
+    await redis.set(key, JSON.stringify(user));
 }
 
 export async function deleteUserFromCache(id: string) {
-    await redis.del(`user:${id}`);
+    const key = generateCachedUserKey(id);
+    await redis.del(key);
 }
 
 export async function getUserFromCache(id: string) {
-    const cachedUser = await redis.get<CachedUser | null>(`user:${id}`);
+    const key = generateCachedUserKey(id);
+
+    const cachedUser = await redis.get<CachedUser | null>(key);
     if (!cachedUser) {
         const cachableUser = await getCachableUser(id);
         if (!cachableUser) return null;
@@ -68,7 +76,7 @@ export async function getUserFromCache(id: string) {
 }
 
 export async function addUsernameToCache(username: string) {
-    await redis.sadd("usernames", username);
+    await redis.sadd(usernamesKey, username);
 }
 
 export async function updateUsernameInCache(
@@ -76,17 +84,17 @@ export async function updateUsernameInCache(
     newUsername: string
 ) {
     const pipeline = redis.pipeline();
-    pipeline.srem("usernames", oldUsername);
-    pipeline.sadd("usernames", newUsername);
+    pipeline.srem(usernamesKey, oldUsername);
+    pipeline.sadd(usernamesKey, newUsername);
     await pipeline.exec();
 }
 
 export async function deleteUsernameFromCache(username: string) {
-    await redis.srem("usernames", username);
+    await redis.srem(usernamesKey, username);
 }
 
 export async function checkExistingUsernameInCache(username: string) {
-    const existingUsernamesRaw = await redis.smembers<string[][]>("usernames");
+    const existingUsernamesRaw = await redis.smembers<string[][]>(usernamesKey);
     const existingUsernames = existingUsernamesRaw.flatMap(
         (existingUsername) => existingUsername
     );

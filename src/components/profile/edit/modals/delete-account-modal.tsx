@@ -52,7 +52,7 @@ function DeleteAccountModal({
         },
     });
 
-    const { mutate: handleDeleteAccount, isLoading: isPending } =
+    const { mutate: handleDeleteAccount, isPending } =
         trpc.user.deleteUser.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Deleting account...");
@@ -139,9 +139,9 @@ function DeleteAccountModal({
                                                                 }
                                                             >
                                                                 {isVisible ? (
-                                                                    <Icons.hide className="h-5 w-5 opacity-80" />
+                                                                    <Icons.hide className="size-5 opacity-80" />
                                                                 ) : (
-                                                                    <Icons.view className="h-5 w-5 opacity-80" />
+                                                                    <Icons.view className="size-5 opacity-80" />
                                                                 )}
                                                             </button>
                                                         }

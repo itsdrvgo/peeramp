@@ -30,7 +30,7 @@ function ProfileEditSkeleton({ className, ...props }: DefaultProps) {
             </div>
 
             <div className="flex items-center gap-5">
-                <Skeleton className="h-14 w-14 rounded-full" />
+                <Skeleton className="size-14 rounded-full" />
 
                 <div className="space-y-1">
                     <Skeleton className="h-5 w-24 rounded-lg" />
@@ -85,14 +85,14 @@ function ProfileEditSkeleton({ className, ...props }: DefaultProps) {
                     <Skeleton className="h-7 w-32 rounded-xl" />
 
                     <Button
-                        className="h-auto w-auto gap-0 p-0 text-sm"
+                        className="size-auto gap-0 p-0 text-sm"
                         isDisabled={true}
                     >
                         <div className="border-r border-white/20 px-3 py-1 pr-2">
                             <p>Add Connection</p>
                         </div>
                         <div className="p-1 px-2">
-                            <Icons.add className="h-4 w-4" />
+                            <Icons.add className="size-4" />
                         </div>
                     </Button>
                 </div>

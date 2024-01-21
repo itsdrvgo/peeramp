@@ -2,7 +2,7 @@ import { authMiddleware } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 export default authMiddleware({
-    ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico"],
+    ignoredRoutes: ["/api/users", "/og.webp", "/favicon.ico", "/test"],
     publicRoutes: [
         "/signin(.*)",
         "/signup(.*)",
@@ -17,7 +17,9 @@ export default authMiddleware({
         if (auth.isPublicRoute) {
             const isAuthenticated =
                 auth.userId &&
-                (["/signin", "/signup"].includes(req.nextUrl.pathname) ||
+                (["/signin", "/signup"].some((route) =>
+                    req.nextUrl.pathname.startsWith(route)
+                ) ||
                     req.nextUrl.pathname === "/");
 
             if (isAuthenticated) {

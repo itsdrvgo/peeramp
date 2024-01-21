@@ -53,7 +53,7 @@ function ProfileUpdateForm({ user }: PageProps) {
         },
     });
 
-    const { mutate: handleUserUpdate, isLoading: isPending } =
+    const { mutate: handleUserUpdate, isPending } =
         trpc.user.updateUser.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Updating...");

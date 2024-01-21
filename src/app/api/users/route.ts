@@ -9,7 +9,7 @@ import {
     getUserFromCache,
     updateUserInCache,
     updateUsernameInCache,
-} from "@/src/lib/redis/methods/user";
+} from "@/src/lib/redis/methods/user/user";
 import { CResponse, handleError } from "@/src/lib/utils";
 import {
     userCreateWebhookSchema,

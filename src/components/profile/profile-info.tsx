@@ -83,7 +83,7 @@ function ProfileInfo({ className, user, ampCount, ...props }: PageProps) {
                         <Button
                             size="sm"
                             variant="flat"
-                            startContent={<Icons.pencil className="h-4 w-4" />}
+                            startContent={<Icons.pencil className="size-4" />}
                             className="min-w-0 md:px-2"
                             onPress={() => router.push("/profile/edit")}
                         >
@@ -231,7 +231,7 @@ function getAccountSocials({
                                     className="cursor-pointer"
                                     startContent={
                                         <div className="p-1">
-                                            <Icon className="h-[10px] w-[10px]" />
+                                            <Icon className="size-[10px]" />
                                         </div>
                                     }
                                 >
@@ -243,11 +243,13 @@ function getAccountSocials({
 
                     {user.publicMetadata.socials.length > 3 && (
                         <Button
-                            className="h-auto w-auto min-w-0 items-center gap-0 bg-default-100 px-2 py-[2px]"
+                            size="sm"
+                            radius="full"
+                            className="h-7 min-h-0 min-w-0 items-center gap-0 bg-default-100 p-2"
                             variant="flat"
                             onPress={() => onMoreModalOpen()}
                         >
-                            <p>+ {user.publicMetadata.socials.length - 3}</p>
+                            + {user.publicMetadata.socials.length - 3}
                         </Button>
                     )}
                 </>

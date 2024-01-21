@@ -1,7 +1,7 @@
 import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
-import { nanoid } from "nanoid";
 import { z } from "zod";
+import { generateId } from "../../utils";
 import { publicMetadataSchema, userSocialSchema } from "../../validation/user";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -41,7 +41,7 @@ export const userSocialRouter = createTRPCRouter({
                         ...metadata.socials,
                         {
                             ...social,
-                            id: nanoid(),
+                            id: generateId(),
                         },
                     ],
                 },

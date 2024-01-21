@@ -149,9 +149,9 @@ function ChangePasswordModal({
                                                                 }
                                                             >
                                                                 {isVisible1 ? (
-                                                                    <Icons.hide className="h-5 w-5 opacity-80" />
+                                                                    <Icons.hide className="size-5 opacity-80" />
                                                                 ) : (
-                                                                    <Icons.view className="h-5 w-5 opacity-80" />
+                                                                    <Icons.view className="size-5 opacity-80" />
                                                                 )}
                                                             </button>
                                                         }
@@ -192,9 +192,9 @@ function ChangePasswordModal({
                                                                 }
                                                             >
                                                                 {isVisible2 ? (
-                                                                    <Icons.hide className="h-5 w-5 opacity-80" />
+                                                                    <Icons.hide className="size-5 opacity-80" />
                                                                 ) : (
-                                                                    <Icons.view className="h-5 w-5 opacity-80" />
+                                                                    <Icons.view className="size-5 opacity-80" />
                                                                 )}
                                                             </button>
                                                         }

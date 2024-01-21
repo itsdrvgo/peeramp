@@ -1,3 +1,4 @@
+import { init } from "@paralleldrive/cuid2";
 import { clsx, type ClassValue } from "clsx";
 import { DrizzleError } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -8,6 +9,10 @@ import { Icons } from "../components/icons/icons";
 import { DEFAULT_ERROR_MESSAGE } from "../config/const";
 import { ResponseMessages } from "./validation/response";
 import { userCategoriesSchema, UserSocialType } from "./validation/user";
+
+export const generateId = init({
+    length: 16,
+});
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -33,12 +38,6 @@ export function handleError(err: unknown) {
             message: "UNKNOWN_ERROR",
             longMessage: (err as Error).message,
         });
-}
-
-export function getTheme() {
-    if (typeof window === "undefined" || typeof localStorage === "undefined")
-        return "dark";
-    return (localStorage.getItem("theme") as "dark" | "light") ?? "dark";
 }
 
 export function shortenNumber(num: number): string {

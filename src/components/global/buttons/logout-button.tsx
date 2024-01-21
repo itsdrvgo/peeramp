@@ -35,7 +35,7 @@ function LogoutButton({ className, ...props }: ButtonProps) {
             variant="light"
             isIconOnly
             onPress={handleLogout}
-            startContent={<Icons.logout className="h-5 w-5" />}
+            startContent={<Icons.logout className="size-5" />}
             {...props}
         />
     );

@@ -1,5 +1,11 @@
 import { IncomingHttpHeaders } from "http";
-import { HTMLAttributes, ReactNode } from "react";
+import {
+    ChangeEvent,
+    ClipboardEvent,
+    DragEvent,
+    HTMLAttributes,
+    ReactNode,
+} from "react";
 import { WebhookRequiredHeaders } from "svix";
 import { Icons } from "../components/icons/icons";
 import {
@@ -80,3 +86,22 @@ export type UploadFileResponse = {
     name: string;
     size: number;
 };
+
+export type FileReturnType = {
+    status: "idle" | "error" | "success";
+    message: string;
+    isError: boolean;
+    isSuccess: boolean;
+    data?: {
+        images: ExtendedFile[];
+        videos: ExtendedFile[];
+        others: ExtendedFile[];
+        rejectedFiles: ExtendedFile[];
+    };
+    type?: "file" | "text";
+};
+
+export type UploadEvent<T = HTMLDivElement> =
+    | DragEvent<T>
+    | ClipboardEvent<T>
+    | ChangeEvent<T>;

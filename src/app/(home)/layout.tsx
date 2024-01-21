@@ -4,9 +4,9 @@ import { RootLayoutProps } from "@/src/types";
 
 function Layout({ children }: RootLayoutProps) {
     return (
-        <div className="flex h-screen flex-col justify-between overflow-x-hidden">
+        <div className="flex min-h-screen flex-col">
             <NavbarHome />
-            <main>{children}</main>
+            <main className="flex flex-1 items-center">{children}</main>
             <Footer />
         </div>
     );

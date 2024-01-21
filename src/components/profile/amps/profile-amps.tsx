@@ -17,14 +17,14 @@ interface PageProps extends DefaultProps {
 }
 
 function ProfileAmps({ user, className, ...props }: PageProps) {
-    const { data: pinnedAmp, isLoading: isPinnedAmpLoading } =
+    const { data: pinnedAmp, isPending: isPinnedAmpLoading } =
         trpc.amp.getPinnedAmp.useQuery({
             creatorId: user.id,
         });
 
     const {
         data: publishedAmpsRaw,
-        isLoading: isPublishedAmpsLoading,
+        isPending: isPublishedAmpsLoading,
         fetchNextPage: fetchNextPublishedAmpsPage,
         isFetchingNextPage: isFetchingNextPublishedAmpsPage,
     } = trpc.amp.getInfiniteAmps.useInfiniteQuery(
@@ -39,7 +39,7 @@ function ProfileAmps({ user, className, ...props }: PageProps) {
 
     const {
         data: draftAmpsRaw,
-        isLoading: isDraftAmpsLoading,
+        isPending: isDraftAmpsLoading,
         fetchNextPage: fetchNextDraftAmpsPage,
         isFetchingNextPage: isFetchingNextDraftAmpsPage,
     } = trpc.amp.getInfiniteAmps.useInfiniteQuery(
@@ -114,7 +114,7 @@ function ProfileAmps({ user, className, ...props }: PageProps) {
                             pinnedAmp && (
                                 <div className="group space-y-3 border-b border-black/30 p-4 px-0 dark:border-white/20 md:px-2">
                                     <div className="flex items-center gap-2 text-sm opacity-60">
-                                        <Icons.pin className="h-4 w-4 fill-white" />
+                                        <Icons.pin className="size-4 fill-white" />
                                         <p>Pinned</p>
                                     </div>
 

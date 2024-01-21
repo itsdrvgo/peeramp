@@ -69,7 +69,7 @@ function Hero({ className, ...props }: DefaultProps) {
     return (
         <section
             className={cn(
-                "flex w-full flex-col items-center gap-20",
+                "flex w-full flex-col items-center justify-center gap-20",
                 className
             )}
             {...props}

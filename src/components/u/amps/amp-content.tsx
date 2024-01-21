@@ -1,27 +1,30 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
 import {
     cn,
     convertMstoTimeElapsed,
     extractYTVideoId,
+    generateId,
     isYouTubeVideo,
 } from "@/src/lib/utils";
+import { AmpWithAnalytics } from "@/src/lib/validation/amp";
 import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
+import { UserResource } from "@clerk/types";
 import { Image, Link, useDisclosure } from "@nextui-org/react";
-import { nanoid } from "nanoid";
-import ImageViewModal from "../../global/modals/image-view-modal";
-import AmpAccessoryButtons from "../../profile/amps/amp-accessory-buttons";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+import AmpAccessoryButtons from "../../global/buttons/amp-accessory-buttons";
+import ImageViewModal from "../../global/modals/image-view-modal";
+import Player from "../../ui/player";
 
 interface PageProps extends DefaultProps {
-    amp: Amp;
+    amp: AmpWithAnalytics;
     target: CachedUserWithoutEmail;
+    user: UserResource | null;
 }
 
-function AmpContent({ amp, target, className, ...props }: PageProps) {
+function AmpContent({ amp, target, user, className, ...props }: PageProps) {
     const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure();
 
     return (
@@ -75,7 +78,7 @@ function AmpContent({ amp, target, className, ...props }: PageProps) {
                                             }
                                             title={
                                                 amp.metadata.title ??
-                                                "video_" + nanoid()
+                                                "video_" + generateId()
                                             }
                                         />
                                     </div>
@@ -88,7 +91,7 @@ function AmpContent({ amp, target, className, ...props }: PageProps) {
                                                     src={amp.metadata.image}
                                                     alt={
                                                         amp.metadata.title ??
-                                                        "image_" + nanoid()
+                                                        "image_" + generateId()
                                                     }
                                                 />
                                             </button>
@@ -129,9 +132,50 @@ function AmpContent({ amp, target, className, ...props }: PageProps) {
                                 </div>
                             </div>
                         )}
+
+                    {amp.attachments && amp.attachments.length > 0 && (
+                        <div
+                            className={cn(
+                                "grid grid-cols-2 gap-2",
+                                amp.attachments.length === 1 && "grid-cols-1",
+                                amp.attachments.length === 3 && "grid-cols-3"
+                            )}
+                        >
+                            {amp.attachments
+                                .filter(
+                                    (attachment) => attachment?.type === "image"
+                                )
+                                .map((attachment, index) => (
+                                    <Image
+                                        key={attachment?.id ?? index}
+                                        src={attachment?.url ?? ""}
+                                        alt={attachment?.name ?? ""}
+                                        radius="sm"
+                                        width={800}
+                                        height={800}
+                                        loading="lazy"
+                                        className="aspect-video object-cover"
+                                    />
+                                ))}
+
+                            {amp.attachments
+                                .filter(
+                                    (attachment) => attachment?.type === "video"
+                                )
+                                .map((attachment, index) => (
+                                    <Player
+                                        key={attachment?.id ?? index}
+                                        source={{
+                                            type: "uploadthing",
+                                            fileKey: attachment?.key ?? "",
+                                        }}
+                                    />
+                                ))}
+                        </div>
+                    )}
                 </div>
 
-                <AmpAccessoryButtons amp={amp} />
+                <AmpAccessoryButtons amp={amp} user={user} />
             </div>
 
             <ImageViewModal
@@ -147,17 +191,17 @@ function AmpContent({ amp, target, className, ...props }: PageProps) {
 export default AmpContent;
 
 export function sanitizeContent(content: string) {
-    return content.split(/(https?:\/\/[^\s]+)/g).map((part) => {
+    return content.split(/(https?:\/\/[^\s]+)/g).map((part, index) => {
         if (part.match(/(https?:\/\/[^\s]+)/g)) {
             return (
-                <Link key={nanoid()} href={part} underline="hover" isExternal>
+                <Link key={index} href={part} underline="hover" isExternal>
                     {part}
                 </Link>
             );
         } else if (part.match(/(@[^\s]+)/g)) {
             return (
                 <Link
-                    key={nanoid()}
+                    key={index}
                     href={`/u/${part.slice(1)}`}
                     underline="hover"
                 >
@@ -167,7 +211,7 @@ export function sanitizeContent(content: string) {
         } else if (part.match(/(#[^\s]+)/g)) {
             return (
                 <Link
-                    key={nanoid()}
+                    key={index}
                     href={`/t/${part.slice(1)}`}
                     underline="hover"
                 >

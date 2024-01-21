@@ -26,7 +26,9 @@ function ResumePreview({ className, resume, ...props }: PageProps) {
                     className="text-base font-semibold opacity-70"
                     isExternal
                 >
-                    {resume?.name ?? "Resume"}
+                    {resume?.name
+                        ? "file_" + resume.name.split("_")[1]
+                        : "Resume"}
                 </Link>
                 <p className="text-sm opacity-60 md:text-base">(Your Resume)</p>
             </div>
