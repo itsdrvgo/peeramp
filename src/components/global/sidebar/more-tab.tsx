@@ -1,7 +1,6 @@
 "use client";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
-import useThemeStore from "@/src/lib/store/theme";
 import { handleClientError } from "@/src/lib/utils";
 import { isClerkAPIResponseError, useClerk } from "@clerk/nextjs";
 import {
@@ -15,23 +14,13 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Icons } from "../../icons/icons";
+import { useTheme } from "../../providers/theme";
 
 function MoreTab() {
     const { signOut } = useClerk();
     const router = useRouter();
 
-    const setTheme = useThemeStore((state) => state.setTheme);
-    const theme = useThemeStore((state) => state.theme);
-
-    const handleThemeChange = () => {
-        if (theme === "dark") {
-            setTheme("light");
-            localStorage.setItem("theme", "light");
-        } else {
-            setTheme("dark");
-            localStorage.setItem("theme", "dark");
-        }
-    };
+    const [theme, setTheme] = useTheme();
 
     const { mutate: handleLogout } = useMutation({
         onMutate: () => {
@@ -67,7 +56,7 @@ function MoreTab() {
         >
             <DropdownTrigger>
                 <div className="flex cursor-pointer items-center gap-4 rounded-lg p-2 md:p-4 md:px-3 md:hover:bg-default-100">
-                    <Icons.menu className="h-6 w-6" />
+                    <Icons.menu className="size-6" />
                     <p className="hidden md:block">More</p>
                 </div>
             </DropdownTrigger>
@@ -76,17 +65,21 @@ function MoreTab() {
                 <DropdownSection showDivider>
                     <DropdownItem href="/settings">
                         <div className="flex items-center gap-3 rounded-md p-2 px-1">
-                            <Icons.settings className="h-5 w-5" />
+                            <Icons.settings className="size-5" />
                             <p>Settings</p>
                         </div>
                     </DropdownItem>
 
-                    <DropdownItem onClick={handleThemeChange}>
+                    <DropdownItem
+                        onClick={() =>
+                            setTheme(theme === "dark" ? "light" : "dark")
+                        }
+                    >
                         <div className="flex items-center gap-3 rounded-md p-2 px-1">
                             {theme === "dark" ? (
-                                <Icons.sun className="h-5 w-5" />
+                                <Icons.sun className="size-5" />
                             ) : (
-                                <Icons.moon className="h-5 w-5" />
+                                <Icons.moon className="size-5" />
                             )}
                             <p>
                                 Switch to {theme === "dark" ? "Light" : "Dark"}
@@ -96,7 +89,7 @@ function MoreTab() {
 
                     <DropdownItem href="/report">
                         <div className="flex items-center gap-3 rounded-md p-2 px-1">
-                            <Icons.warning className="h-5 w-5" />
+                            <Icons.warning className="size-5" />
                             <p>Report an issue</p>
                         </div>
                     </DropdownItem>

@@ -29,7 +29,7 @@ function ProfileEducation({ className, user, ...props }: PageProps) {
                     <div>
                         <Button
                             size="sm"
-                            startContent={<Icons.add className="h-4 w-4" />}
+                            startContent={<Icons.add className="size-4" />}
                             color="primary"
                             variant="flat"
                             onPress={onEducationAddModalOpen}

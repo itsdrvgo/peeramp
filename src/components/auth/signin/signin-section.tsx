@@ -10,7 +10,7 @@ function SigninSection({ className, ...props }: DefaultProps) {
     return (
         <section
             className={cn(
-                "border-black/10 p-4 dark:border-white/10 md:flex md:w-2/3 md:items-center md:justify-center md:border-r md:px-4 md:py-0",
+                "size-full border-black/10 p-4 dark:border-white/10 md:flex md:w-2/3 md:items-center md:justify-center md:border-r md:px-4 md:py-0",
                 className
             )}
             {...props}

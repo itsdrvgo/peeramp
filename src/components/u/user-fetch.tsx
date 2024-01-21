@@ -36,7 +36,6 @@ async function UserFetch({ params, className, ...props }: PageProps) {
         image: dbTarget.image,
         isVerified: dbTarget.details.isVerified,
         resume: dbTarget.details.resume,
-        score: dbTarget.details.score,
         socials: dbTarget.details.socials,
         type: dbTarget.details.type,
         updatedAt: dbTarget.updatedAt.toISOString(),

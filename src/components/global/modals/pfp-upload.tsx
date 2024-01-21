@@ -1,7 +1,9 @@
 "use client";
 
 import { DEFAULT_ERROR_MESSAGE } from "@/src/config/const";
-import { cn, handleClientError } from "@/src/lib/utils";
+import { useDropzone } from "@/src/hooks/useDropzone";
+import { cn, generateId, handleClientError } from "@/src/lib/utils";
+import { UploadEvent } from "@/src/types";
 import { UserResource } from "@clerk/types";
 import {
     Avatar,
@@ -13,13 +15,11 @@ import {
     ModalHeader,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import "cropperjs/dist/cropper.css";
-import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
-import { Cropper, ReactCropperElement } from "react-cropper";
-import Dropzone from "react-dropzone";
+import { FixedCropperRef } from "react-advanced-cropper";
 import toast from "react-hot-toast";
 import { Icons } from "../../icons/icons";
+import ImageAdjust from "./amps/image-adjust";
 
 interface PfpUploadModalProps {
     user: UserResource;
@@ -34,48 +34,51 @@ function PfpUploadModal({
     isOpen,
     onOpenChange,
 }: PfpUploadModalProps) {
-    const cropperRef = useRef<ReactCropperElement>(null);
+    const { processFiles, uploadConfig } = useDropzone({
+        image: {
+            maxCount: 1,
+            maxFileSize: 1024 * 1024 * 5, // 5MB
+            fileTypes: [
+                "image/png",
+                "image/jpeg",
+                "image/jpg",
+                "image/gif",
+                "image/webp",
+            ],
+        },
+    });
 
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [isDragActive, setIsDragActive] = useState(false);
+    const cropperRef = useRef<FixedCropperRef>(null);
 
-    const handleFileUpload = (file: File) => {
-        setSelectedImage(URL.createObjectURL(file));
-        toast.success("Image uploaded");
+    const [imageFile, setImageFile] = useState<ExtendedFile | null>(null);
+
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleUpload = (uploadEvent: UploadEvent) => {
+        const { message, type, data, isError } = processFiles(uploadEvent);
+
+        if (isError) return toast.error(message);
+        if (!type) return toast.error("No image is selected!");
+        if (!data || !data.images) return toast.error(DEFAULT_ERROR_MESSAGE);
+
+        if (data.rejectedFiles.length > 0)
+            toast.error(
+                "File rejected: " +
+                    data.rejectedFiles[0].file.name +
+                    "!, make sure the image is of max " +
+                    uploadConfig.image!.maxFileSize / 1024 / 1024 +
+                    "MB, and is of " +
+                    uploadConfig.image?.fileTypes
+                        .map((type) => "'" + type + "'")
+                        .join(", ") +
+                    " types"
+            );
+
+        if (type === "file") setImageFile(data.images[0]);
     };
 
-    const handleCrop = () => {
-        const cropper = cropperRef.current?.cropper;
-        if (!cropper) return toast.error(DEFAULT_ERROR_MESSAGE);
-
-        const croppedImage = cropper.getCroppedCanvas().toDataURL();
-
-        const blobBin = atob(croppedImage.split(",")[1]);
-        const mimeString = croppedImage
-            .split(",")[0]
-            .split(":")[1]
-            .split(";")[0];
-        const ab = new ArrayBuffer(blobBin.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < blobBin.length; i++) {
-            ia[i] = blobBin.charCodeAt(i);
-        }
-        const newFile = new Blob([ab], { type: mimeString });
-
-        const file = new File(
-            [newFile],
-            "pfp_" + user.username + "_" + nanoid(),
-            {
-                type: mimeString,
-                lastModified: Date.now(),
-            }
-        );
-
-        setImageFile(file);
-    };
-
-    const { mutate: handleImageUpdate, isLoading: isImageUpdating } =
+    const { mutate: handleImageUpdate, isPending: isImageUpdating } =
         useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Updating...");
@@ -84,11 +87,33 @@ function PfpUploadModal({
             mutationFn: async () => {
                 if (!imageFile) throw new Error("No image is selected!");
 
-                const formData = new FormData();
-                formData.append("image", imageFile);
+                const cropper = cropperRef.current;
+                const croppedImage = cropper?.getCanvas()?.toDataURL();
+                if (!croppedImage) throw new Error("No image is selected!");
+
+                const blobBin = atob(croppedImage.split(",")[1]);
+                const mimeString = croppedImage
+                    .split(",")[0]
+                    .split(":")[1]
+                    .split(";")[0];
+                const ab = new ArrayBuffer(blobBin.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < blobBin.length; i++) {
+                    ia[i] = blobBin.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+
+                const file = new File(
+                    [blob],
+                    "pfp_" + user.username + "_" + generateId() + "_crpd.png",
+                    {
+                        type: mimeString,
+                        lastModified: Date.now(),
+                    }
+                );
 
                 await user.setProfileImage({
-                    file: imageFile,
+                    file,
                 });
             },
             onSuccess: (_, __, ctx) => {
@@ -102,12 +127,11 @@ function PfpUploadModal({
             },
             onSettled: () => {
                 setImageFile(null);
-                setSelectedImage(null);
                 onClose();
             },
         });
 
-    const { mutate: handleRemoveImage, isLoading: isImageRemoving } =
+    const { mutate: handleRemoveImage, isPending: isImageRemoving } =
         useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Removing...");
@@ -119,7 +143,7 @@ function PfpUploadModal({
 
                 const image = new File(
                     [blob],
-                    "pfp_" + user.username + "_" + nanoid(),
+                    "pfp_" + user.username + "_" + generateId(),
                     {
                         type: "image/png",
                         lastModified: Date.now(),
@@ -144,7 +168,6 @@ function PfpUploadModal({
             },
             onSettled: () => {
                 setImageFile(null);
-                setSelectedImage(null);
                 onClose();
             },
         });
@@ -154,113 +177,84 @@ function PfpUploadModal({
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             onClose={() => {
-                setSelectedImage(null);
                 setImageFile(null);
             }}
             placement="center"
         >
             <ModalContent>
-                {(close) => (
+                {() => (
                     <>
                         <ModalHeader>Update Profile Picture</ModalHeader>
 
                         <ModalBody className="gap-5">
-                            {!selectedImage ? (
-                                <>
-                                    <Dropzone
-                                        onDrop={(acceptedFiles) =>
-                                            handleFileUpload(acceptedFiles[0])
-                                        }
-                                        accept={{
-                                            "image/png": [".png"],
-                                            "image/jpeg": [".jpeg"],
-                                            "image/jpg": [".jpg"],
-                                        }}
-                                        maxFiles={1}
-                                        onDragEnter={() =>
-                                            setIsDragActive(true)
-                                        }
-                                        onDragLeave={() =>
-                                            setIsDragActive(false)
-                                        }
-                                        onDropAccepted={() =>
-                                            setIsDragActive(false)
-                                        }
-                                        maxSize={2 * 1024 * 1024}
-                                        onDropRejected={(fileRejections) =>
-                                            toast.error(
-                                                fileRejections[0].errors[0]
-                                                    .message
-                                            )
-                                        }
-                                    >
-                                        {({
-                                            getRootProps,
-                                            getInputProps,
-                                            open,
-                                        }) => (
-                                            <div
-                                                {...getRootProps()}
-                                                className={cn(
-                                                    "flex w-full cursor-pointer flex-col items-center justify-center gap-5 rounded-lg border border-dashed border-gray-500 bg-background p-12 text-center md:gap-7",
-                                                    isDragActive && "bg-sky-900"
-                                                )}
-                                            >
-                                                <Avatar
-                                                    showFallback
-                                                    src={user.imageUrl}
-                                                    alt={user.username!}
-                                                    size="lg"
-                                                    classNames={{
-                                                        base: "h-24 w-24",
-                                                    }}
-                                                />
-
-                                                <input {...getInputProps()} />
-
-                                                <p className="text-sm md:text-base">
-                                                    Drag & drop your image here
-                                                </p>
-
-                                                <Button
-                                                    size="sm"
-                                                    type="button"
-                                                    color="secondary"
-                                                    className="font-semibold"
-                                                    startContent={
-                                                        <Icons.upload className="h-4 w-4" />
-                                                    }
-                                                    onPress={open}
-                                                >
-                                                    Upload Image
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </Dropzone>
-                                </>
-                            ) : (
-                                <Cropper
-                                    src={selectedImage}
-                                    style={{
-                                        height: "100%",
-                                        width: "100%",
+                            <div
+                                className={cn(
+                                    "flex cursor-pointer flex-col items-center justify-center gap-5 rounded-lg border border-dashed border-primary/20 p-12 text-center",
+                                    isDragging &&
+                                        "border-dashed border-primary",
+                                    imageFile && "hidden"
+                                )}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDragOver={() => setIsDragging(true)}
+                                onDrop={handleUpload}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <Avatar
+                                    showFallback
+                                    src={user.imageUrl}
+                                    alt={user.username!}
+                                    size="lg"
+                                    classNames={{
+                                        base: "h-24 w-24",
                                     }}
-                                    initialAspectRatio={1 / 1}
-                                    aspectRatio={1 / 1}
-                                    guides={true}
-                                    crop={handleCrop}
-                                    ref={cropperRef}
                                 />
-                            )}
+
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleUpload}
+                                    className="hidden"
+                                    accept={Object.values(uploadConfig)
+                                        .map((config) => config.fileTypes)
+                                        .flat()
+                                        .join(", ")}
+                                />
+
+                                <Button
+                                    size="sm"
+                                    type="button"
+                                    color="secondary"
+                                    className="font-semibold"
+                                    startContent={
+                                        <Icons.upload className="size-4" />
+                                    }
+                                    onPress={() =>
+                                        fileInputRef.current?.click()
+                                    }
+                                >
+                                    Upload Image
+                                </Button>
+                            </div>
+
+                            <ImageAdjust
+                                type="fixed"
+                                imageFile={imageFile}
+                                preset={"square"}
+                                cropperRef={cropperRef}
+                                className={cn(!imageFile && "hidden")}
+                            />
                         </ModalBody>
 
                         <ModalFooter>
-                            {selectedImage ? (
+                            {imageFile ? (
                                 <>
                                     <Button
                                         color="danger"
                                         variant="light"
-                                        onPress={close}
+                                        onPress={() => {
+                                            setImageFile(null);
+                                            URL.revokeObjectURL(imageFile.url);
+                                        }}
                                         isDisabled={isImageUpdating}
                                     >
                                         Cancel
@@ -280,7 +274,7 @@ function PfpUploadModal({
                             ) : (
                                 <div className="w-full space-y-5">
                                     <div className="relative border-b border-white/20">
-                                        <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-default-50 p-1 px-2 text-sm opacity-80">
+                                        <p className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-default-50 p-1 px-2 text-xs opacity-80 md:text-sm">
                                             OR
                                         </p>
                                     </div>

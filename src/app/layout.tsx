@@ -1,6 +1,5 @@
 import "./globals.css";
 import { siteConfig } from "@/src/config/site";
-import { Analytics } from "@vercel/analytics/react";
 import { Metadata } from "next";
 import { Titillium_Web } from "next/font/google";
 import { Toaster } from "react-hot-toast";
@@ -72,7 +71,6 @@ function RootLayout({ children }: RootLayoutProps) {
                     )}
                 >
                     {children}
-                    <Analytics />
                     <Toaster
                         toastOptions={{
                             style: {

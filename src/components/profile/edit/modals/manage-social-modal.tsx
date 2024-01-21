@@ -66,7 +66,7 @@ function ManageSocialModal({
         },
     });
 
-    const { mutate: addSocial, isLoading: isAdding } =
+    const { mutate: addSocial, isPending: isAdding } =
         trpc.user.social.addSocial.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Adding connection...");
@@ -85,7 +85,7 @@ function ManageSocialModal({
             },
         });
 
-    const { mutate: editSocial, isLoading: isEditing } =
+    const { mutate: editSocial, isPending: isEditing } =
         trpc.user.social.editSocial.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Updating connection...");
@@ -104,7 +104,7 @@ function ManageSocialModal({
             },
         });
 
-    const { mutate: handleDeleteSocial, isLoading: isDeleting } =
+    const { mutate: handleDeleteSocial, isPending: isDeleting } =
         trpc.user.social.deleteSocial.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Deleting connection...");

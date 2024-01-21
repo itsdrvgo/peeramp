@@ -68,7 +68,7 @@ function EducationItem({
         onOpenChange: onDeleteModalOpenChange,
     } = useDisclosure();
 
-    const { mutate: handleDeleteEducation, isLoading } =
+    const { mutate: handleDeleteEducation, isPending } =
         trpc.user.education.deleteEducation.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Deleting education...");
@@ -100,10 +100,10 @@ function EducationItem({
                 {...props}
             >
                 <div className="space-y-1">
-                    <p className="text-lg font-semibold text-primary">
+                    <p className="font-semibold text-primary md:text-lg">
                         {education.organization}
                     </p>
-                    <div className="text-sm">
+                    <div className="space-y-1 text-xs md:text-sm">
                         <p>
                             {startTime} - {endTime}
                         </p>
@@ -136,7 +136,7 @@ function EducationItem({
                                 isIconOnly
                                 variant="light"
                                 startContent={
-                                    <Icons.moreVert className="h-4 w-4" />
+                                    <Icons.moreVert className="size-4" />
                                 }
                             />
                         </DropdownTrigger>
@@ -183,7 +183,7 @@ function EducationItem({
                                 <Button
                                     color="danger"
                                     variant="light"
-                                    isDisabled={isLoading}
+                                    isDisabled={isPending}
                                     onPress={close}
                                 >
                                     Cancel
@@ -191,8 +191,8 @@ function EducationItem({
                                 <Button
                                     color="primary"
                                     variant="flat"
-                                    isDisabled={isLoading}
-                                    isLoading={isLoading}
+                                    isDisabled={isPending}
+                                    isLoading={isPending}
                                     onPress={() =>
                                         handleDeleteEducation({
                                             educationId: education.id!,

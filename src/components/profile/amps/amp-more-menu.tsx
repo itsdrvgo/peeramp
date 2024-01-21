@@ -16,9 +16,9 @@ import {
 } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import ManageAmpModal from "../../global/modals/amps/manage-amp-modal";
 import { Icons } from "../../icons/icons";
 import DeleteAmpModal from "./modals/delete-amp-modal";
-import EditAmpModal from "./modals/edit-amp-modal";
 import PublishAmpModal from "./modals/publish-amp-modal";
 
 interface PageProps extends DefaultProps {
@@ -86,14 +86,14 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                             radius="full"
                             variant="light"
                             size="sm"
-                            startContent={<Icons.moreHor className="h-4 w-4" />}
+                            startContent={<Icons.moreHor className="size-4" />}
                         />
                     </DropdownTrigger>
                     <DropdownMenu>
                         <DropdownSection showDivider aria-label="General">
                             <DropdownItem
                                 startContent={
-                                    <Icons.copy className="h-4 w-4" />
+                                    <Icons.copy className="size-4" />
                                 }
                                 onPress={() => {
                                     navigator.clipboard.writeText(
@@ -108,7 +108,7 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                                 Copy Link
                             </DropdownItem>
                             <DropdownItem
-                                startContent={<Icons.pin className="h-4 w-4" />}
+                                startContent={<Icons.pin className="size-4" />}
                                 onPress={() => {
                                     amp.pinned
                                         ? handleUnpinAmp({
@@ -130,7 +130,7 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                             </DropdownItem>
                             <DropdownItem
                                 startContent={
-                                    <Icons.upload className="h-4 w-4" />
+                                    <Icons.upload className="size-4" />
                                 }
                                 onPress={onPublishModalOpen}
                                 className={cn({
@@ -141,7 +141,7 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                             </DropdownItem>
                             <DropdownItem
                                 startContent={
-                                    <Icons.pencil className="h-4 w-4" />
+                                    <Icons.pencil className="size-4" />
                                 }
                                 onPress={onEditModalOpen}
                             >
@@ -153,7 +153,7 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                             <DropdownItem
                                 color="danger"
                                 startContent={
-                                    <Icons.trash className="h-4 w-4" />
+                                    <Icons.trash className="size-4" />
                                 }
                                 onPress={() => onDeleteModalOpen()}
                             >
@@ -164,9 +164,12 @@ function AmpMoreMenu({ amp, user, className, ...props }: PageProps) {
                 </Dropdown>
             </div>
 
-            <EditAmpModal
+            <ManageAmpModal
                 amp={amp}
-                user={user}
+                firstName={user.firstName!}
+                image={user.imageUrl}
+                userId={user.id}
+                username={user.username!}
                 isOpen={isEditModalOpen}
                 onClose={onEditModalClose}
                 onOpenChange={onEditModalOpenChange}

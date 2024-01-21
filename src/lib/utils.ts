@@ -1,3 +1,4 @@
+import { init } from "@paralleldrive/cuid2";
 import { clsx, type ClassValue } from "clsx";
 import { DrizzleError } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -6,8 +7,12 @@ import { twMerge } from "tailwind-merge";
 import { ZodError } from "zod";
 import { Icons } from "../components/icons/icons";
 import { DEFAULT_ERROR_MESSAGE } from "../config/const";
-import { ResponseMessages } from "../types";
+import { ResponseMessages } from "./validation/response";
 import { userCategoriesSchema, UserSocialType } from "./validation/user";
+
+export const generateId = init({
+    length: 16,
+});
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -19,22 +24,20 @@ export const wait = (ms: number) =>
 export function handleError(err: unknown) {
     console.error(err);
     if (err instanceof ZodError)
-        return NextResponse.json({
-            code: 422,
-            message: err.issues.map((x) => x.message).join(", "),
+        return CResponse({
+            message: "UNPROCESSABLE_ENTITY",
+            longMessage: err.issues.map((x) => x.message).join(", "),
         });
     else if (err instanceof DrizzleError)
-        return NextResponse.json({
-            code: 500,
-            message: err.message,
+        return CResponse({
+            message: "UNKNOWN_ERROR",
+            longMessage: err.message,
         });
-    else return CResponse({ message: "UNKNOWN_ERROR" });
-}
-
-export function getTheme() {
-    if (typeof window === "undefined" || typeof localStorage === "undefined")
-        return "dark";
-    return (localStorage.getItem("theme") as "dark" | "light") ?? "dark";
+    else
+        return CResponse({
+            message: "UNKNOWN_ERROR",
+            longMessage: (err as Error).message,
+        });
 }
 
 export function shortenNumber(num: number): string {
@@ -57,12 +60,14 @@ export async function cFetch<T>(
     return data;
 }
 
-export function CResponse({
+export function CResponse<T>({
     message,
+    longMessage,
     data,
 }: {
     message: ResponseMessages;
-    data?: unknown;
+    longMessage?: string;
+    data?: T;
 }) {
     let code: number;
 
@@ -120,7 +125,8 @@ export function CResponse({
     return NextResponse.json({
         code,
         message,
-        data: JSON.stringify(data),
+        longMessage,
+        data,
     });
 }
 

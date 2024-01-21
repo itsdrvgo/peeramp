@@ -6,12 +6,12 @@ import { SignUpData, signupSchema } from "@/src/lib/validation/auth";
 import { isClerkAPIResponseError, useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Checkbox, Input, Link } from "@nextui-org/react";
+import { useMutation } from "@tanstack/react-query";
 import NextLink from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Icons } from "../icons/icons";
 import {
     Form,
     FormControl,
@@ -20,18 +20,11 @@ import {
     FormLabel,
     FormMessage,
 } from "../ui/form";
+import PasswordInput from "../ui/password-input";
 
 function SignUpForm() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-
-    const [isLoading, setIsLoading] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
-
-    const isMentor =
-        searchParams.has("type") && searchParams.get("type") === "mentor";
-
     const { signUp, isLoaded } = useSignUp();
 
     const form = useForm<SignUpData>({
@@ -46,16 +39,16 @@ function SignUpForm() {
         },
     });
 
-    const onSubmit = async (data: SignUpData) => {
-        if (!isLoaded)
-            return toast.error("Authentication service is not loaded!");
-        if (!isChecked) return toast.error("Please agree to the TOS!");
+    const { mutate: onSubmit, isPending } = useMutation({
+        onMutate: () => {
+            const toastId = toast.loading("Signing up, please wait...");
+            return { toastId };
+        },
+        mutationFn: async (data: SignUpData) => {
+            if (!isLoaded)
+                throw new Error("Authentication service is not loaded!");
+            if (!isChecked) throw new Error("Please agree to the TOS!");
 
-        setIsLoading(true);
-
-        const toastId = toast.loading("Signing up, please wait...");
-
-        try {
             await signUp.create({
                 emailAddress: data.email,
                 username: data.username,
@@ -67,33 +60,33 @@ function SignUpForm() {
             await signUp.prepareEmailAddressVerification({
                 strategy: "email_code",
             });
-
+        },
+        onSuccess: (_, __, ctx) => {
             toast.success("Please check your email for a verification code!", {
-                id: toastId,
+                id: ctx?.toastId,
             });
 
-            router.push("/signup/verify" + (isMentor ? "?type=mentor" : ""));
-        } catch (err) {
+            router.push("/signup/verify");
+        },
+        onError: (err, _, ctx) => {
             isClerkAPIResponseError(err)
                 ? toast.error(
                       err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
                       {
-                          id: toastId,
+                          id: ctx?.toastId,
                       }
                   )
-                : handleClientError(err, toastId);
-
-            return;
-        } finally {
-            setIsLoading(false);
-        }
-    };
+                : handleClientError(err, ctx?.toastId);
+        },
+    });
 
     return (
         <Form {...form}>
             <form
-                className="grid gap-4"
-                onSubmit={(...args) => form.handleSubmit(onSubmit)(...args)}
+                className="space-y-4"
+                onSubmit={(...args) =>
+                    form.handleSubmit((data) => onSubmit(data))(...args)
+                }
             >
                 <FormField
                     control={form.control}
@@ -107,7 +100,7 @@ function SignUpForm() {
                                     size="sm"
                                     radius="sm"
                                     placeholder="ryomensukuna"
-                                    isDisabled={isLoading}
+                                    isDisabled={isPending}
                                     {...field}
                                 />
                             </FormControl>
@@ -129,7 +122,7 @@ function SignUpForm() {
                                     size="sm"
                                     radius="sm"
                                     placeholder="ryomensukuna@jjk.jp"
-                                    isDisabled={isLoading}
+                                    isDisabled={isPending}
                                     {...field}
                                 />
                             </FormControl>
@@ -151,7 +144,7 @@ function SignUpForm() {
                                         size="sm"
                                         radius="sm"
                                         placeholder="Ryomen"
-                                        isDisabled={isLoading}
+                                        isDisabled={isPending}
                                         {...field}
                                     />
                                 </FormControl>
@@ -172,7 +165,7 @@ function SignUpForm() {
                                         size="sm"
                                         radius="sm"
                                         placeholder="Sukuna"
-                                        isDisabled={isLoading}
+                                        isDisabled={isPending}
                                         {...field}
                                     />
                                 </FormControl>
@@ -189,27 +182,11 @@ function SignUpForm() {
                         <FormItem>
                             <FormLabel>Password</FormLabel>
                             <FormControl>
-                                <Input
+                                <PasswordInput
                                     size="sm"
                                     radius="sm"
                                     placeholder="********"
-                                    type={isVisible ? "text" : "password"}
-                                    isDisabled={isLoading}
-                                    endContent={
-                                        <button
-                                            type="button"
-                                            className="focus:outline-none"
-                                            onClick={() =>
-                                                setIsVisible(!isVisible)
-                                            }
-                                        >
-                                            {isVisible ? (
-                                                <Icons.hide className="h-5 w-5 opacity-80" />
-                                            ) : (
-                                                <Icons.view className="h-5 w-5 opacity-80" />
-                                            )}
-                                        </button>
-                                    }
+                                    isDisabled={isPending}
                                     {...field}
                                 />
                             </FormControl>
@@ -230,7 +207,7 @@ function SignUpForm() {
                                     radius="sm"
                                     placeholder="********"
                                     type="password"
-                                    isDisabled={isLoading}
+                                    isDisabled={isPending}
                                     {...field}
                                 />
                             </FormControl>
@@ -276,11 +253,12 @@ function SignUpForm() {
                 <Button
                     className="bg-default-700 font-semibold text-white dark:bg-primary-900 dark:text-black"
                     type="submit"
+                    fullWidth
                     radius="sm"
-                    isDisabled={isLoading}
-                    isLoading={isLoading}
+                    isDisabled={isPending}
+                    isLoading={isPending}
                 >
-                    {isLoading ? <>Signing Up</> : <>Sign Up</>}
+                    {isPending ? "Signing Up" : "Sign Up"}
                 </Button>
             </form>
         </Form>

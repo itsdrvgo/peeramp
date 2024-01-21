@@ -45,7 +45,7 @@ function ChangeUsernameModal({
         },
     });
 
-    const { mutate: handleUsernameChange, isLoading: isPending } = useMutation({
+    const { mutate: handleUsernameChange, isPending } = useMutation({
         onMutate: () => {
             const toastId = toast.loading("Changing username...");
             return { toastId };

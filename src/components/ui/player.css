@@ -1,0 +1,103 @@
+:root {
+    --progress-color: hsl(0, 0%, 100%);
+    --remaining-color: rgb(58, 58, 58);
+}
+
+/* VIDEO PROGRESS BAR */
+
+.video_progress_bar {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    border-radius: 15px;
+    height: 3px;
+    background: var(--remaining-color);
+    transition: all .2s ease-in-out;
+}
+
+.video_progress_bar:hover {
+    height: 6px;
+}
+
+.video_progress_bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 0px;
+    width: 0px;
+    background-color: var(--progress-color);
+    border-radius: 50%;
+    border: none;
+    transition: all .2s ease-in-out;
+}
+
+.video_progress_bar:hover::-webkit-slider-thumb {
+    height: 15px;
+    width: 15px;
+}
+
+.video_progress_bar::-moz-range-thumb {
+    height: 0px;
+    width: 0px;
+    background-color: var(--progress-color);
+    border-radius: 50%;
+    border: none;
+    transition: all .2s ease-in-out;
+}
+
+.video_progress_bar:hover::-moz-range-thumb {
+    height: 15px;
+    width: 15px;
+}
+
+.video_progress_bar::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.video_progress_bar:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 13px rgba(255, 255, 255, 0.2);
+}
+
+.video_progress_bar::-moz-range-thumb:hover {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.video_progress_bar:active::-moz-range-thumb {
+    box-shadow: 0 0 0 13px rgba(255, 255, 255, 0.2);
+}
+
+
+/* VOLUME BAR */
+
+.volume_bar {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    border-radius: 15px;
+    height: 3px;
+    background: var(--remaining-color);
+    transition: all .2s ease-in-out;
+}
+
+.volume_bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    width: 10px;
+    background-color: var(--progress-color);
+    border-radius: 50%;
+    border: none;
+    transition: all .2s ease-in-out;
+}
+
+.volume_bar::-moz-range-thumb {
+    height: 10px;
+    width: 10px;
+    background-color: var(--progress-color);
+    border-radius: 50%;
+    border: none;
+    transition: all .2s ease-in-out;
+}

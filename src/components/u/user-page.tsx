@@ -35,7 +35,7 @@ function UserPage({ target, className, ...props }: PageProps) {
         >
             <UserInfo ampCount={data ?? 0} target={target} />
             <Divider />
-            <UserAmps target={target} />
+            <UserAmps target={target} user={user} />
         </div>
     );
 }

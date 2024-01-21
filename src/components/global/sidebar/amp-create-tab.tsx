@@ -4,7 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { useDisclosure } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { Icons } from "../../icons/icons";
-import CreateAmpModal from "../modals/create-amp-modal";
+import ManageAmpModal from "../modals/amps/manage-amp-modal";
 
 function AmpCreateTab() {
     const { user, isLoaded } = useUser();
@@ -18,7 +18,7 @@ function AmpCreateTab() {
                     toast.error("Please wait while we load your account...")
                 }
             >
-                <Icons.create className="h-6 w-6" />
+                <Icons.create className="size-6" />
                 <p className="hidden md:block">Create</p>
             </button>
         );
@@ -30,7 +30,7 @@ function AmpCreateTab() {
                     toast.error("You must be signed in to create an amp!")
                 }
             >
-                <Icons.create className="h-6 w-6" />
+                <Icons.create className="size-6" />
                 <p className="hidden md:block">Create</p>
             </button>
         );
@@ -42,12 +42,12 @@ function AmpCreateTab() {
                 onClick={onOpen}
             >
                 <div className="p-2 md:p-0">
-                    <Icons.create className="h-6 w-6" />
+                    <Icons.create className="size-6" />
                 </div>
                 <p className="hidden md:block">Create</p>
             </button>
 
-            <CreateAmpModal
+            <ManageAmpModal
                 isOpen={isOpen}
                 onClose={onClose}
                 onOpenChange={onOpenChange}

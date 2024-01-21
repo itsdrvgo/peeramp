@@ -12,7 +12,7 @@ function LogoSection({ className, ...props }: DefaultProps) {
     return (
         <section
             className={cn(
-                "relative flex w-full items-center px-4 md:w-1/3 md:px-0",
+                "relative flex w-full items-center px-4 md:h-full md:w-1/3 md:px-0",
                 className
             )}
             {...props}

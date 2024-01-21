@@ -29,7 +29,7 @@ function ProfileTab({ className, ...props }: LinkProps) {
                             src={DEFAULT_PROFILE_IMAGE_URL}
                             alt="User"
                             showFallback
-                            className="h-6 w-6 md:h-10 md:w-10"
+                            className="size-6 md:size-10"
                         />
                     </div>
 
@@ -59,7 +59,7 @@ function ProfileTab({ className, ...props }: LinkProps) {
                     src={user.imageUrl}
                     alt={user.username!}
                     showFallback
-                    className="h-6 w-6 md:h-10 md:w-10"
+                    className="size-6 md:size-10"
                 />
             </div>
 
@@ -81,7 +81,7 @@ function ProfileTabSkeleton({ className, ...props }: DefaultProps) {
             className={cn("flex items-center gap-4 p-2 px-3", className)}
             {...props}
         >
-            <Skeleton className="h-6 w-6 rounded-full md:h-10 md:w-10" />
+            <Skeleton className="size-6 rounded-full md:size-10" />
 
             <div className="hidden space-y-1 md:block">
                 <Skeleton className="h-5 w-20 rounded-lg" />

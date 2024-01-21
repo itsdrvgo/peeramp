@@ -44,7 +44,7 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                                     className="flex items-center gap-4 rounded-lg p-4 px-3 hover:bg-default-100"
                                     color="foreground"
                                 >
-                                    <Icon className="h-6 w-6" />
+                                    <Icon className="size-6" />
                                     <p>{item.label}</p>
                                 </Link>
                             );
@@ -72,7 +72,7 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                         radius="full"
                         variant="light"
                         startContent={
-                            <Icons.notification className="h-[22px] w-[22px]" />
+                            <Icons.notification className="size-[22px]" />
                         }
                         className="md:hidden"
                     />
@@ -83,7 +83,7 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                         isIconOnly
                         variant="light"
                         startContent={
-                            <Icons.messages className="h-[22px] w-[22px]" />
+                            <Icons.messages className="size-[22px]" />
                         }
                         className="md:hidden"
                     />
@@ -104,7 +104,7 @@ function Sidebar({ className, children, ...props }: DefaultProps) {
                                 className="p-2"
                                 color="foreground"
                             >
-                                <Icon className="h-6 w-6" />
+                                <Icon className="size-6" />
                             </Link>
                         </div>
                     );

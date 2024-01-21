@@ -9,8 +9,8 @@ import {
 import { isClerkAPIResponseError, useSignUp } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "@nextui-org/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import {
@@ -24,14 +24,7 @@ import {
 
 function VerifyForm() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-
-    const [isLoading, setIsLoading] = useState(false);
     const { signUp, isLoaded, setActive } = useSignUp();
-    const [value, setValue] = useState("");
-
-    const isMentor =
-        searchParams.has("type") && searchParams.get("type") === "mentor";
 
     const form = useForm<VerificationCodeData>({
         resolver: zodResolver(verificationCodeSchema),
@@ -40,63 +33,63 @@ function VerifyForm() {
         },
     });
 
-    const onSubmit = async (data: VerificationCodeData) => {
-        if (!isLoaded)
-            return toast.error("Authentication service is not loaded!");
+    const { mutate: onSubmit, isPending } = useMutation({
+        onMutate: () => {
+            const toastId = toast.loading("Verifying, please wait...");
+            return { toastId };
+        },
+        mutationFn: async (data: VerificationCodeData) => {
+            if (!isLoaded)
+                throw new Error("Authentication service is not loaded!");
 
-        setIsLoading(true);
-        const toastId = toast.loading("Verifying, please wait...");
-
-        try {
             const res = await signUp.attemptEmailAddressVerification({
                 code: data.verificationCode,
             });
 
-            switch (res.status) {
+            return res;
+        },
+        onSuccess: async (data, _, ctx) => {
+            switch (data.status) {
                 case "complete":
                     {
                         toast.success(
-                            "Welcome to PeerAmp, " + res.firstName + "!",
+                            "Welcome to PeerAmp, " + data.firstName + "!",
                             {
-                                id: toastId,
+                                id: ctx?.toastId,
                             }
                         );
-                        await setActive({
-                            session: res.createdSessionId,
+                        await setActive!({
+                            session: data.createdSessionId,
                         });
                         await wait(1000);
-                        router.push(
-                            "/profile/edit?new=true" +
-                                (isMentor ? "&type=mentor" : "")
-                        );
+                        router.push("/profile/edit");
                     }
                     break;
 
                 default:
-                    console.log(JSON.stringify(res, null, 2));
+                    console.log(JSON.stringify(data, null, 2));
                     break;
             }
-        } catch (err) {
+        },
+        onError: (err, _, ctx) => {
             isClerkAPIResponseError(err)
                 ? toast.error(
                       err.errors[0]?.longMessage ?? DEFAULT_ERROR_MESSAGE,
                       {
-                          id: toastId,
+                          id: ctx?.toastId,
                       }
                   )
-                : handleClientError(err, toastId);
-
-            return;
-        } finally {
-            setIsLoading(false);
-        }
-    };
+                : handleClientError(err, ctx?.toastId);
+        },
+    });
 
     return (
         <Form {...form}>
             <form
-                className="grid gap-4"
-                onSubmit={(...args) => form.handleSubmit(onSubmit)(...args)}
+                className="space-y-4"
+                onSubmit={(...args) =>
+                    form.handleSubmit((data) => onSubmit(data))(...args)
+                }
             >
                 <FormField
                     control={form.control}
@@ -111,12 +104,14 @@ function VerifyForm() {
                                     size="sm"
                                     radius="sm"
                                     placeholder="132748"
-                                    isDisabled={isLoading}
+                                    isDisabled={isPending}
                                     {...field}
-                                    value={value}
-                                    onValueChange={(val) => {
-                                        if (val.match(/^[0-9]*$/))
-                                            setValue(val);
+                                    onChange={(e) => {
+                                        if (e.target.value.match(/^[0-9]*$/))
+                                            form.setValue(
+                                                "verificationCode",
+                                                e.target.value
+                                            );
                                     }}
                                 />
                             </FormControl>
@@ -128,11 +123,12 @@ function VerifyForm() {
                 <Button
                     className="bg-default-700 font-semibold text-white dark:bg-primary-900 dark:text-black"
                     type="submit"
+                    fullWidth
                     radius="sm"
-                    isDisabled={isLoading}
-                    isLoading={isLoading}
+                    isDisabled={isPending}
+                    isLoading={isPending}
                 >
-                    {isLoading ? <>Verifying</> : <>Submit</>}
+                    {isPending ? "Verifying" : "Submit"}
                 </Button>
             </form>
         </Form>

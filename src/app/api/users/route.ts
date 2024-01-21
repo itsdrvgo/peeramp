@@ -9,7 +9,7 @@ import {
     getUserFromCache,
     updateUserInCache,
     updateUsernameInCache,
-} from "@/src/lib/redis/methods/user";
+} from "@/src/lib/redis/methods/user/user";
 import { CResponse, handleError } from "@/src/lib/utils";
 import {
     userCreateWebhookSchema,
@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
     try {
         body = wh.verify(JSON.stringify(payload), headers) as WebhookData;
     } catch (err) {
-        return CResponse({ message: "BAD_REQUEST" });
+        return CResponse({
+            message: "BAD_REQUEST",
+            longMessage: "Invalid webhook signature",
+        });
     }
 
     const { type, data } = webhookSchema.parse(body);
@@ -86,7 +89,6 @@ export async function POST(req: NextRequest) {
                         category: "none",
                         gender: "none",
                         socials: [],
-                        score: "0",
                         education: [],
                         isVerified: false,
                         resume: null,
@@ -97,7 +99,10 @@ export async function POST(req: NextRequest) {
                     addUsernameToCache(username),
                 ]);
 
-                return CResponse({ message: "CREATED" });
+                return CResponse({
+                    message: "CREATED",
+                    longMessage: "User created successfully",
+                });
             } catch (err) {
                 return handleError(err);
             }
@@ -122,7 +127,11 @@ export async function POST(req: NextRequest) {
                         details: true,
                     },
                 });
-                if (!existingUser) return CResponse({ message: "NOT_FOUND" });
+                if (!existingUser)
+                    return CResponse({
+                        message: "NOT_FOUND",
+                        longMessage: "User not found",
+                    });
 
                 const email =
                     email_addresses.find(
@@ -152,7 +161,6 @@ export async function POST(req: NextRequest) {
                                   socials: public_metadata.socials,
                                   isVerified: public_metadata.isVerified,
                                   education: public_metadata.education,
-                                  score: public_metadata.score,
                                   resume: public_metadata.resume,
                                   usernameChangedAt: new Date(
                                       public_metadata.usernameChangedAt
@@ -167,7 +175,6 @@ export async function POST(req: NextRequest) {
                               category: public_metadata.category,
                               socials: public_metadata.socials,
                               education: public_metadata.education,
-                              score: public_metadata.score,
                               isVerified: public_metadata.isVerified,
                               resume: public_metadata.resume,
                               usernameChangedAt: new Date(
@@ -189,7 +196,6 @@ export async function POST(req: NextRequest) {
                         socials: public_metadata.socials,
                         isVerified: public_metadata.isVerified,
                         education: public_metadata.education,
-                        score: public_metadata.score,
                         resume: public_metadata.resume,
                         createdAt: existingUser.createdAt.toISOString(),
                         updatedAt: new Date().toISOString(),
@@ -200,7 +206,10 @@ export async function POST(req: NextRequest) {
                     manageUsernameChange(id, username, existingUser.username),
                 ]);
 
-                return CResponse({ message: "OK" });
+                return CResponse({
+                    message: "OK",
+                    longMessage: "User updated successfully",
+                });
             } catch (err) {
                 return handleError(err);
             }
@@ -211,7 +220,11 @@ export async function POST(req: NextRequest) {
                 const { id } = userDeleteWebhookSchema.parse(data);
 
                 const existingUser = await getUserFromCache(id);
-                if (!existingUser) return CResponse({ message: "NOT_FOUND" });
+                if (!existingUser)
+                    return CResponse({
+                        message: "NOT_FOUND",
+                        longMessage: "User not found",
+                    });
 
                 await Promise.all([
                     db.delete(users).where(eq(users.id, id)),
@@ -219,14 +232,21 @@ export async function POST(req: NextRequest) {
                     deleteUsernameFromCache(existingUser.username),
                 ]);
 
-                return CResponse({ message: "OK", data: id });
+                return CResponse({
+                    message: "OK",
+                    longMessage: "User deleted successfully",
+                    data: id,
+                });
             } catch (err) {
                 return handleError(err);
             }
         }
 
         default: {
-            return CResponse({ message: "BAD_REQUEST" });
+            return CResponse({
+                message: "BAD_REQUEST",
+                longMessage: "Invalid webhook type",
+            });
         }
     }
 }

@@ -1,27 +1,30 @@
 "use client";
 
-import { Amp } from "@/src/lib/drizzle/schema";
 import {
     cn,
     convertMstoTimeElapsed,
     extractYTVideoId,
+    generateId,
     isYouTubeVideo,
 } from "@/src/lib/utils";
+import { AmpWithAnalytics } from "@/src/lib/validation/amp";
 import { CachedUserWithoutEmail } from "@/src/lib/validation/user";
 import { DefaultProps } from "@/src/types";
+import { UserResource } from "@clerk/types";
 import { Image, Link, useDisclosure } from "@nextui-org/react";
-import { nanoid } from "nanoid";
-import ImageViewModal from "../../global/modals/image-view-modal";
-import AmpAccessoryButtons from "../../profile/amps/amp-accessory-buttons";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+import AmpAccessoryButtons from "../../global/buttons/amp-accessory-buttons";
+import ImageViewModal from "../../global/modals/image-view-modal";
+import Player from "../../ui/player";
 
 interface PageProps extends DefaultProps {
-    amp: Amp;
+    amp: AmpWithAnalytics;
     target: CachedUserWithoutEmail;
+    user: UserResource | null;
 }
 
-function AmpContent({ amp, target, className, ...props }: PageProps) {
+function AmpContent({ amp, target, user, className, ...props }: PageProps) {
     const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure();
 
     return (
@@ -54,80 +57,125 @@ function AmpContent({ amp, target, className, ...props }: PageProps) {
                         ))}
                     </p>
 
-                    {amp.metadata && Object.keys(amp.metadata).length > 0 && (
-                        <div
-                            className={cn(
-                                "rounded-xl bg-secondary-100 p-2",
-                                amp.metadata.image
-                                    ? "space-y-2 pb-3"
-                                    : "space-y-0 px-2 py-3"
-                            )}
-                        >
-                            {isYouTubeVideo(amp.metadata.url) ? (
-                                <div className="overflow-hidden rounded-lg">
-                                    <LiteYouTubeEmbed
-                                        id={
-                                            extractYTVideoId(
-                                                amp.metadata.url
-                                            ) ?? ""
-                                        }
-                                        title={
-                                            amp.metadata.title ??
-                                            "video_" + nanoid()
-                                        }
-                                    />
-                                </div>
-                            ) : (
-                                amp.metadata.image && (
-                                    <div>
-                                        <button onClick={onOpen}>
-                                            <Image
-                                                radius="sm"
-                                                src={amp.metadata.image}
-                                                alt={
-                                                    amp.metadata.title ??
-                                                    "image_" + nanoid()
-                                                }
-                                            />
-                                        </button>
+                    {amp.metadata &&
+                        Object.keys(amp.metadata).length > 0 &&
+                        amp.metadata.isVisible && (
+                            <div
+                                className={cn(
+                                    "rounded-xl bg-secondary-100 p-2",
+                                    amp.metadata.image
+                                        ? "space-y-2 pb-3"
+                                        : "space-y-0 px-2 py-3"
+                                )}
+                            >
+                                {isYouTubeVideo(amp.metadata.url) ? (
+                                    <div className="overflow-hidden rounded-lg">
+                                        <LiteYouTubeEmbed
+                                            id={
+                                                extractYTVideoId(
+                                                    amp.metadata.url
+                                                ) ?? ""
+                                            }
+                                            title={
+                                                amp.metadata.title ??
+                                                "video_" + generateId()
+                                            }
+                                        />
                                     </div>
-                                )
-                            )}
+                                ) : (
+                                    amp.metadata.image && (
+                                        <div>
+                                            <button onClick={onOpen}>
+                                                <Image
+                                                    radius="sm"
+                                                    src={amp.metadata.image}
+                                                    alt={
+                                                        amp.metadata.title ??
+                                                        "image_" + generateId()
+                                                    }
+                                                />
+                                            </button>
+                                        </div>
+                                    )
+                                )}
 
-                            <div className="space-y-1 px-1">
-                                {amp.metadata.title && amp.metadata.url && (
-                                    <Link
-                                        className="font-semibold text-default-50 dark:text-primary"
-                                        href={amp.metadata.url}
-                                        underline="hover"
-                                        isExternal
-                                    >
-                                        {amp.metadata.title
-                                            ? amp.metadata.title.length > 100
-                                                ? amp.metadata.title.slice(
+                                <div className="space-y-1 px-1">
+                                    {amp.metadata.title && amp.metadata.url && (
+                                        <Link
+                                            className="font-semibold text-default-50 dark:text-primary"
+                                            href={amp.metadata.url}
+                                            underline="hover"
+                                            isExternal
+                                        >
+                                            {amp.metadata.title
+                                                ? amp.metadata.title.length >
+                                                  100
+                                                    ? amp.metadata.title.slice(
+                                                          0,
+                                                          100
+                                                      ) + "..."
+                                                    : amp.metadata.title
+                                                : amp.metadata.url}
+                                        </Link>
+                                    )}
+                                    {amp.metadata.description && (
+                                        <p className="text-sm text-white/60">
+                                            {amp.metadata.description.length >
+                                            100
+                                                ? amp.metadata.description.slice(
                                                       0,
                                                       100
                                                   ) + "..."
-                                                : amp.metadata.title
-                                            : amp.metadata.url}
-                                    </Link>
-                                )}
-                                {amp.metadata.description && (
-                                    <p className="text-sm text-white/60">
-                                        {amp.metadata.description.length > 100
-                                            ? amp.metadata.description.slice(
-                                                  0,
-                                                  100
-                                              ) + "..."
-                                            : amp.metadata.description}
-                                    </p>
-                                )}
+                                                : amp.metadata.description}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
+                        )}
+
+                    {amp.attachments && amp.attachments.length > 0 && (
+                        <div
+                            className={cn(
+                                "grid grid-cols-2 gap-2",
+                                amp.attachments.length === 1 && "grid-cols-1",
+                                amp.attachments.length === 3 && "grid-cols-3"
+                            )}
+                        >
+                            {amp.attachments
+                                .filter(
+                                    (attachment) => attachment?.type === "image"
+                                )
+                                .map((attachment, index) => (
+                                    <Image
+                                        key={attachment?.id ?? index}
+                                        src={attachment?.url ?? ""}
+                                        alt={attachment?.name ?? ""}
+                                        radius="sm"
+                                        width={800}
+                                        height={800}
+                                        loading="lazy"
+                                        className="aspect-video object-cover"
+                                    />
+                                ))}
+
+                            {amp.attachments
+                                .filter(
+                                    (attachment) => attachment?.type === "video"
+                                )
+                                .map((attachment, index) => (
+                                    <Player
+                                        key={attachment?.id ?? index}
+                                        source={{
+                                            type: "uploadthing",
+                                            fileKey: attachment?.key ?? "",
+                                        }}
+                                    />
+                                ))}
                         </div>
                     )}
                 </div>
 
-                <AmpAccessoryButtons amp={amp} />
+                <AmpAccessoryButtons amp={amp} user={user} />
             </div>
 
             <ImageViewModal
@@ -143,17 +191,17 @@ function AmpContent({ amp, target, className, ...props }: PageProps) {
 export default AmpContent;
 
 export function sanitizeContent(content: string) {
-    return content.split(/(https?:\/\/[^\s]+)/g).map((part) => {
+    return content.split(/(https?:\/\/[^\s]+)/g).map((part, index) => {
         if (part.match(/(https?:\/\/[^\s]+)/g)) {
             return (
-                <Link key={nanoid()} href={part} underline="hover" isExternal>
+                <Link key={index} href={part} underline="hover" isExternal>
                     {part}
                 </Link>
             );
         } else if (part.match(/(@[^\s]+)/g)) {
             return (
                 <Link
-                    key={nanoid()}
+                    key={index}
                     href={`/u/${part.slice(1)}`}
                     underline="hover"
                 >
@@ -163,7 +211,7 @@ export function sanitizeContent(content: string) {
         } else if (part.match(/(#[^\s]+)/g)) {
             return (
                 <Link
-                    key={nanoid()}
+                    key={index}
                     href={`/t/${part.slice(1)}`}
                     underline="hover"
                 >

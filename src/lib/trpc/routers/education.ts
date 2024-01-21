@@ -1,7 +1,7 @@
 import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
-import { nanoid } from "nanoid";
 import { z } from "zod";
+import { generateId } from "../../utils";
 import {
     publicMetadataSchema,
     userEducationSchema,
@@ -38,7 +38,7 @@ export const userEducationRouter = createTRPCRouter({
                         ...metadata.education,
                         {
                             ...education,
-                            id: nanoid(),
+                            id: generateId(),
                         },
                     ],
                 },

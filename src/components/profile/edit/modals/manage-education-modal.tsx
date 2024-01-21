@@ -164,7 +164,7 @@ function ManageEducationModal({
         },
     });
 
-    const { mutate: handleAddEducation, isLoading: isAdding } =
+    const { mutate: handleAddEducation, isPending: isAdding } =
         trpc.user.education.addEduction.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Adding education...");
@@ -183,7 +183,7 @@ function ManageEducationModal({
             },
         });
 
-    const { mutate: handleEditEducation, isLoading: isEditing } =
+    const { mutate: handleEditEducation, isPending: isEditing } =
         trpc.user.education.editEducation.useMutation({
             onMutate: () => {
                 const toastId = toast.loading("Updating education...");
